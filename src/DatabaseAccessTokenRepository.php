@@ -82,7 +82,7 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
         $resource = $query->first($attributes);
 
         if (! $resource || $this->tokenExpired($resource)) {
-            return null;
+            return;
         }
 
         return $resource;
