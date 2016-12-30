@@ -56,11 +56,7 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
     {
         $token = $this->getTable()->where('authenticatable_id', $authenticatableId)->where('token', $token)->first();
 
-        if ($token && ! $this->tokenExpired((object) $token)) {
-            return $token;
-        }
-
-        return false;
+        return $this->filterExpiredToken($token);
     }
 
     /**
@@ -79,13 +75,9 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
             $query = $query->where($column, $value);
         }
 
-        $resource = $query->first($attributes);
+        $token = $query->first($attributes);
 
-        if (! $resource || $this->tokenExpired($resource)) {
-            return;
-        }
-
-        return $resource;
+        return $this->filterExpiredToken($token);
     }
 
     /**
@@ -167,6 +159,20 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
         ];
 
         return $payload;
+    }
+
+    /**
+     * Filter the given database response and only return if it is not expired.
+     *
+     * @param stdClass|array|null $token
+     *
+     * @return stdClass|array|null
+     */
+    private function filterExpiredToken($token)
+    {
+        if ($token && ! $this->tokenExpired((object) $token)) {
+            return $token;
+        }
     }
 
     /**

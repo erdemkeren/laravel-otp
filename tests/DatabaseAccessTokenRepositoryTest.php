@@ -85,7 +85,7 @@ class DatabaseAccessTokenRepositoryTest extends \PHPUnit_Framework_TestCase
             'expires_at' => '2016-12-28 23:15:01',
         ]);
 
-        $this->assertFalse($this->accessTokenRepository->retrieve(1, 'foo'));
+        $this->assertNull($this->accessTokenRepository->retrieve(1, 'foo'));
     }
 
     /** @test */
