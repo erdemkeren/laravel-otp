@@ -1,6 +1,6 @@
 {
     "name": "erdemkeren/temporary-access",
-    "description": "This package allows you to create temporary access grants for your users.",
+    "description": "This package allows you to create temporary access tokens for your users in your Laravel applications.",
     "homepage": "https://github.com/erdemkeren/temporary-access",
     "keywords": ["temporary", "access", "grant"],
     "license": "MIT",
