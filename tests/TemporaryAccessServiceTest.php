@@ -73,7 +73,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->generator->shouldReceive('generate')->once()->andReturn($this->accessCode);
         $this->accessCode->shouldReceive('plain')->once()->andReturn('foo');
         $this->accessCode->shouldReceive('__toString')->once()->andReturn('bar');
-        $this->repository->shouldReceive('store')->once()->with(1, "bar", null)->andReturn([
+        $this->repository->shouldReceive('store')->once()->with(1, 'bar', null)->andReturn([
             'authenticatable_id' => 1,
             'id' => 1,
             'token' => 'bar',
@@ -92,7 +92,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->generator->shouldReceive('generate')->once()->andReturn($this->accessCode);
         $this->accessCode->shouldReceive('plain')->once()->andReturn('foo');
         $this->accessCode->shouldReceive('__toString')->once()->andReturn('bar');
-        $this->repository->shouldReceive('store')->once()->with(1, "bar", '2016-12-29 13:35:00')->andReturn([
+        $this->repository->shouldReceive('store')->once()->with(1, 'bar', '2016-12-29 13:35:00')->andReturn([
             'authenticatable_id' => 1,
             'id' => 1,
             'token' => 'bar',
@@ -335,9 +335,9 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
     {
         $this->repository->shouldReceive('retrieveByAttributes')->once()->with([
             'authenticatable_id' => 1,
-            'token'              => 'foo'
+            'token'              => 'foo',
         ], [
-            'token'
+            'token',
         ])->andReturn($this->accessToken);
 
         $accessToken = $this->service->retrieveByAttributes(['authenticatable_id' => 1, 'token' => 'foo'], ['token']);
@@ -350,9 +350,9 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
     {
         $this->repository->shouldReceive('retrieveByAttributes')->once()->with([
             'authenticatable_id' => 1,
-            'token'              => 'foo'
+            'token'              => 'foo',
         ], [
-            'token'
+            'token',
         ])->andReturn(null);
 
         $accessToken = $this->service->retrieveByAttributes(['authenticatable_id' => 1, 'token' => 'foo'], ['token']);
