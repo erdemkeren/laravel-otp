@@ -17,7 +17,7 @@
         "nesbot/carbon": "~1.21"
     },
     "require-dev": {
-        "mockery/mockery": "~0.9",
+        "mockery/mockery": "^0.9.5",
         "phpunit/phpunit": "4.*"
     },
     "autoload": {
