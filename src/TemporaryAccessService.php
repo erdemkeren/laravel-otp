@@ -236,7 +236,7 @@ final class TemporaryAccessService
     private function retrieveFromRepository($authenticatableId, $encryptedText)
     {
         if (! $attributes = $this->repository->retrieve($authenticatableId, $encryptedText)) {
-            return null;
+            return;
         }
 
         return $this->makeAccessToken((array) $attributes);
