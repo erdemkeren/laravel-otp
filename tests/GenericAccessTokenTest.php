@@ -70,7 +70,7 @@ class GenericAccessTokenTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function it_shall_throw_exception_when_no_plain_is_available()
     {
-        $this->expectException(\LogicException::class);
+        $this->setExpectedException(\LogicException::class);
 
         $this->retrievedAccessToken->plain();
     }
