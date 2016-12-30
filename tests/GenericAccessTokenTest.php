@@ -4,16 +4,16 @@ namespace Erdemkeren\TemporaryAccess\Test;
 
 use Carbon\Carbon;
 use Erdemkeren\TemporaryAccess\GenericAccessToken;
-use Erdemkeren\TemporaryAccess\Contracts\AccessToken;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
 
 class GenericAccessTokenTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var AccessToken
+     * @var AccessTokenInterface
      */
     private $accessToken;
     /**
-     * @var AccessToken
+     * @var AccessTokenInterface
      */
     private $retrievedAccessToken;
 
@@ -46,7 +46,7 @@ class GenericAccessTokenTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function it_shall_be_an_instance_of_access_token_contract()
     {
-        $this->assertInstanceOf(AccessToken::class, $this->accessToken);
+        $this->assertInstanceOf(AccessTokenInterface::class, $this->accessToken);
     }
 
     /** @test */

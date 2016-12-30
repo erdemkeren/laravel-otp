@@ -4,7 +4,7 @@ namespace Erdemkeren\TemporaryAccess\Contracts;
 
 use stdClass;
 
-interface AccessTokenRepository
+interface AccessTokenRepositoryInterface
 {
     /**
      * Retrieve an access token from the storage.

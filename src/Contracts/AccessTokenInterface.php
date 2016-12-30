@@ -2,7 +2,7 @@
 
 namespace Erdemkeren\TemporaryAccess\Contracts;
 
-interface AccessToken extends TokenInformation
+interface AccessTokenInterface extends TokenInformationInterface
 {
     /**
      * Get the unique identifier of the authenticatable who owns the access token.
@@ -30,7 +30,7 @@ interface AccessToken extends TokenInformation
      *
      * @param  int $prolong The prolong time in seconds.
      *
-     * @return AccessToken
+     * @return AccessTokenInterface
      */
     public function prolong($prolong);
 }

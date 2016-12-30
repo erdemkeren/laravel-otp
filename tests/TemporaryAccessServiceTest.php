@@ -4,12 +4,12 @@ namespace Erdemkeren\TemporaryAccess\Tests;
 
 use Mockery as M;
 use Carbon\Carbon;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Erdemkeren\TemporaryAccess\Contracts\AccessCode;
-use Erdemkeren\TemporaryAccess\Contracts\AccessToken;
 use Erdemkeren\TemporaryAccess\TemporaryAccessService;
-use Erdemkeren\TemporaryAccess\Contracts\AccessCodeGenerator;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepository;
+use Erdemkeren\TemporaryAccess\Contracts\AccessCodeInterface;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
+use Erdemkeren\TemporaryAccess\Contracts\AccessCodeGeneratorInterface;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 
 class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
 {
@@ -19,43 +19,43 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
     private $service;
 
     /**
-     * @var AccessTokenRepository
+     * @var AccessTokenRepositoryInterface
      */
     private $repository;
 
     /**
-     * @var AccessCodeGenerator
+     * @var AccessCodeGeneratorInterface
      */
     private $generator;
 
     /**
-     * @var AccessCode
+     * @var AccessCodeInterface
      */
     private $accessCode;
 
     /**
-     * @var Authenticatable
+     * @var AuthenticatableContract
      */
     private $authenticatable;
 
     /**
-     * @var AccessToken
+     * @var AccessTokenInterface
      */
     private $accessToken;
 
     /**
-     * @var AccessToken
+     * @var AccessTokenInterface
      */
     private $accessTokenClone;
 
     public function setUp()
     {
-        $this->authenticatable = M::mock(Authenticatable::class);
-        $this->repository = $repository = M::mock(AccessTokenRepository::class);
-        $this->generator = $generator = M::mock(AccessCodeGenerator::class);
-        $this->accessCode = M::mock(AccessCode::class);
-        $this->accessToken = M::mock(AccessToken::class);
-        $this->accessTokenClone = M::mock(AccessToken::class);
+        $this->authenticatable = M::mock(AuthenticatableContract::class);
+        $this->repository = $repository = M::mock(AccessTokenRepositoryInterface::class);
+        $this->generator = $generator = M::mock(AccessCodeGeneratorInterface::class);
+        $this->accessCode = M::mock(AccessCodeInterface::class);
+        $this->accessToken = M::mock(AccessTokenInterface::class);
+        $this->accessTokenClone = M::mock(AccessTokenInterface::class);
         $this->service = new TemporaryAccessService($repository, $generator);
     }
 
@@ -82,7 +82,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $accessToken = $this->service->generate($this->authenticatable);
-        $this->assertInstanceOf(AccessToken::class, $accessToken);
+        $this->assertInstanceOf(AccessTokenInterface::class, $accessToken);
     }
 
     /** @test */
@@ -103,7 +103,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         Carbon::setTestNow(Carbon::create(2016, 12, 29, 13, 20));
 
         $accessToken = $this->service->generate($this->authenticatable, Carbon::now()->addMinutes(15));
-        $this->assertInstanceOf(AccessToken::class, $accessToken);
+        $this->assertInstanceOf(AccessTokenInterface::class, $accessToken);
     }
 
     /** @test */
@@ -125,7 +125,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
 
         $accessCode = $this->service->makeAccessCode('foo');
 
-        $this->assertInstanceOf(AccessCode::class, $accessCode);
+        $this->assertInstanceOf(AccessCodeInterface::class, $accessCode);
     }
 
     /** @test */
@@ -137,7 +137,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->repository->shouldReceive('retrieve')->once()->with(1, 'foo')->andReturn($this->accessToken);
 
         $result = $this->service->retrieveByCode($this->authenticatable, $this->accessCode);
-        $this->assertInstanceOf(AccessToken::class, $result);
+        $this->assertInstanceOf(AccessTokenInterface::class, $result);
     }
 
     /** @test */
@@ -149,7 +149,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->repository->shouldReceive('retrieve')->once()->with(1, 'foo')->andReturn($this->accessToken);
 
         $result = $this->service->retrieveByToken($this->authenticatable, $this->accessCode);
-        $this->assertInstanceOf(AccessToken::class, $result);
+        $this->assertInstanceOf(AccessTokenInterface::class, $result);
     }
 
     /** @test */
@@ -162,7 +162,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->repository->shouldReceive('retrieve')->once()->with(1, 'bar')->andReturn($this->accessToken);
 
         $result = $this->service->retrieveByCode($this->authenticatable, 'foo');
-        $this->assertInstanceOf(AccessToken::class, $result);
+        $this->assertInstanceOf(AccessTokenInterface::class, $result);
     }
 
     /** @test */
@@ -173,7 +173,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->repository->shouldReceive('retrieve')->once()->with(1, 'bar')->andReturn($this->accessToken);
 
         $result = $this->service->retrieveByToken($this->authenticatable, 'bar');
-        $this->assertInstanceOf(AccessToken::class, $result);
+        $this->assertInstanceOf(AccessTokenInterface::class, $result);
     }
 
     /** @test */
@@ -251,7 +251,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->repository->shouldReceive('update')->once()->with(1, 'foo', '2016-12-29 16:55:00')->andReturn(true);
 
         $result = $this->service->checkCodeAndProlong($this->authenticatable, $this->accessCode, 5);
-        $this->assertInstanceOf(AccessToken::class, $result);
+        $this->assertInstanceOf(AccessTokenInterface::class, $result);
     }
 
     /** @test */
@@ -270,7 +270,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->repository->shouldReceive('update')->once()->with(1, 'bar', '2016-12-29 16:55:00')->andReturn(true);
 
         $result = $this->service->checkCodeAndProlong($this->authenticatable, 'foo', 5);
-        $this->assertInstanceOf(AccessToken::class, $result);
+        $this->assertInstanceOf(AccessTokenInterface::class, $result);
     }
 
     /** @test */
@@ -290,7 +290,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->repository->shouldReceive('update')->once()->with(1, 'foo', '2016-12-29 16:55:00')->andReturn(true);
 
         $result = $this->service->checkCodeAndProlong($this->authenticatable, $this->accessCode);
-        $this->assertInstanceOf(AccessToken::class, $result);
+        $this->assertInstanceOf(AccessTokenInterface::class, $result);
     }
 
     /** @test */
@@ -309,7 +309,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->repository->shouldReceive('update')->once()->with(1, 'foo', '2016-12-29 16:55:00')->andReturn(true);
 
         $result = $this->service->checkTokenAndProlong($this->authenticatable, 'foo');
-        $this->assertInstanceOf(AccessToken::class, $result);
+        $this->assertInstanceOf(AccessTokenInterface::class, $result);
     }
 
     /** @test */
@@ -342,7 +342,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
 
         $accessToken = $this->service->retrieveByAttributes(['authenticatable_id' => 1, 'token' => 'foo'], ['token']);
 
-        $this->assertInstanceOf(AccessToken::class, $accessToken);
+        $this->assertInstanceOf(AccessTokenInterface::class, $accessToken);
     }
 
     /** @test */

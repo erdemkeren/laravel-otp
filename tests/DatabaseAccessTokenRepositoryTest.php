@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\ConnectionInterface;
 use Erdemkeren\TemporaryAccess\DatabaseAccessTokenRepository;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepository;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
 
 class DatabaseAccessTokenRepositoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -22,7 +22,7 @@ class DatabaseAccessTokenRepositoryTest extends \PHPUnit_Framework_TestCase
     private $builder;
 
     /**
-     * @var AccessTokenRepository
+     * @var AccessTokenRepositoryInterface
      */
     private $accessTokenRepository;
 
@@ -46,7 +46,7 @@ class DatabaseAccessTokenRepositoryTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function it_shall_be_an_instance_of_access_token_repository()
     {
-        $this->assertInstanceOf(AccessTokenRepository::class, $this->accessTokenRepository);
+        $this->assertInstanceOf(AccessTokenRepositoryInterface::class, $this->accessTokenRepository);
     }
 
     /** @test */

@@ -3,8 +3,8 @@
 namespace Erdemkeren\TemporaryAccess\Tests;
 
 use Erdemkeren\TemporaryAccess\AccessCodeGenerator;
-use Erdemkeren\TemporaryAccess\Contracts\AccessCode as AccessCodeContract;
-use Erdemkeren\TemporaryAccess\Contracts\AccessCodeGenerator as AccessCodeGeneratorContract;
+use Erdemkeren\TemporaryAccess\Contracts\AccessCodeInterface;
+use Erdemkeren\TemporaryAccess\Contracts\AccessCodeGeneratorInterface;
 
 class AccessCodeGeneratorTest extends \PHPUnit_Framework_TestCase
 {
@@ -20,7 +20,7 @@ class AccessCodeGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function it_shall_be_an_instance_of_access_code_generator_contract()
     {
-        $this->assertInstanceOf(AccessCodeGeneratorContract::class, $this->accessCodeGenerator);
+        $this->assertInstanceOf(AccessCodeGeneratorInterface::class, $this->accessCodeGenerator);
     }
 
     /** @test */
@@ -28,7 +28,7 @@ class AccessCodeGeneratorTest extends \PHPUnit_Framework_TestCase
     {
         $accessCode = $this->accessCodeGenerator->generate();
 
-        $this->assertInstanceOf(AccessCodeContract::class, $accessCode);
+        $this->assertInstanceOf(AccessCodeInterface::class, $accessCode);
 
         $this->assertEquals(6, strlen($accessCode->plain()));
         $this->assertEquals(64, strlen($accessCode->encrypted()));

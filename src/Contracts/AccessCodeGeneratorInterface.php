@@ -2,14 +2,14 @@
 
 namespace Erdemkeren\TemporaryAccess\Contracts;
 
-interface AccessCodeGenerator
+interface AccessCodeGeneratorInterface
 {
     /**
      * Generate a new access code.
      *
      * @param  int $length
      *
-     * @return AccessCode
+     * @return AccessCodeInterface
      */
     public function generate($length = 6);
 
@@ -18,7 +18,7 @@ interface AccessCodeGenerator
      *
      * @param  string $plainText
      *
-     * @return AccessCode
+     * @return AccessCodeInterface
      */
     public function fromPlain($plainText);
 }

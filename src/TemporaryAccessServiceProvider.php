@@ -3,8 +3,8 @@
 namespace Erdemkeren\TemporaryAccess;
 
 use Illuminate\Support\ServiceProvider;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepository;
-use Erdemkeren\TemporaryAccess\Contracts\AccessCodeGenerator as AccessCodeGeneratorContract;
+use Erdemkeren\TemporaryAccess\Contracts\AccessCodeGeneratorInterface;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
 
 class TemporaryAccessServiceProvider extends ServiceProvider
 {
@@ -23,12 +23,12 @@ class TemporaryAccessServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $this->app->singleton(AccessTokenRepository::class, function ($app) {
+        $this->app->singleton(AccessTokenRepositoryInterface::class, function () {
             return new DatabaseAccessTokenRepository($this->app['db']->connection(),
                 config('temporary_access.table', 'temporary_access_tokens'), config('temporary_access.expires', 15));
         });
 
-        $this->app->singleton(AccessCodeGeneratorContract::class, function ($app) {
+        $this->app->singleton(AccessCodeGeneratorInterface::class, function () {
             return new AccessCodeGenerator(config('app.key'));
         });
     }
@@ -36,8 +36,8 @@ class TemporaryAccessServiceProvider extends ServiceProvider
     public function provides()
     {
         return [
-            AccessTokenRepository::class,
-            AccessCodeGeneratorContract::class,
+            AccessCodeGeneratorInterface::class,
+            AccessTokenRepositoryInterface::class,
         ];
     }
 }

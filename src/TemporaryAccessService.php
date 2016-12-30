@@ -3,36 +3,36 @@
 namespace Erdemkeren\TemporaryAccess;
 
 use Carbon\Carbon;
+use Erdemkeren\TemporaryAccess\Contracts\AccessCodeInterface;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
+use Erdemkeren\TemporaryAccess\Contracts\TokenInformationInterface;
+use Erdemkeren\TemporaryAccess\Contracts\AccessCodeGeneratorInterface;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Erdemkeren\TemporaryAccess\Contracts\AccessCode as AccessCodeContract;
-use Erdemkeren\TemporaryAccess\Contracts\AccessToken as AccessTokenContract;
-use Erdemkeren\TemporaryAccess\Contracts\TokenInformation as TokenInformationContract;
-use Erdemkeren\TemporaryAccess\Contracts\AccessCodeGenerator as AccessCodeGeneratorContract;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepository as AccessTokenRepositoryContract;
 
 final class TemporaryAccessService
 {
     /**
      * The access token repository implementation.
      *
-     * @var AccessTokenRepositoryContract
+     * @var AccessTokenRepositoryInterface
      */
     private $repository;
 
     /**
      * The access code generator implementation.
      *
-     * @var AccessCodeGeneratorContract
+     * @var AccessCodeGeneratorInterface
      */
     private $codeGenerator;
 
     /**
      * TemporaryAccessService constructor.
      *
-     * @param AccessTokenRepositoryContract $repository
-     * @param AccessCodeGeneratorContract   $codeGenerator
+     * @param AccessTokenRepositoryInterface $repository
+     * @param AccessCodeGeneratorInterface   $codeGenerator
      */
-    public function __construct(AccessTokenRepositoryContract $repository, AccessCodeGeneratorContract $codeGenerator)
+    public function __construct(AccessTokenRepositoryInterface $repository, AccessCodeGeneratorInterface $codeGenerator)
     {
         $this->repository = $repository;
         $this->codeGenerator = $codeGenerator;
@@ -41,14 +41,14 @@ final class TemporaryAccessService
     /**
      * Retrieve an access token from the storage by the plain code.
      *
-     * @param AuthenticatableContract         $authenticatable The authenticatable who owns the access code.
-     * @param string|TokenInformationContract $plainText       The access code of the authenticatable.
+     * @param AuthenticatableContract          $authenticatable The authenticatable who owns the access code.
+     * @param string|TokenInformationInterface $plainText       The access code of the authenticatable.
      *
-     * @return null|AccessTokenContract
+     * @return null|AccessTokenInterface
      */
     public function retrieveByCode(AuthenticatableContract $authenticatable, $plainText)
     {
-        if (! $plainText instanceof TokenInformationContract) {
+        if (! $plainText instanceof TokenInformationInterface) {
             $plainText = $this->makeAccessCode($plainText);
         }
 
@@ -60,14 +60,14 @@ final class TemporaryAccessService
     /**
      * Retrieve an access token from the storage by the actual token.
      *
-     * @param AuthenticatableContract         $authenticatable The authenticatable who owns the access code.
-     * @param string|TokenInformationContract $encryptedText   The access code of the authenticatable.
+     * @param AuthenticatableContract          $authenticatable The authenticatable who owns the access code.
+     * @param string|TokenInformationInterface $encryptedText   The access code of the authenticatable.
      *
-     * @return null|AccessTokenContract
+     * @return null|AccessTokenInterface
      */
     public function retrieveByToken(AuthenticatableContract $authenticatable, $encryptedText)
     {
-        if ($encryptedText instanceof TokenInformationContract) {
+        if ($encryptedText instanceof TokenInformationInterface) {
             $encryptedText = $encryptedText->encrypted();
         }
 
@@ -79,8 +79,8 @@ final class TemporaryAccessService
     /**
      * Determine if an access code exists and is valid.
      *
-     * @param  AuthenticatableContract         $authenticatable The authenticatable who owns the access code.
-     * @param  string|TokenInformationContract $plainText       The access token of the authenticatable.
+     * @param  AuthenticatableContract          $authenticatable The authenticatable who owns the access code.
+     * @param  string|TokenInformationInterface $plainText       The access token of the authenticatable.
      *
      * @return bool
      */
@@ -92,8 +92,8 @@ final class TemporaryAccessService
     /**
      * Determine if an access token exists and is valid.
      *
-     * @param  AuthenticatableContract         $authenticatable The authenticatable who owns the access code.
-     * @param  string|TokenInformationContract $encryptedText   The encrypted access token of the authenticatable.
+     * @param  AuthenticatableContract          $authenticatable The authenticatable who owns the access code.
+     * @param  string|TokenInformationInterface $encryptedText   The encrypted access token of the authenticatable.
      *
      * @return bool
      */
@@ -106,11 +106,11 @@ final class TemporaryAccessService
      * Determine if an access code record exists and prolong the expire date if so.
      * If no prolong time given, we will reset the original expire time.
      *
-     * @param  AuthenticatableContract         $authenticatable The authenticatable who owns the access code.
-     * @param  string|TokenInformationContract $plainText       The access code of the authenticatable.
-     * @param  int|null                        $prolong         The prolong time in minutes.
+     * @param  AuthenticatableContract          $authenticatable The authenticatable who owns the access code.
+     * @param  string|TokenInformationInterface $plainText       The access code of the authenticatable.
+     * @param  int|null                         $prolong         The prolong time in minutes.
      *
-     * @return bool|AccessTokenContract
+     * @return bool|AccessTokenInterface
      */
     public function checkCodeAndProlong(AuthenticatableContract $authenticatable, $plainText, $prolong = null)
     {
@@ -125,11 +125,11 @@ final class TemporaryAccessService
      * Determine if an access token record exists and prolong the expire date if so.
      * If no prolong time given, we will reset the original expire time.
      *
-     * @param  AuthenticatableContract         $authenticatable The authenticatable who owns the access code.
-     * @param  string|TokenInformationContract $encryptedText   The access code of the authenticatable.
-     * @param  int|null                        $prolong         The prolong time in minutes.
+     * @param  AuthenticatableContract          $authenticatable The authenticatable who owns the access code.
+     * @param  string|TokenInformationInterface $encryptedText   The access code of the authenticatable.
+     * @param  int|null                         $prolong         The prolong time in minutes.
      *
-     * @return bool|AccessTokenContract
+     * @return bool|AccessTokenInterface
      */
     public function checkTokenAndProlong(AuthenticatableContract $authenticatable, $encryptedText, $prolong = null)
     {
@@ -146,7 +146,7 @@ final class TemporaryAccessService
      * @param  AuthenticatableContract $authenticatable The authenticatable who owns the access code.
      * @param  Carbon|null             $expiresAt       The optional expire date of the access token.
      *
-     * @return AccessTokenContract
+     * @return AccessTokenInterface
      */
     public function generate(AuthenticatableContract $authenticatable, Carbon $expiresAt = null)
     {
@@ -163,11 +163,11 @@ final class TemporaryAccessService
     /**
      * Update an access token in the storage.
      *
-     * @param  AccessTokenContract $accessToken The access token to be updated.
+     * @param  AccessTokenInterface $accessToken The access token to be updated.
      *
      * @return bool
      */
-    public function update(AccessTokenContract $accessToken)
+    public function update(AccessTokenInterface $accessToken)
     {
         $token = $accessToken->token();
         $expiresAt = $accessToken->expiresAt();
@@ -181,7 +181,7 @@ final class TemporaryAccessService
      *
      * @param  string $plainText The plain text code to be converted back to access code instance.
      *
-     * @return AccessCodeContract
+     * @return AccessCodeInterface
      */
     public function makeAccessCode($plainText)
     {
@@ -194,7 +194,7 @@ final class TemporaryAccessService
      * @param  array $queryParams The key - value pairs to match.
      * @param  array $attributes  The attributes to be returned from the storage.
      *
-     * @return AccessTokenContract|null
+     * @return AccessTokenInterface|null
      */
     public function retrieveByAttributes(array $queryParams, array $attributes = ['*'])
     {
@@ -206,11 +206,11 @@ final class TemporaryAccessService
     /**
      * Delete the given access token from the storage.
      *
-     * @param  AccessTokenContract $accessToken The access token to be deleted.
+     * @param  AccessTokenInterface $accessToken The access token to be deleted.
      *
      * @return bool
      */
-    public function delete(AccessTokenContract $accessToken)
+    public function delete(AccessTokenInterface $accessToken)
     {
         return (bool) $this->repository->delete($accessToken->authenticatableId(), $accessToken->token());
     }
@@ -236,7 +236,7 @@ final class TemporaryAccessService
     private function retrieveFromRepository($authenticatableId, $encryptedText)
     {
         if (! $attributes = $this->repository->retrieve($authenticatableId, $encryptedText)) {
-            return;
+            return null;
         }
 
         return $this->makeAccessToken((array) $attributes);
@@ -245,12 +245,12 @@ final class TemporaryAccessService
     /**
      * Prolong the access token then update it in the storage.
      *
-     * @param  AccessTokenContract $accessToken
-     * @param  int|null            $prolong
+     * @param  AccessTokenInterface $accessToken
+     * @param  int|null             $prolong
      *
-     * @return bool|AccessTokenContract
+     * @return bool|AccessTokenInterface
      */
-    private function prolongAndUpdateAccessToken(AccessTokenContract $accessToken, $prolong = null)
+    private function prolongAndUpdateAccessToken(AccessTokenInterface $accessToken, $prolong = null)
     {
         $accessToken = $this->prolongAccessToken($accessToken, $prolong);
 
@@ -264,12 +264,12 @@ final class TemporaryAccessService
     /**
      * Prolong an access token.
      *
-     * @param AccessTokenContract $accessToken
-     * @param int|null            $prolong
+     * @param AccessTokenInterface $accessToken
+     * @param int|null             $prolong
      *
-     * @return AccessTokenContract
+     * @return AccessTokenInterface
      */
-    private function prolongAccessToken(AccessTokenContract $accessToken, $prolong = null)
+    private function prolongAccessToken(AccessTokenInterface $accessToken, $prolong = null)
     {
         $prolong = $prolong ? $prolong * 60 : $this->getNow()->diffInSeconds($accessToken->createdAt());
 

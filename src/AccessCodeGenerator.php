@@ -2,10 +2,9 @@
 
 namespace Erdemkeren\TemporaryAccess;
 
-use Erdemkeren\TemporaryAccess\Contracts\AccessCode as AccessCodeContract;
-use Erdemkeren\TemporaryAccess\Contracts\AccessCodeGenerator as AccessCodeGeneratorContract;
+use Erdemkeren\TemporaryAccess\Contracts\AccessCodeGeneratorInterface;
 
-final class AccessCodeGenerator implements AccessCodeGeneratorContract
+final class AccessCodeGenerator implements AccessCodeGeneratorInterface
 {
     /**
      * The key to be used to encrypt the access code.
@@ -68,7 +67,7 @@ final class AccessCodeGenerator implements AccessCodeGeneratorContract
      * @param  string $plainText     The plain text code.
      * @param  string $encryptedText The encrypted code.
      *
-     * @return AccessCodeContract
+     * @return AccessCode
      */
     private function makeCode($plainText, $encryptedText)
     {

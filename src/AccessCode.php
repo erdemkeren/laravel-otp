@@ -2,9 +2,9 @@
 
 namespace Erdemkeren\TemporaryAccess;
 
-use Erdemkeren\TemporaryAccess\Contracts\AccessCode as Contract;
+use Erdemkeren\TemporaryAccess\Contracts\AccessCodeInterface;
 
-final class AccessCode implements Contract
+final class AccessCode implements AccessCodeInterface
 {
     /**
      * The plain text.

@@ -2,7 +2,7 @@
 
 namespace Erdemkeren\TemporaryAccess\Contracts;
 
-interface TokenInformation
+interface TokenInformationInterface
 {
     /**
      * Get the token.

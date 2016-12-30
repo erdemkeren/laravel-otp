@@ -2,7 +2,7 @@
 
 namespace Erdemkeren\TemporaryAccess\Contracts;
 
-interface AccessCode extends TokenInformation
+interface AccessCodeInterface extends TokenInformationInterface
 {
     /**
      * Convert the access code to string.

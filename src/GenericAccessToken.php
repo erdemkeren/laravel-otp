@@ -4,9 +4,9 @@ namespace Erdemkeren\TemporaryAccess;
 
 use Carbon\Carbon;
 use LogicException;
-use Erdemkeren\TemporaryAccess\Contracts\AccessToken as AccessTokenContract;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
 
-final class GenericAccessToken implements AccessTokenContract
+final class GenericAccessToken implements AccessTokenInterface
 {
     /**
      * The attributes of the access token.
@@ -107,7 +107,7 @@ final class GenericAccessToken implements AccessTokenContract
      *
      * @param  int $prolong
      *
-     * @return AccessTokenContract
+     * @return GenericAccessToken
      */
     public function prolong($prolong)
     {

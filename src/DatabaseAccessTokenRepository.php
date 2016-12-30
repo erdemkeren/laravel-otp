@@ -4,15 +4,15 @@ namespace Erdemkeren\TemporaryAccess;
 
 use stdClass;
 use Carbon\Carbon;
-use Illuminate\Database\ConnectionInterface as ConnectionContract;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepository as AccessTokenRepositoryContract;
+use Illuminate\Database\ConnectionInterface;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
 
-final class DatabaseAccessTokenRepository implements AccessTokenRepositoryContract
+final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterface
 {
     /**
      * The connection.
      *
-     * @var ConnectionContract
+     * @var ConnectionInterface
      */
     private $connection;
 
@@ -33,11 +33,11 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryContra
     /**
      * DatabaseAccessTokenRepository constructor.
      *
-     * @param ConnectionContract $connection
+     * @param ConnectionInterface $connection
      * @param string             $table
      * @param int                $expires
      */
-    public function __construct(ConnectionContract $connection, $table, $expires)
+    public function __construct(ConnectionInterface $connection, $table, $expires)
     {
         $this->table = $table;
         $this->expires = $expires;
@@ -82,7 +82,7 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryContra
         $resource = $query->first($attributes);
 
         if (! $resource || $this->tokenExpired($resource)) {
-            return;
+            return null;
         }
 
         return $resource;
@@ -206,7 +206,7 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryContra
     /**
      * Get the database connection instance.
      *
-     * @return ConnectionContract
+     * @return ConnectionInterface
      */
     private function getConnection()
     {
