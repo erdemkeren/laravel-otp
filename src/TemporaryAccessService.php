@@ -86,7 +86,7 @@ final class TemporaryAccessService
      */
     public function checkCode(AuthenticatableContract $authenticatable, $plainText)
     {
-        return ! ! $this->retrieveByCode($authenticatable, $plainText);
+        return (bool) $this->retrieveByCode($authenticatable, $plainText);
     }
 
     /**
@@ -99,7 +99,7 @@ final class TemporaryAccessService
      */
     public function checkToken(AuthenticatableContract $authenticatable, $encryptedText)
     {
-        return ! ! $this->retrieveByToken($authenticatable, $encryptedText);
+        return (bool) $this->retrieveByToken($authenticatable, $encryptedText);
     }
 
     /**
@@ -212,7 +212,7 @@ final class TemporaryAccessService
      */
     public function delete(AccessTokenContract $accessToken)
     {
-        return ! ! $this->repository->delete($accessToken->authenticatableId(), $accessToken->token());
+        return (bool) $this->repository->delete($accessToken->authenticatableId(), $accessToken->token());
     }
 
     /**
@@ -236,7 +236,7 @@ final class TemporaryAccessService
     private function retrieveFromRepository($authenticatableId, $encryptedText)
     {
         if (! $attributes = $this->repository->retrieve($authenticatableId, $encryptedText)) {
-            return null;
+            return;
         }
 
         return $this->makeAccessToken((array) $attributes);

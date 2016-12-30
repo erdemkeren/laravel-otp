@@ -13,11 +13,11 @@ class TemporaryAccessServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . '/../database/migrations/' => database_path('migrations')
+            __DIR__.'/../database/migrations/' => database_path('migrations'),
         ], 'migrations');
 
         $this->publishes([
-            __DIR__ . '/../config/temporary_access.php' => config_path('temporary_access.php'),
+            __DIR__.'/../config/temporary_access.php' => config_path('temporary_access.php'),
         ]);
     }
 

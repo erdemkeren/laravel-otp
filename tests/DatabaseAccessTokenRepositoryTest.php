@@ -2,12 +2,12 @@
 
 namespace Erdemkeren\TemporaryAccess\Tests;
 
-use Carbon\Carbon;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepository;
-use Erdemkeren\TemporaryAccess\DatabaseAccessTokenRepository;
-use Illuminate\Database\ConnectionInterface;
-use Illuminate\Database\Query\Builder;
 use Mockery as M;
+use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\ConnectionInterface;
+use Erdemkeren\TemporaryAccess\DatabaseAccessTokenRepository;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepository;
 
 class DatabaseAccessTokenRepositoryTest extends \PHPUnit_Framework_TestCase
 {

@@ -82,7 +82,7 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryContra
         $resource = $query->first($attributes);
 
         if (! $resource || $this->tokenExpired($resource)) {
-            return null;
+            return;
         }
 
         return $resource;
@@ -118,8 +118,8 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryContra
      */
     public function update($authenticatableId, $token, $expires)
     {
-        return ! ! $this->getTable()->where('authenticatable_id', $authenticatableId)->where('token', $token)->update([
-            'expires_at' => (string) $expires
+        return (bool) $this->getTable()->where('authenticatable_id', $authenticatableId)->where('token', $token)->update([
+            'expires_at' => (string) $expires,
         ]);
     }
 
@@ -133,7 +133,7 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryContra
      */
     public function delete($authenticatableId, $token)
     {
-        return ! ! $this->getTable()->where('authenticatable_id', $authenticatableId)->where('token', $token)->delete();
+        return (bool) $this->getTable()->where('authenticatable_id', $authenticatableId)->where('token', $token)->delete();
     }
 
     /**
