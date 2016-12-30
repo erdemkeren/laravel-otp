@@ -13,8 +13,7 @@ class CreateTemporaryAccessTokensTable extends Migration
      */
     public function up()
     {
-        Schema::create('temporary_access_tokens', function(Blueprint $table)
-        {
+        Schema::create('temporary_access_tokens', function (Blueprint $table) {
             $table->unsignedInteger('authenticatable_id');
             $table->string('token', 64);
             $table->timestamp('created_at')->useCurrent();

@@ -47,6 +47,5 @@ class AccessCodeGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function it_shall_generate_new_instances_of_itself()
     {
-
     }
 }
