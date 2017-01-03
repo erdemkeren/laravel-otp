@@ -121,7 +121,7 @@ final class TemporaryAccessService
      * If no prolong time given, we will reset the original expire time.
      *
      * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
-     * @param  string|TokenInterface   $plainText       The token of the authenticatable.
+     * @param  string                  $plainText       The token of the authenticatable.
      * @param  int|null                $prolong         The prolong time in minutes.
      *
      * @return bool|AccessTokenInterface
