@@ -32,7 +32,7 @@ public function TemporaryAccessController extends Controller
     {
         $token = $request->input('token');
         
-        if(! $this->service->checkToken(auth()->user(), $token)) {
+        if(! $this->service->check(auth()->user(), $token)) {
             // Whoops! Do something.
         }
         
@@ -47,7 +47,7 @@ public function TemporaryAccessController extends Controller
     {
         $token = $request->input('token');
         
-        if(! $this->service->checkTokenAndProlong(auth()->user(), $token)) {
+        if(! $this->service->checkAndProlong(auth()->user(), $token)) {
             // Whoops! Do something.
         }
         
@@ -62,9 +62,9 @@ public function TemporaryAccessController extends Controller
     
     public function validate(Request $request)
     {
-        $code = $request->input('code');
+        $code = $request->input('token');
         
-        if(! $token = $this->service->retrieveByCode(auth()->user(), $code)) {
+        if(! $token = $this->service->retrieveUsingPlainText(auth()->user(), $token)) {
             // Whoops! Do something.
         }
         
@@ -127,20 +127,15 @@ return [
 
 The package has a `TemporaryAccessService`, which is (probably) the only class you need to interact with. There is no facade yet, but planning to add it in the future.
 
-Before reading the usage, here are the base definitions:
-
-1- The plain text string which will be used by the users is `code`. 
-2- The codes are created with the encrypted texts: `tokens`.
-
-To let you decide stick with the `code` or return the associated `token` after first validation, every retrieval service provided by the package has two signatures. Like:
+To let you decide which version of the token (plain text or encrypted) most of the service methods has two different signatures. Like:
 ```php
-retrieveByCode(AuthenticatableContract $authenticatable, $plainText);
+$service->retrieveUsingPlainText(AuthenticatableContract $authenticatable, $plainText);
 ```
 
 and
 
 ```php
-retrieveByToken(AuthenticatableContract $authenticatable, $encryptedText);
+$service->retrieve(AuthenticatableContract $authenticatable, $encryptedText);
 ```
 
 When you need to create a new temporary access token; you can call the `generate` method of the TemporaryAccessService with the user who will own the access token.
@@ -151,46 +146,250 @@ $service = app()->make(Erdemkeren\TemporaryAccess\TemporaryAccessService::class)
 $token = $service->generate($user = \App\User::find(1));
 ```
 
-When you need to validate an access token, you can call the `exists` method of the TemporaryAccessService.
+When you need to validate an access token, you can call the `check` method of the TemporaryAccessService.
 
 ```php
-$service->exists($user, "8JBGJA"); // true
-$service->exists($user, $token);   // true
+$service->check($user, $token);   // true
+$service->checkUsingPlainText($user, "8JBGJA"); // true
 ```
 
-If you want to extend the expire date of the token after validate; there is a method for that: `checkAndProlong` 
+If you want to extend the expire date of the token after validation; there is a method for that!: `checkAndProlong` 
+
+```php
+(string) $accessToken->expiresAt(); // "2016-12-29 22:25:00"
+$token = $service->checkAndProlong($user, $token);
+(string) $accessToken->expiresAt(); // "2016-12-29 22:25:30" (Executed after 30 seconds.)
+```
+
+The same applies for plain text checks:
 
 ```php
 (string) $token->expiresAt(); // "2016-12-29 22:25:00"
-$token = $service->checkAndProlong($user, "8JBGJA");
+$token = $service->checkUsingPlainTextAndProlong($user, "8JBGJA");
 (string) $token->expiresAt(); // "2016-12-29 22:25:30" (Executed after 30 seconds.)
 ```
 
-If you don't want to share the plain access code between requests, you can use `retrieveByAttributes` method:
+If you have a special case which you can't use the retrieve methods, you can use `retrieveByAttributes` method:
 
 ```php
 $service->retrieveByAttributes([
-    'authenticatable_id' => $user->getAuthIdentifier(),
-    'token' => $token->encrypted(),
+    'token' => $encryptedText,
+]);
+
+// or maybe
+
+$service->retrieveByAttributes([
+    'token' => (string) $service->makeTokenFromPlainText("8JBGJA"),
 ]);
 ```
 
 You can call the `delete` method to delete an access token:
+
 ```php
 $service->delete($token);
+
+// or
+
+$service->delete((string) $service->makeTokenFromPlainText("8JBGJA"));
 ```
 
 If you need to clear all expired token history from your database, you can use the `deleteExpired` method:
 
 ```php
-$service->deleteExpired($token);
+$service->deleteExpired();
 ```
 
 
 ### Available methods
 
-Please see `TemporaryAccessService` class for available methods.
+The available methods of the `Erdemkeren\TemporaryAccess\TemporaryAccessService`:
 
+```php
+/**
+ * Retrieve an access token from the storage by the actual token.
+ *
+ * @param AuthenticatableContract $authenticatable The authenticatable who owns the token.
+ * @param string|TokenInterface   $encryptedText   The token of the authenticatable.
+ *
+ * @return null|AccessTokenInterface
+ */
+public function retrieve(AuthenticatableContract $authenticatable, $encryptedText);
+
+/**
+ * Retrieve an access token from the storage by the plain token.
+ *
+ * @param AuthenticatableContract $authenticatable The authenticatable who owns the token.
+ * @param string|TokenInterface   $plainText       The token of the authenticatable.
+ *
+ * @return null|AccessTokenInterface
+ */
+public function retrieveUsingPlainText(AuthenticatableContract $authenticatable, $plainText);
+
+/**
+ * Determine if an access token exists and is valid.
+ *
+ * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
+ * @param  string|TokenInterface   $encryptedText   The encrypted token of the authenticatable.
+ *
+ * @return bool
+ */
+public function check(AuthenticatableContract $authenticatable, $encryptedText);
+
+/**
+ * Determine if an access token exists and is valid.
+ *
+ * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
+ * @param  string|TokenInterface   $plainText       The plain token of the authenticatable.
+ *
+ * @return bool
+ */
+public function checkUsingPlainText(AuthenticatableContract $authenticatable, $plainText);
+
+/**
+ * Determine if an access token record exists and prolong the expire date if so.
+ * If no prolong time given, we will reset the original expire time.
+ *
+ * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
+ * @param  string|TokenInterface   $encryptedText   The token of the authenticatable.
+ * @param  int|null                $prolong         The prolong time in minutes.
+ *
+ * @return bool|AccessTokenInterface
+ */
+public function checkAndProlong(AuthenticatableContract $authenticatable, $encryptedText, $prolong = null);
+
+/**
+ * Determine if an access token record exists and prolong the expire date if so.
+ * If no prolong time given, we will reset the original expire time.
+ *
+ * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
+ * @param  string|TokenInterface   $plainText       The token of the authenticatable.
+ * @param  int|null                $prolong         The prolong time in minutes.
+ *
+ * @return bool|AccessTokenInterface
+ */
+public function checkUsingPlainTextAndProlong(AuthenticatableContract $authenticatable, $plainText, $prolong = null);
+
+/**
+ * Generate a new access token in the storage and get the token.
+ *
+ * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
+ * @param  Carbon|null             $expiresAt       The optional expire date of the access token.
+ *
+ * @return AccessTokenInterface
+ */
+public function generate(AuthenticatableContract $authenticatable, Carbon $expiresAt = null);
+
+/**
+ * Update an access token in the storage.
+ *
+ * @param  AccessTokenInterface $accessToken The access token to be updated.
+ *
+ * @return bool
+ */
+public function update(AccessTokenInterface $accessToken);
+
+/**
+ * Revive an token from the given plain text.
+ *
+ * @param  string $plainText The plain text to be converted back to token instance.
+ *
+ * @return TokenInterface
+ */
+public function makeTokenFromPlainText($plainText);
+
+/**
+ * Revive an token from the given plain text.
+ *
+ * @param  string $encryptedText The encrypted token to be converted back to token instance.
+ *
+ * @return TokenInterface
+ */
+public function makeTokenFromEncryptedText($encryptedText);
+
+/**
+ * Retrieve the first resource by the given attributes.
+ *
+ * @param  array $queryParams The key - value pairs to match.
+ * @param  array $attributes  The attributes to be returned from the storage.
+ *
+ * @return AccessTokenInterface|null
+ */
+public function retrieveByAttributes(array $queryParams, array $attributes = ['*']);
+
+/**
+ * Delete the given access token from the storage.
+ *
+ * @param  AccessTokenInterface|string $accessToken The access token or the encrypted text to be deleted.
+ *
+ * @return bool
+ */
+public function delete($accessToken);
+
+/**
+ * Delete the expired access tokens from the storage.
+ *
+ * @return void
+ */
+public function deleteExpired();
+```
+
+The available methods of the `Erdemkeren\TemporaryAccess\GenericAccessToken`:
+
+```php
+/**
+ * Get the unique identifier of the authenticatable who owns the access token.
+ *
+ * @return string
+ */
+public function authenticatableId();
+
+/**
+ * Get the token.
+ *
+ * @return TokenInterface
+ */
+public function token();
+
+/**
+ * Get the access token as plain text.
+ *
+ * @return string
+ * @throws LogicException
+ */
+public function plain();
+
+/**
+ * Get the access token encrypted.
+ *
+ * @return string
+ */
+public function encrypted();
+
+/**
+ * Get the created at timestamp of the access token.
+ *
+ * @return \Carbon\Carbon
+ */
+public function createdAt();
+
+/**
+ * Get the expires at timestamp of the access token.
+ *
+ * @return \Carbon\Carbon
+ */
+public function expiresAt();
+
+/**
+ * Get a new instance of the access token with a longer expire date.
+ *
+ * @param  int $prolong The prolong time in seconds.
+ *
+ * @return GenericAccessToken
+ */
+public function prolong($prolong);
+```
+
+There are more public methods you can use. If you want to learn more, please see the source code.
 
 ## Changelog
 

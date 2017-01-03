@@ -33,9 +33,9 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
     /**
      * DatabaseAccessTokenRepository constructor.
      *
-     * @param ConnectionInterface $connection
-     * @param string             $table
-     * @param int                $expires
+     * @param ConnectionInterface $connection The database connection interface.
+     * @param string              $table      The name of the database table.
+     * @param int                 $expires    The default expire time in minutes.
      */
     public function __construct(ConnectionInterface $connection, $table, $expires)
     {
@@ -47,20 +47,20 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
     /**
      * Retrieve an access token from the storage.
      *
-     * @param  int    $authenticatableId The unique identifier of the authenticatable who owns the access token.
-     * @param  string $token             The access code of the authenticatable.
+     * @param  int    $authenticatableId The unique identifier of the authenticatable who has the access.
+     * @param  string $token             The encrypted token of the authenticatable.
      *
      * @return stdClass|array|bool
      */
     public function retrieve($authenticatableId, $token)
     {
-        $token = $this->getTable()->where('authenticatable_id', $authenticatableId)->where('token', $token)->first();
+        $token = $this->find($authenticatableId, $token)->first();
 
-        return $this->filterExpiredToken($token);
+        return $this->filterExpiredAccessToken($token);
     }
 
     /**
-     * Retrieve the first resource by the given attributes.
+     * Retrieve the first valid resource by the given attributes.
      *
      * @param  array $queryParams The key - value pairs to match.
      * @param  array $attributes  The attributes to be returned from the storage.
@@ -77,14 +77,14 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
 
         $token = $query->first($attributes);
 
-        return $this->filterExpiredToken($token);
+        return $this->filterExpiredAccessToken($token);
     }
 
     /**
      * Store a new access token in the storage.
      *
-     * @param  int         $authenticatableId The unique identifier of the authenticatable who owns the access token.
-     * @param  string      $token             The access code generated for the authenticatable.
+     * @param  int         $authenticatableId The unique identifier of the authenticatable who has the access.
+     * @param  string      $token             The encrypted token of the authenticatable.
      * @param  string|null $expiresAt         The expiration date of the access token.
      *
      * @return array
@@ -103,15 +103,15 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
      * Update the expire date of the given access token in the storage.
      *
      * @param  int    $authenticatableId The unique identifier of the authenticatable.
-     * @param  string $token             The encrypted access code to be updated.
-     * @param  string $expires           The new expiration date of the access token.
+     * @param  string $token             The encrypted token to be updated.
+     * @param  string $expiresAt         The new expiration date of the access token.
      *
      * @return bool
      */
-    public function update($authenticatableId, $token, $expires)
+    public function update($authenticatableId, $token, $expiresAt)
     {
-        return (bool) $this->getTable()->where('authenticatable_id', $authenticatableId)->where('token', $token)->update([
-            'expires_at' => (string) $expires,
+        return (bool) $this->find($authenticatableId, $token)->update([
+            'expires_at' => (string) $expiresAt,
         ]);
     }
 
@@ -119,13 +119,13 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
      * Delete a resource from the storage.
      *
      * @param  int    $authenticatableId The unique identifier of the authenticatable.
-     * @param  string $token             The code of the authenticatable.
+     * @param  string $token             The encrypted token of the authenticatable.
      *
-     * @return bool
+     * @return int
      */
     public function delete($authenticatableId, $token)
     {
-        return (bool) $this->getTable()->where('authenticatable_id', $authenticatableId)->where('token', $token)->delete();
+        return (bool) $this->find($authenticatableId, $token)->delete();
     }
 
     /**
@@ -139,6 +139,19 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
     }
 
     /**
+     * Get a new find query.
+     *
+     * @param  int    $authenticatableId
+     * @param  string $token
+     *
+     * @return \Illuminate\Database\Query\Builder
+     */
+    private function find($authenticatableId, $token)
+    {
+        return $this->getTable()->where('authenticatable_id', $authenticatableId)->where('token', $token);
+    }
+
+    /**
      * Get an access token payload.
      *
      * @param  int         $authenticatableId
@@ -149,7 +162,7 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
      */
     private function getAccessTokenPayload($authenticatableId, $token, $expiresAt)
     {
-        $expiresAt = $expiresAt ? $expiresAt : $this->getNow()->addMinutes($this->expires);
+        $expiresAt = $expiresAt ? $expiresAt : $this->makeExpiresAt();
 
         $payload = [
             'authenticatable_id' => $authenticatableId,
@@ -164,39 +177,61 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
     /**
      * Filter the given database response and only return if it is not expired.
      *
-     * @param stdClass|array|null $token
+     * @param stdClass|array|null $accessToken
      *
      * @return stdClass|array|null
      */
-    private function filterExpiredToken($token)
+    private function filterExpiredAccessToken($accessToken)
     {
-        if ($token && ! $this->tokenExpired((object) $token)) {
-            return $token;
+        if ($accessToken && ! $this->accessTokenExpired((object) $accessToken)) {
+            return $accessToken;
         }
     }
 
     /**
      * Determine if the token has expired.
      *
-     * @param  stdClass $token
+     * @param  stdClass $accessToken
      *
      * @return bool
      */
-    private function tokenExpired(stdClass $token)
+    private function accessTokenExpired(stdClass $accessToken)
     {
-        $expiresAt = $token->expires_at ? new Carbon($token->expires_at) : $this->getNow()->addMinutes($this->expires);
+        $expiresAt = $accessToken->expires_at ? new Carbon($accessToken->expires_at) : $this->makeExpiresAt();
 
         return $this->getNow()->gte($expiresAt);
     }
 
     /**
-     * Get the current UNIX timestamp.
+     * Make the expires at property from configuration.
+     *
+     * @return Carbon
+     */
+    private function makeExpiresAt()
+    {
+        return $this->getFuture($this->expires);
+    }
+
+    /**
+     * Get the current time.
      *
      * @return Carbon
      */
     private function getNow()
     {
         return Carbon::now();
+    }
+
+    /**
+     * Get the time after given minutes.
+     *
+     * @param  int $minutesLater
+     *
+     * @return Carbon
+     */
+    private function getFuture($minutesLater)
+    {
+        return $this->getNow()->addMinutes($minutesLater);
     }
 
     /**

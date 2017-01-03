@@ -50,7 +50,7 @@ class DatabaseAccessTokenRepositoryTest extends \PHPUnit_Framework_TestCase
     }
 
     /** @test */
-    public function it_shall_determine_if_a_token_is_not_expired()
+    public function it_shall_determine_if_an_access_token_is_not_expired()
     {
         $this->connection->shouldReceive('table')->once()->andReturn($this->builder);
 
@@ -70,7 +70,7 @@ class DatabaseAccessTokenRepositoryTest extends \PHPUnit_Framework_TestCase
     }
 
     /** @test */
-    public function it_shall_determine_if_a_token_is_expired()
+    public function it_shall_determine_if_an_access_token_is_expired()
     {
         $this->connection->shouldReceive('table')->once()->andReturn($this->builder);
 
@@ -144,7 +144,7 @@ class DatabaseAccessTokenRepositoryTest extends \PHPUnit_Framework_TestCase
     }
 
     /** @test */
-    public function it_shall_return_null_if_the_token_is_not_found()
+    public function it_shall_return_null_if_the_access_token_is_not_found()
     {
         $this->connection->shouldReceive('table')->once()->andReturn($this->builder);
 
@@ -158,7 +158,7 @@ class DatabaseAccessTokenRepositoryTest extends \PHPUnit_Framework_TestCase
     }
 
     /** @test */
-    public function it_shall_return_null_if_the_token_is_is_expired()
+    public function it_shall_return_null_if_the_access_token_is_is_expired()
     {
         $this->connection->shouldReceive('table')->once()->andReturn($this->builder);
 

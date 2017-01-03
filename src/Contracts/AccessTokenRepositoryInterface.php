@@ -9,12 +9,12 @@ interface AccessTokenRepositoryInterface
     /**
      * Retrieve an access token from the storage.
      *
-     * @param  int    $authenticatableId The unique identifier of the authenticatable who owns the access token.
-     * @param  string $code              The access code of the authenticatable.
+     * @param  int    $authenticatableId The unique identifier of the authenticatable who has the access.
+     * @param  string $token             The encrypted token of the authenticatable.
      *
      * @return stdClass|array|bool
      */
-    public function retrieve($authenticatableId, $code);
+    public function retrieve($authenticatableId, $token);
 
     /**
      * Retrieve the first valid resource by the given attributes.
@@ -29,34 +29,34 @@ interface AccessTokenRepositoryInterface
     /**
      * Store a new access token in the storage.
      *
-     * @param  int         $authenticatableId The unique identifier of the authenticatable who owns the access token.
-     * @param  string      $code              The access token generated for the authenticatable.
-     * @param  string|null $expires           The expiration date of the access token.
+     * @param  int         $authenticatableId The unique identifier of the authenticatable who has the access.
+     * @param  string      $token             The encrypted token of the authenticatable.
+     * @param  string|null $expiresAt         The expiration date of the access token.
      *
      * @return array
      */
-    public function store($authenticatableId, $code, $expires = null);
+    public function store($authenticatableId, $token, $expiresAt = null);
 
     /**
      * Update the expire date of the given access token in the storage.
      *
      * @param  int    $authenticatableId The unique identifier of the authenticatable.
-     * @param  string $code              The encrypted access token to be updated.
-     * @param  string $expires           The new expiration date of the access token.
+     * @param  string $token             The encrypted token to be updated.
+     * @param  string $expiresAt         The new expiration date of the access token.
      *
      * @return bool
      */
-    public function update($authenticatableId, $code, $expires);
+    public function update($authenticatableId, $token, $expiresAt);
 
     /**
      * Delete a resource from the storage.
      *
      * @param  int    $authenticatableId The unique identifier of the authenticatable.
-     * @param  string $code              The token to be deleted.
+     * @param  string $token             The encrypted token of the authenticatable.
      *
      * @return int
      */
-    public function delete($authenticatableId, $code);
+    public function delete($authenticatableId, $token);
 
     /**
      * Delete expired access tokens from the storage.

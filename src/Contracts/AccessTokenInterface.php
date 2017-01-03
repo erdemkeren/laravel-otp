@@ -2,7 +2,7 @@
 
 namespace Erdemkeren\TemporaryAccess\Contracts;
 
-interface AccessTokenInterface extends TokenInformationInterface
+interface AccessTokenInterface extends TokenInterface
 {
     /**
      * Get the unique identifier of the authenticatable who owns the access token.
@@ -24,6 +24,13 @@ interface AccessTokenInterface extends TokenInformationInterface
      * @return \Carbon\Carbon
      */
     public function expiresAt();
+    
+    /**
+     * Get the token.
+     *
+     * @return TokenInterface
+     */
+    public function token();
 
     /**
      * Prolong the expire date of the access token.

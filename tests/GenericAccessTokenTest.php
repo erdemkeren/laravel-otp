@@ -2,8 +2,10 @@
 
 namespace Erdemkeren\TemporaryAccess\Test;
 
+use Mockery as M;
 use Carbon\Carbon;
 use Erdemkeren\TemporaryAccess\GenericAccessToken;
+use Erdemkeren\TemporaryAccess\Contracts\TokenInterface;
 use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
 
 class GenericAccessTokenTest extends \PHPUnit_Framework_TestCase
@@ -12,10 +14,11 @@ class GenericAccessTokenTest extends \PHPUnit_Framework_TestCase
      * @var AccessTokenInterface
      */
     private $accessToken;
+
     /**
-     * @var AccessTokenInterface
+     * @var TokenInterface
      */
-    private $retrievedAccessToken;
+    private $token;
 
     /**
      * @var array
@@ -33,14 +36,18 @@ class GenericAccessTokenTest extends \PHPUnit_Framework_TestCase
             'expires_at'         => '2016-12-28 19:50:27',
         ];
 
-        $this->accessToken = new GenericAccessToken($accessTokenAttributes);
+        $this->token = $token = M::mock(TokenInterface::class);
 
-        $retrievedAccessTokenAttributes = $accessTokenAttributes;
-        unset($retrievedAccessTokenAttributes['plain']);
-
-        $this->retrievedAccessToken = new GenericAccessToken($retrievedAccessTokenAttributes);
+        $this->accessToken = new GenericAccessToken($token, $accessTokenAttributes);
 
         parent::setUp();
+    }
+
+    public function tearDown()
+    {
+        M::close();
+
+        parent::tearDown();
     }
 
     /** @test */
@@ -56,35 +63,35 @@ class GenericAccessTokenTest extends \PHPUnit_Framework_TestCase
     }
 
     /** @test */
-    public function it_shall_provide_the_plain_code()
+    public function it_shall_provide_the_token_as_plain_text()
     {
-        $this->assertEquals($this->accessToken->plain(), $this->accessTokenAttributes['plain']);
-    }
+        $this->token->shouldReceive('plain')->once()->andReturn('foo');
 
-    /** @test */
-    public function it_shall_provide_the_token_with_alias_code()
-    {
-        $this->assertEquals($this->accessToken->code(), $this->accessTokenAttributes['plain']);
+        $this->assertEquals($this->accessToken->plain(), 'foo');
     }
 
     /** @test */
     public function it_shall_throw_exception_when_no_plain_is_available()
     {
+        $this->token->shouldReceive('plain')->once()->andReturn(null);
+
         $this->setExpectedException(\LogicException::class);
 
-        $this->retrievedAccessToken->plain();
+        $this->accessToken->plain();
     }
 
     /** @test */
     public function it_shall_provide_the_token()
     {
-        $this->assertEquals($this->accessToken->token(), $this->accessTokenAttributes['token']);
+        $this->assertEquals($this->accessToken->token(), $this->token);
     }
 
     /** @test */
-    public function it_shall_provide_the_token_with_alias_encrypted()
+    public function it_shall_provide_the_token_as_encrypted_text()
     {
-        $this->assertEquals($this->accessToken->encrypted(), $this->accessTokenAttributes['token']);
+        $this->token->shouldReceive('__toString')->once()->andReturn('bar');
+
+        $this->assertEquals($this->accessToken->encrypted(), 'bar');
     }
 
     /** @test */
