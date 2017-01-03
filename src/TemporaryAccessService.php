@@ -56,7 +56,7 @@ final class TemporaryAccessService
      * Retrieve an access token from the storage by the plain token.
      *
      * @param AuthenticatableContract $authenticatable The authenticatable who owns the token.
-     * @param string|TokenInterface   $plainText       The token of the authenticatable.
+     * @param string                  $plainText       The token of the authenticatable.
      *
      * @return null|AccessTokenInterface
      */
@@ -86,7 +86,7 @@ final class TemporaryAccessService
      * Determine if an access token exists and is valid.
      *
      * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
-     * @param  string|TokenInterface   $plainText       The plain token of the authenticatable.
+     * @param  string                  $plainText       The plain token of the authenticatable.
      *
      * @return bool
      */
