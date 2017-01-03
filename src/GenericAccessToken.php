@@ -63,7 +63,7 @@ final class GenericAccessToken implements AccessTokenInterface
      */
     public function plain()
     {
-        if(! $plainText = $this->token->plain()) {
+        if (! $plainText = $this->token->plain()) {
             $message = 'The plain text is not available at this state.';
             throw new LogicException($message);
         }

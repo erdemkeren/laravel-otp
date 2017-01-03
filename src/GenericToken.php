@@ -50,7 +50,6 @@ final class GenericToken implements TokenInterface
     public function encrypted()
     {
         return $this->encryptedText;
-
     }
 
     /**
