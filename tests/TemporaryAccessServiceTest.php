@@ -2,14 +2,14 @@
 
 namespace Erdemkeren\TemporaryAccess\Tests;
 
-use Carbon\Carbon;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
-use Erdemkeren\TemporaryAccess\Contracts\TokenGeneratorInterface;
-use Erdemkeren\TemporaryAccess\Contracts\TokenInterface;
-use Erdemkeren\TemporaryAccess\TemporaryAccessService;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Mockery as M;
+use Carbon\Carbon;
+use Erdemkeren\TemporaryAccess\TemporaryAccessService;
+use Erdemkeren\TemporaryAccess\Contracts\TokenInterface;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
+use Erdemkeren\TemporaryAccess\Contracts\TokenGeneratorInterface;
+use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 
 class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
 {
@@ -72,7 +72,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->authenticatable->shouldReceive('getAuthIdentifier')->once()->andReturn(1);
         $this->generator->shouldReceive('generate')->once()->andReturn($this->token);
         $this->token->shouldReceive('__toString')->once()->andReturn('bar');
-        
+
         $this->repository->shouldReceive('store')->once()->with(1, 'bar', null)->andReturn((object) [
             'authenticatable_id' => 1,
             'id'                 => 1,
@@ -91,7 +91,7 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->authenticatable->shouldReceive('getAuthIdentifier')->once()->andReturn(1);
         $this->generator->shouldReceive('generate')->once()->andReturn($this->token);
         $this->token->shouldReceive('__toString')->once()->andReturn('bar');
-        
+
         $this->repository->shouldReceive('store')->once()->with(1, 'bar', '2016-12-29 13:35:00')->andReturn((object) [
             'authenticatable_id' => 1,
             'id'                 => 1,
@@ -309,7 +309,6 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->token->shouldReceive('__toString')->once()->andReturn('foo');
         $this->repository->shouldReceive('update')->once()->with(1, 'foo', '2016-12-29 16:55:00')->andReturn(true);
 
-
         $result = $this->service->checkAndProlong($this->authenticatable, $this->accessToken, 5);
         $this->assertInstanceOf(AccessTokenInterface::class, $result);
     }
@@ -454,7 +453,6 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
 
     public function it_shall_create_access_tokens_by_plain_texts()
     {
-
     }
 
     /** @test */

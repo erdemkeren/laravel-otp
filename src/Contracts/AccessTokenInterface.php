@@ -24,7 +24,7 @@ interface AccessTokenInterface extends TokenInterface
      * @return \Carbon\Carbon
      */
     public function expiresAt();
-    
+
     /**
      * Get the token.
      *
