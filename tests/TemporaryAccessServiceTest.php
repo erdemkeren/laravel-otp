@@ -451,18 +451,22 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($accessToken);
     }
 
-    public function it_shall_create_access_tokens_by_plain_texts()
-    {
-    }
-
     /** @test */
     public function it_shall_delete_access_tokens()
     {
-        $this->accessToken->shouldReceive('authenticatableId')->once()->andReturn(1);
         $this->accessToken->shouldReceive('__toString')->once()->andReturn('foo');
-        $this->repository->shouldReceive('delete')->once()->with(1, 'foo')->andReturn(1);
+        $this->repository->shouldReceive('delete')->once()->with('foo')->andReturn(1);
 
         $result = $this->service->delete($this->accessToken);
+        $this->assertTrue($result);
+    }
+
+    /** @test */
+    public function it_shall_delete_string_access_tokens()
+    {
+        $this->repository->shouldReceive('delete')->once()->with('foo')->andReturn(1);
+
+        $result = $this->service->delete('foo');
         $this->assertTrue($result);
     }
 

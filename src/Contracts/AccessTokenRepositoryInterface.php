@@ -51,12 +51,11 @@ interface AccessTokenRepositoryInterface
     /**
      * Delete a resource from the storage.
      *
-     * @param  int    $authenticatableId The unique identifier of the authenticatable.
-     * @param  string $token             The encrypted token of the authenticatable.
+     * @param  string $token The encrypted token of the authenticatable.
      *
      * @return int
      */
-    public function delete($authenticatableId, $token);
+    public function delete($token);
 
     /**
      * Delete expired access tokens from the storage.

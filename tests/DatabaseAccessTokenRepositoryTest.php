@@ -206,11 +206,11 @@ class DatabaseAccessTokenRepositoryTest extends \PHPUnit_Framework_TestCase
     {
         $this->connection->shouldReceive('table')->once()->andReturn($this->builder);
 
-        $this->builder->shouldReceive('where')->twice()->andReturn($this->builder);
+        $this->builder->shouldReceive('where')->once()->andReturn($this->builder);
 
         $this->builder->shouldReceive('delete')->once()->andReturn(1);
 
-        $this->accessTokenRepository->delete(1, 'foo');
+        $this->accessTokenRepository->delete('foo');
     }
 
     /** @test */

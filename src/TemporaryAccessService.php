@@ -218,7 +218,7 @@ final class TemporaryAccessService
      */
     public function delete($accessToken)
     {
-        return (bool) $this->repository->delete($accessToken->authenticatableId(), (string) $accessToken);
+        return (bool) $this->repository->delete((string) $accessToken);
     }
 
     /**

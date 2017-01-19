@@ -118,14 +118,13 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
     /**
      * Delete a resource from the storage.
      *
-     * @param  int    $authenticatableId The unique identifier of the authenticatable.
-     * @param  string $token             The encrypted token of the authenticatable.
+     * @param  string $token The encrypted token of the authenticatable.
      *
      * @return int
      */
-    public function delete($authenticatableId, $token)
+    public function delete($token)
     {
-        return (bool) $this->find($authenticatableId, $token)->delete();
+        return $this->getTable()->where('token', $token)->delete();
     }
 
     /**
