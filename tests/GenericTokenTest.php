@@ -2,7 +2,7 @@
 
 namespace Erdemkeren\TemporaryAccess\Test;
 
-use Erdemkeren\TemporaryAccess\GenericToken;
+use Erdemkeren\TemporaryAccess\Token\GenericToken;
 
 class GenericTokenTest extends \PHPUnit_Framework_TestCase
 {

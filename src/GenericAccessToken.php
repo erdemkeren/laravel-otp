@@ -4,7 +4,7 @@ namespace Erdemkeren\TemporaryAccess;
 
 use Carbon\Carbon;
 use LogicException;
-use Erdemkeren\TemporaryAccess\Contracts\TokenInterface;
+use Erdemkeren\TemporaryAccess\Token\TokenInterface;
 use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
 
 final class GenericAccessToken implements AccessTokenInterface

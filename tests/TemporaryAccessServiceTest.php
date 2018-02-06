@@ -5,11 +5,11 @@ namespace Erdemkeren\TemporaryAccess\Tests;
 use Mockery as M;
 use Carbon\Carbon;
 use Erdemkeren\TemporaryAccess\TemporaryAccessService;
-use Erdemkeren\TemporaryAccess\Contracts\TokenInterface;
+use Erdemkeren\TemporaryAccess\Token\TokenInterface;
 use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
-use Erdemkeren\TemporaryAccess\Contracts\TokenGeneratorInterface;
 use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Erdemkeren\TemporaryAccess\Token\TokenGenerator\TokenGeneratorInterface;
 
 class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
 {

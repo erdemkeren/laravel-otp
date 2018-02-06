@@ -1,13 +1,20 @@
 <?php
 
-namespace Erdemkeren\TemporaryAccess\Tests;
+namespace Erdemkeren\TemporaryAccess\Token\TokenGenerator;
 
-use Erdemkeren\TemporaryAccess\TokenGenerator;
-use Erdemkeren\TemporaryAccess\Contracts\TokenInterface;
+use Erdemkeren\TemporaryAccess\Token\TokenInterface;
 use Erdemkeren\TemporaryAccess\Contracts\TokenGeneratorInterface;
 
-class TokenGeneratorTest extends \PHPUnit_Framework_TestCase
+use \Mockery;
+
+function random_int ($min, $max) {
+    return NumericNo0TokenGeneratorTest::$functions->random_int($min, $max);
+}
+
+class NumericNo0TokenGeneratorTest extends \PHPUnit_Framework_TestCase
 {
+    public static $functions;
+
     /**
      * @var TokenGenerator
      */
@@ -15,7 +22,14 @@ class TokenGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->tokenGenerator = new TokenGenerator('key');
+        self::$functions = Mockery::mock();
+
+        $this->tokenGenerator = new NumericNo0TokenGenerator('key', 6);
+    }
+
+    public function tearDown()
+    {
+        Mockery::close();
     }
 
     public function it_shall_be_an_instance_of_token_generator_contract()
@@ -27,6 +41,20 @@ class TokenGeneratorTest extends \PHPUnit_Framework_TestCase
     public function it_shall_generate_new_tokens()
     {
         $token = $this->tokenGenerator->generate();
+
+        $this->assertInstanceOf(TokenInterface::class, $token);
+
+        $this->assertEquals(6, strlen($token->plain()));
+        $this->assertEquals(64, strlen($token->encrypted()));
+    }
+
+    /** @test */
+    public function it_shall_generate_less_secure_tokens_even_if_random_int_throws_exceptions()
+    {
+        self::$functions->shouldReceive('random_int')->with(100000, 999999)->once()->andThrow(\Exception::class);
+        self::$functions->shouldReceive('random_int')->with(1, 9)->once()->andThrow(\Exception::class);
+
+        $token = (new NumericNo0TokenGenerator('key', 6))->generate();
 
         $this->assertInstanceOf(TokenInterface::class, $token);
 

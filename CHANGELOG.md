@@ -2,6 +2,15 @@
 
 All notable changes to `erdemkeren/temporary-access` will be documented in this file.
 
+## 2.1.0 - 2018-02-06
+
+- Adds token generator options:
+    - String
+    - Numeric
+    - Numeric No 0
+  which is configurable from config file.
+- Moves the token & generators and interfaces to a common directory and namespace.
+
 ## 2.0.0 - 2017-01-04
 
 - The code and token discrimination removed from the package. Plain text and encrypted text used instead.

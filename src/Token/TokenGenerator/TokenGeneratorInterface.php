@@ -1,6 +1,8 @@
 <?php
 
-namespace Erdemkeren\TemporaryAccess\Contracts;
+namespace Erdemkeren\TemporaryAccess\Token\TokenGenerator;
+
+use Erdemkeren\TemporaryAccess\Token\TokenInterface;
 
 interface TokenGeneratorInterface
 {

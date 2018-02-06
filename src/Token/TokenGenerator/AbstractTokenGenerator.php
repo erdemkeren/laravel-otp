@@ -1,10 +1,10 @@
 <?php
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\TemporaryAccess\Token\TokenGenerator;
 
-use Erdemkeren\TemporaryAccess\Contracts\TokenGeneratorInterface;
+use Erdemkeren\TemporaryAccess\Token\GenericToken;
 
-final class TokenGenerator implements TokenGeneratorInterface
+abstract class AbstractTokenGenerator implements TokenGeneratorInterface
 {
     /**
      * The key to be used to encrypt the plain token.
@@ -16,9 +16,10 @@ final class TokenGenerator implements TokenGeneratorInterface
     /**
      * TokenGenerator constructor.
      *
-     * @param string $key The key to be used by the hash algorithm.
+     * @param string $key    The key to be used by the hash algorithm.
+     * @param int    $length The length of the tokens being generated.
      */
-    public function __construct($key)
+    public function __construct($key, $length = 6)
     {
         $this->key = $key;
     }
@@ -32,7 +33,7 @@ final class TokenGenerator implements TokenGeneratorInterface
      */
     public function generate($length = 6)
     {
-        $plainText = str_random($length);
+        $plainText = $this->getPlainText($length);
 
         return $this->makeToken($this->encrypt($plainText), $plainText);
     }
@@ -85,4 +86,13 @@ final class TokenGenerator implements TokenGeneratorInterface
     {
         return new GenericToken($encryptedText, $plainText);
     }
+
+    /**
+     * Get the plain text version of the token being generated.
+     *
+     * @param  int $length
+     *
+     * @return string
+     */
+    abstract protected function getPlainText(int $length): string;
 }

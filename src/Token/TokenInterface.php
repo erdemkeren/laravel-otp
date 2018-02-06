@@ -1,6 +1,6 @@
 <?php
 
-namespace Erdemkeren\TemporaryAccess\Contracts;
+namespace Erdemkeren\TemporaryAccess\Token;
 
 interface TokenInterface
 {

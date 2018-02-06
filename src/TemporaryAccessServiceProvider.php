@@ -2,9 +2,11 @@
 
 namespace Erdemkeren\TemporaryAccess;
 
+use UnexpectedValueException;
 use Illuminate\Support\ServiceProvider;
-use Erdemkeren\TemporaryAccess\Contracts\TokenGeneratorInterface;
+use Erdemkeren\TemporaryAccess\Token\TokenGenerator;
 use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
+use Erdemkeren\TemporaryAccess\Token\TokenGenerator\TokenGeneratorInterface;
 
 class TemporaryAccessServiceProvider extends ServiceProvider
 {
@@ -29,7 +31,15 @@ class TemporaryAccessServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(TokenGeneratorInterface::class, function () {
-            return new TokenGenerator(config('app.key'));
+            $generator = config('temporary_access.token_generator', 'string');
+            $generators = $this->getTokenGenerators();
+            if(! array_key_exists($generator, $generators)) {
+                throw new UnexpectedValueException(
+                    "The access token generator [$generator] could not be found."
+                );
+
+                return $generators[$generator];
+            }
         });
     }
 
@@ -38,6 +48,21 @@ class TemporaryAccessServiceProvider extends ServiceProvider
         return [
             TokenGeneratorInterface::class,
             AccessTokenRepositoryInterface::class,
+        ];
+    }
+
+    private function getTokenGenerators(): array
+    {
+        return [
+            'string' => function (string $key): TokenGeneratorInterface {
+                return new TokenGenerator\StringTokenGenerator($key);
+            },
+            'numeric' => function (string $key): TokenGeneratorInterface {
+                return new TokenGenerator\NumericTokenGenerator($key);
+            },
+            'numeric-no-0' => function (string $key): TokenGeneratorInterface {
+                return new TokenGenerator\NumericNo0TokenGenerator($key);
+            }
         ];
     }
 }

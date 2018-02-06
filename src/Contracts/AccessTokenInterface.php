@@ -2,6 +2,8 @@
 
 namespace Erdemkeren\TemporaryAccess\Contracts;
 
+use Erdemkeren\TemporaryAccess\Token\TokenInterface;
+
 interface AccessTokenInterface extends TokenInterface
 {
     /**

@@ -5,7 +5,7 @@ namespace Erdemkeren\TemporaryAccess\Test;
 use Mockery as M;
 use Carbon\Carbon;
 use Erdemkeren\TemporaryAccess\GenericAccessToken;
-use Erdemkeren\TemporaryAccess\Contracts\TokenInterface;
+use Erdemkeren\TemporaryAccess\Token\TokenInterface;
 use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
 
 class GenericAccessTokenTest extends \PHPUnit_Framework_TestCase

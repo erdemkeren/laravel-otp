@@ -1,8 +1,6 @@
 <?php
 
-namespace Erdemkeren\TemporaryAccess;
-
-use Erdemkeren\TemporaryAccess\Contracts\TokenInterface;
+namespace Erdemkeren\TemporaryAccess\Token;
 
 final class GenericToken implements TokenInterface
 {
