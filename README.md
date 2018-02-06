@@ -110,15 +110,16 @@ Apply the migrations (Will create a table called `temporary_access_tokens` if yo
 $ php artisan migrate
 ```
 
-(Optional) Change the table name in the configuration `config/temporary_access.php`:
+(Optional) Change the table name or token generator in the configuration `config/temporary_access.php`:
 
 ```php
 <?php
 
 // Defaults.
 return [
-    'table'   => 'temporary_access_tokens',
-    'expires' => 15 // in minutes.
+    'token_generator' => 'string', // string, numeric or numeric-no-0
+    'table'           => 'temporary_access_tokens',
+    'expires'         => 15 // in minutes.
 ];
 
 ```
@@ -128,6 +129,7 @@ return [
 The package has a `TemporaryAccessService`, which is (probably) the only class you need to interact with. There is no facade yet, but planning to add it in the future.
 
 To let you decide which version of the token (plain text or encrypted) most of the service methods has two different signatures. Like:
+
 ```php
 $service->retrieveUsingPlainText(AuthenticatableContract $authenticatable, $plainText);
 ```
