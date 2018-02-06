@@ -39,7 +39,7 @@ class TemporaryAccessServiceProvider extends ServiceProvider
                 );
             }
 
-            return $generators[$generator];
+            return $generators[$generator](config('app.secret'));
         });
     }
 
