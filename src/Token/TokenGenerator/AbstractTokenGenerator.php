@@ -94,5 +94,5 @@ abstract class AbstractTokenGenerator implements TokenGeneratorInterface
      *
      * @return string
      */
-    abstract protected function getPlainText(int $length): string;
+    abstract protected function getPlainText($length);
 }

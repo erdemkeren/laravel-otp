@@ -51,16 +51,16 @@ class TemporaryAccessServiceProvider extends ServiceProvider
         ];
     }
 
-    private function getTokenGenerators(): array
+    private function getTokenGenerators()
     {
         return [
-            'string' => function (string $key): TokenGeneratorInterface {
+            'string' => function ($key) {
                 return new TokenGenerator\StringTokenGenerator($key);
             },
-            'numeric' => function (string $key): TokenGeneratorInterface {
+            'numeric' => function ($key) {
                 return new TokenGenerator\NumericTokenGenerator($key);
             },
-            'numeric-no-0' => function (string $key): TokenGeneratorInterface {
+            'numeric-no-0' => function ($key) {
                 return new TokenGenerator\NumericNo0TokenGenerator($key);
             }
         ];

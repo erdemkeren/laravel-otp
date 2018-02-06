@@ -6,7 +6,7 @@ use Exception;
 
 final class NumericNo0TokenGenerator extends NumericTokenGenerator implements TokenGeneratorInterface
 {
-    protected function getPlainText(int $length): string
+    protected function getPlainText($length)
     {
         $range = $this->generateRangeForLength($length);
 
@@ -19,7 +19,7 @@ final class NumericNo0TokenGenerator extends NumericTokenGenerator implements To
         return (string) str_replace(0, $this->getRandomDigitWithNo0(), (string) $int);
     }
 
-    private function getRandomDigitWithNo0(): int
+    private function getRandomDigitWithNo0()
     {
         try {
             $int = random_int(1, 9);

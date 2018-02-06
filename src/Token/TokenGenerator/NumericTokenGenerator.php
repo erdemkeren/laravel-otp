@@ -6,7 +6,7 @@ use Exception;
 
 class NumericTokenGenerator extends AbstractTokenGenerator implements TokenGeneratorInterface
 {
-    protected function getPlainText(int $length): string
+    protected function getPlainText($length)
     {
         $range = $this->generateRangeForLength($length);
 
@@ -19,7 +19,7 @@ class NumericTokenGenerator extends AbstractTokenGenerator implements TokenGener
         return (string) $int;
     }
 
-    protected function generateRangeForLength(int $length): array
+    protected function generateRangeForLength($length)
     {
         $min = 1;
         $max = 9;
