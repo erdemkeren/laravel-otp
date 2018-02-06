@@ -24,15 +24,15 @@ class NumericTokenGenerator extends AbstractTokenGenerator implements TokenGener
         $min = 1;
         $max = 9;
 
-        while($length > 1) {
+        while ($length > 1) {
             $min .= 0;
             $max .= 9;
 
-            --$length;
+            $length--;
         }
 
         return [
-            $min, $max
+            $min, $max,
         ];
     }
 }

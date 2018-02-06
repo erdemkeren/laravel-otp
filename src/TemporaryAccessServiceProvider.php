@@ -33,7 +33,7 @@ class TemporaryAccessServiceProvider extends ServiceProvider
         $this->app->singleton(TokenGeneratorInterface::class, function () {
             $generator = config('temporary_access.token_generator', 'string');
             $generators = $this->getTokenGenerators();
-            if(! array_key_exists($generator, $generators)) {
+            if (! array_key_exists($generator, $generators)) {
                 throw new UnexpectedValueException(
                     "The access token generator [$generator] could not be found."
                 );
@@ -62,7 +62,7 @@ class TemporaryAccessServiceProvider extends ServiceProvider
             },
             'numeric-no-0' => function ($key) {
                 return new TokenGenerator\NumericNo0TokenGenerator($key);
-            }
+            },
         ];
     }
 }

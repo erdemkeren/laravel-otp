@@ -2,12 +2,12 @@
 
 namespace Erdemkeren\TemporaryAccess\Token\TokenGenerator;
 
+use Mockery;
 use Erdemkeren\TemporaryAccess\Token\TokenInterface;
 use Erdemkeren\TemporaryAccess\Contracts\TokenGeneratorInterface;
 
-use \Mockery;
-
-function random_int ($min, $max) {
+function random_int($min, $max)
+{
     return NumericNo0TokenGeneratorTest::$functions->random_int($min, $max);
 }
 
