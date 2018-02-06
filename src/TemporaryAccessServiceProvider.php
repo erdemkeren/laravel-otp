@@ -37,9 +37,9 @@ class TemporaryAccessServiceProvider extends ServiceProvider
                 throw new UnexpectedValueException(
                     "The access token generator [$generator] could not be found."
                 );
-
-                return $generators[$generator];
             }
+
+            return $generators[$generator];
         });
     }
 
