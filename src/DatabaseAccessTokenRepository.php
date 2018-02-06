@@ -176,9 +176,9 @@ final class DatabaseAccessTokenRepository implements AccessTokenRepositoryInterf
     /**
      * Filter the given database response and only return if it is not expired.
      *
-     * @param stdClass|array|null $accessToken
+     * @param object|stdClass|array|null $accessToken
      *
-     * @return stdClass|array|null
+     * @return object|stdClass|array|null
      */
     private function filterExpiredAccessToken($accessToken)
     {

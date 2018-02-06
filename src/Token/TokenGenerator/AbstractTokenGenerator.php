@@ -17,9 +17,8 @@ abstract class AbstractTokenGenerator implements TokenGeneratorInterface
      * TokenGenerator constructor.
      *
      * @param string $key    The key to be used by the hash algorithm.
-     * @param int    $length The length of the tokens being generated.
      */
-    public function __construct($key, $length = 6)
+    public function __construct($key)
     {
         $this->key = $key;
     }
