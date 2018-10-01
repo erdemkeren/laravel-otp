@@ -57,7 +57,7 @@ class TemporaryAccessServiceProvider extends ServiceProvider
         return new TemporaryAccessService(
             new PasswordGeneratorManager(),
             new Encryptor(config('app.secret')),
-            'string',
+            config('temporary_access.token_generator', 'string'),
             6
         );
     }
