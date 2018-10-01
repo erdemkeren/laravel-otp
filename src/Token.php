@@ -25,7 +25,8 @@ final class Token implements TokenInterface
         ?Carbon $createdAt = null,
         ?Carbon $updatedAt = null,
         ?Carbon $expiresAt = null
-    ) {
+    )
+    {
         $now = $this->getNow();
 
         $this->attributes['authenticable_id'] = $authenticableId;
@@ -103,6 +104,28 @@ final class Token implements TokenInterface
         return $token;
     }
 
+    public static function findByAttributes(array $attributes): ?TokenInterface
+    {
+        $query = DB::table(config('temporary_access.table'));
+
+        foreach ($attributes as $key => $value) {
+            $query->where($key, $value);
+        }
+
+        if (!$entity = $query->first()) {
+            return null;
+        }
+
+        return new static(
+            $entity->authenticable_id,
+            $entity->cipher_text,
+            null,
+            new Carbon($entity->created_at),
+            new Carbon($entity->updated_at),
+            new Carbon($entity->expires_at)
+        );
+    }
+
     private function persist(): bool
     {
         $this->attributes['created_at'] = $this->attributes['created_at'] ?: $this->getNow();
@@ -110,7 +133,7 @@ final class Token implements TokenInterface
 
         $attributes = $this->attributes;
 
-        if(array_key_exists('plain_text', $attributes)) {
+        if (array_key_exists('plain_text', $attributes)) {
             unset($attributes['plain_text']);
         }
 

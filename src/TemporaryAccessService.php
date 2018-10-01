@@ -93,6 +93,18 @@ final class TemporaryAccessService
         return Token::create($authenticatable->getAuthIdentifier(), $cipherText, $plainText);
     }
 
+    public function findByPlainText(string $plainText): ?TokenInterface
+    {
+        return $this->findByCipherText($this->encryptor->encrypt($plainText));
+    }
+
+    public function findByCipherText(string $cipherText): ?TokenInterface
+    {
+        return Token::findByAttributes([
+            'cipher_text' => $cipherText
+        ]);
+    }
+
     /**
      * Add a new password generator implementation.
      *
