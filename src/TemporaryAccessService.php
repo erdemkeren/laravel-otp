@@ -84,7 +84,7 @@ final class TemporaryAccessService
      *
      * @return Token
      */
-    public function create(int $authenticatable, ?int $length = null): Token
+    public function create(Authenticatable $authenticatable, ?int $length = null): TokenInterface
     {
         $plainText = $this->getPasswordGenerator()($length ?: $this->passwordLength);
 
