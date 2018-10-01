@@ -14,6 +14,12 @@ class TemporaryAccessServiceProvider extends ServiceProvider
      */
     protected $defer = true;
 
+    public function boot(): void
+    {
+        $this->publishes([$this->configPath() => config_path('temporary_access.php')]);
+        $this->publishes([$this->migrationPath() => database_path('migrations')]);
+    }
+
     /**
      * Register the temporary access service.
      *
@@ -22,7 +28,6 @@ class TemporaryAccessServiceProvider extends ServiceProvider
     public function register(): void
     {
         $service = $this->createServiceInstance();
-
         $this->registerDefaultPasswordGenerators($service);
 
         $this->app->singleton('temporary-access', function () use ($service) {
@@ -68,5 +73,25 @@ class TemporaryAccessServiceProvider extends ServiceProvider
         $service->addPasswordGenerator('string', Generators\StringPasswordGenerator::class);
         $service->addPasswordGenerator('numeric', Generators\NumericPasswordGenerator::class);
         $service->addPasswordGenerator('numeric-no-0', Generators\NumericNo0PasswordGenerator::class);
+    }
+
+    /**
+     * Get the project config path.
+     *
+     * @return string
+     */
+    private function configPath()
+    {
+        return __DIR__ . '/../config/temporary_access.php';
+    }
+
+    /**
+     * Get the migration path.
+     *
+     * @return string
+     */
+    private function migrationPath()
+    {
+        return __DIR__ . '/../database/migrations/';
     }
 }

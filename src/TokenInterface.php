@@ -17,5 +17,4 @@ interface TokenInterface
     public function timeLeft(): int;
     public function refresh(): bool;
     public function extend(?int $seconds = null): bool;
-    public function persist(): bool;
 }

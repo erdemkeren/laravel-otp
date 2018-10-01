@@ -103,23 +103,26 @@ final class Token implements TokenInterface
         return $token;
     }
 
-    public function persist(): bool
+    private function persist(): bool
     {
         $this->attributes['created_at'] = $this->attributes['created_at'] ?: $this->getNow();
         $this->attributes['updated_at'] = $this->getNow();
 
+        $attributes = $this->attributes;
+
+        if(array_key_exists('plain_text', $attributes)) {
+            unset($attributes['plain_text']);
+        }
+
         try {
-            /**
             DB::beginTransaction();
 
             DB::table(config('temporary_access.table'))->updateOrInsert([
-                    'authenticable_id' => $this->authenticableId(),
-                    'cipher_text' => $this->cipherText(),
-                ], $this->attributes);
+                'authenticable_id' => $this->authenticableId(),
+                'cipher_text' => $this->cipherText(),
+            ], $attributes);
 
-            DB::commit()
-            */
-
+            DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
 

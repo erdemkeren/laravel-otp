@@ -11,6 +11,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
  */
 final class TokenGenerated extends Notification implements ShouldQueue
 {
+    use Queueable;
+
     /**
      * The token generated.
      *

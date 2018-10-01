@@ -90,7 +90,7 @@ final class TemporaryAccessService
 
         $cipherText = $this->encryptor->encrypt($plainText);
 
-        return Token::create($authenticatable, $cipherText, $plainText);
+        return Token::create($authenticatable->getAuthIdentifier(), $cipherText, $plainText);
     }
 
     /**
