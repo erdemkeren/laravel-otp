@@ -2,312 +2,116 @@
 
 namespace Erdemkeren\TemporaryAccess;
 
-use Carbon\Carbon;
-use Erdemkeren\TemporaryAccess\Token\TokenInterface;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Erdemkeren\TemporaryAccess\Token\TokenGenerator\TokenGeneratorInterface;
+use Illuminate\Contracts\Auth\Authenticatable;
 
+/**
+ * Class TemporaryAccessService.
+ */
 final class TemporaryAccessService
 {
     /**
-     * The access token repository implementation.
+     * The password generator manager.
      *
-     * @var AccessTokenRepositoryInterface
+     * @var PasswordGeneratorManager
      */
-    private $repository;
+    private $manager;
 
     /**
-     * The token generator implementation.
+     * The encryptor implementation.
      *
-     * @var TokenGeneratorInterface
+     * @var EncryptorInterface
      */
-    private $tokenGenerator;
+    private $encryptor;
+
+    /**
+     * The password length.
+     *
+     * @var int
+     */
+    private $passwordLength;
+
+    /**
+     * The default temporary access password generator.
+     *
+     * @var string
+     */
+    private $defaultGenerator;
+
+    /**
+     * The password generator.
+     *
+     * @var callable
+     */
+    private $passwordGenerator;
 
     /**
      * TemporaryAccessService constructor.
-     *
-     * @param AccessTokenRepositoryInterface $repository     The access token repository implementation.
-     * @param TokenGeneratorInterface        $tokenGenerator The token generator implementation.
+     * @param PasswordGeneratorManager $manager
+     * @param EncryptorInterface $encryptor
+     * @param string $defaultGenerator
+     * @param int $passwordLength
      */
-    public function __construct(AccessTokenRepositoryInterface $repository, TokenGeneratorInterface $tokenGenerator)
-    {
-        $this->repository = $repository;
-        $this->tokenGenerator = $tokenGenerator;
+    public function __construct(
+        PasswordGeneratorManager $manager,
+        EncryptorInterface $encryptor,
+        string $defaultGenerator,
+        int $passwordLength
+    ) {
+        $this->manager = $manager;
+        $this->encryptor = $encryptor;
+        $this->passwordLength = $passwordLength;
+        $this->defaultGenerator = $defaultGenerator;
     }
 
-    /**
-     * Retrieve an access token from the storage by the actual token.
-     *
-     * @param AuthenticatableContract $authenticatable The authenticatable who owns the token.
-     * @param string|TokenInterface   $encryptedText   The token of the authenticatable.
-     *
-     * @return null|AccessTokenInterface
-     */
-    public function retrieve(AuthenticatableContract $authenticatable, $encryptedText)
-    {
-        $authenticatableIdentifier = $authenticatable->getAuthIdentifier();
-
-        return $this->retrieveFromRepository($authenticatableIdentifier, (string) $encryptedText);
-    }
 
     /**
-     * Retrieve an access token from the storage by the plain token.
+     * Set the active password generator of the temporary access service.
      *
-     * @param AuthenticatableContract $authenticatable The authenticatable who owns the token.
-     * @param string                  $plainText       The token of the authenticatable.
-     *
-     * @return null|AccessTokenInterface
-     */
-    public function retrieveUsingPlainText(AuthenticatableContract $authenticatable, $plainText)
-    {
-        if (! $plainText instanceof TokenInterface) {
-            $plainText = $this->makeTokenFromPlainText($plainText);
-        }
-
-        return $this->retrieve($authenticatable, $plainText);
-    }
-
-    /**
-     * Determine if an access token exists and is valid.
-     *
-     * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
-     * @param  string|TokenInterface   $encryptedText   The encrypted token of the authenticatable.
-     *
-     * @return bool
-     */
-    public function check(AuthenticatableContract $authenticatable, $encryptedText)
-    {
-        return (bool) $this->retrieve($authenticatable, $encryptedText);
-    }
-
-    /**
-     * Determine if an access token exists and is valid.
-     *
-     * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
-     * @param  string                  $plainText       The plain token of the authenticatable.
-     *
-     * @return bool
-     */
-    public function checkUsingPlainText(AuthenticatableContract $authenticatable, $plainText)
-    {
-        $token = $this->makeTokenFromPlainText($plainText);
-
-        return $this->check($authenticatable, $token);
-    }
-
-    /**
-     * Determine if an access token record exists and prolong the expire date if so.
-     * If no prolong time given, we will reset the original expire time.
-     *
-     * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
-     * @param  string|TokenInterface   $encryptedText   The token of the authenticatable.
-     * @param  int|null                $prolong         The prolong time in minutes.
-     *
-     * @return bool|AccessTokenInterface
-     */
-    public function checkAndProlong(AuthenticatableContract $authenticatable, $encryptedText, $prolong = null)
-    {
-        if (! $accessToken = $this->retrieve($authenticatable, $encryptedText)) {
-            return false;
-        }
-
-        return $this->prolongAndUpdateAccessToken($accessToken, $prolong);
-    }
-
-    /**
-     * Determine if an access token record exists and prolong the expire date if so.
-     * If no prolong time given, we will reset the original expire time.
-     *
-     * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
-     * @param  string                  $plainText       The token of the authenticatable.
-     * @param  int|null                $prolong         The prolong time in minutes.
-     *
-     * @return bool|AccessTokenInterface
-     */
-    public function checkUsingPlainTextAndProlong(AuthenticatableContract $authenticatable, $plainText, $prolong = null)
-    {
-        $token = $this->makeTokenFromPlainText($plainText);
-
-        return $this->checkAndProlong($authenticatable, $token, $prolong);
-    }
-
-    /**
-     * Generate a new access token in the storage and get the token.
-     *
-     * @param  AuthenticatableContract $authenticatable The authenticatable who owns the token.
-     * @param  Carbon|null             $expiresAt       The optional expire date of the access token.
-     *
-     * @return AccessTokenInterface
-     */
-    public function generate(AuthenticatableContract $authenticatable, Carbon $expiresAt = null)
-    {
-        $token = $this->tokenGenerator->generate();
-        $authenticatableId = $authenticatable->getAuthIdentifier();
-        $expiresAt = $expiresAt ? (string) $expiresAt : null;
-
-        $payload = (array) $this->repository->store($authenticatableId, (string) $token, $expiresAt);
-
-        return $this->makeAccessToken($token, $payload);
-    }
-
-    /**
-     * Update an access token in the storage.
-     *
-     * @param  AccessTokenInterface $accessToken The access token to be updated.
-     *
-     * @return bool
-     */
-    public function update(AccessTokenInterface $accessToken)
-    {
-        $token = (string) $accessToken;
-        $expiresAt = (string) $accessToken->expiresAt();
-        $authenticatableId = $accessToken->authenticatableId();
-
-        return $this->repository->update($authenticatableId, $token, $expiresAt);
-    }
-
-    /**
-     * Revive an token from the given plain text.
-     *
-     * @param  string $plainText The plain text to be converted back to token instance.
-     *
-     * @return TokenInterface
-     */
-    public function makeTokenFromPlainText($plainText)
-    {
-        return $this->tokenGenerator->fromPlain($plainText);
-    }
-
-    /**
-     * Revive an token from the given plain text.
-     *
-     * @param  string $encryptedText The encrypted token to be converted back to token instance.
-     *
-     * @return TokenInterface
-     */
-    public function makeTokenFromEncryptedText($encryptedText)
-    {
-        return $this->tokenGenerator->fromEncrypted($encryptedText);
-    }
-
-    /**
-     * Retrieve the first resource by the given attributes.
-     *
-     * @param  array $queryParams The key - value pairs to match.
-     * @param  array $attributes  The attributes to be returned from the storage.
-     *
-     * @return AccessTokenInterface|null
-     */
-    public function retrieveByAttributes(array $queryParams, array $attributes = ['*'])
-    {
-        if (! $attributes = $this->repository->retrieveByAttributes($queryParams, $attributes)) {
-            return;
-        }
-
-        return $attributes ? $this->makeAccessToken((array) $attributes) : null;
-    }
-
-    /**
-     * Delete the given access token from the storage.
-     *
-     * @param  AccessTokenInterface|string $accessToken The access token or the encrypted text to be deleted.
-     *
-     * @return bool
-     */
-    public function delete($accessToken)
-    {
-        return (bool) $this->repository->delete((string) $accessToken);
-    }
-
-    /**
-     * Delete the expired access tokens from the storage.
+     * @param string $name
      *
      * @return void
      */
-    public function deleteExpired()
+    public function setPasswordGenerator(string $name): void
     {
-        $this->repository->deleteExpired();
+        $this->passwordGenerator = $this->manager->get($name);
     }
 
     /**
-     * Retrieve an access token from the storage.
+     * Create a new temporary access token.
      *
-     * @param  int    $authenticatableId
-     * @param  string $encryptedText
+     * @param  Authenticatable $authenticatable
+     * @param  int             $length
      *
-     * @return GenericAccessToken|null
+     * @return Token
      */
-    private function retrieveFromRepository($authenticatableId, $encryptedText)
+    public function create(int $authenticatable, ?int $length = null): Token
     {
-        if (! $attributes = $this->repository->retrieve($authenticatableId, $encryptedText)) {
-            return;
-        }
+        $plainText = $this->getPasswordGenerator()($length ?: $this->passwordLength);
 
-        return $this->makeAccessToken((array) $attributes);
+        $cipherText = $this->encryptor->encrypt($plainText);
+
+        return Token::create($authenticatable, $cipherText, $plainText);
     }
 
     /**
-     * Prolong the access token then update it in the storage.
+     * Add a new password generator implementation.
      *
-     * @param  AccessTokenInterface $accessToken
-     * @param  int|null             $prolong
+     * @param string                                     $name
+     * @param callable|PasswordGeneratorInterface|string $generator
      *
-     * @return bool|AccessTokenInterface
+     * @return void
      */
-    private function prolongAndUpdateAccessToken(AccessTokenInterface $accessToken, $prolong = null)
+    public function addPasswordGenerator(string $name, $generator): void
     {
-        $accessToken = $this->prolongAccessToken($accessToken, $prolong);
-
-        if ($this->update($accessToken)) {
-            return $accessToken;
-        }
-
-        return false;
+        $this->manager->register($name, $generator);
     }
 
     /**
-     * Prolong an access token.
+     * Get the active password generator.
      *
-     * @param AccessTokenInterface $accessToken
-     * @param int|null             $prolong
-     *
-     * @return AccessTokenInterface
+     * @return callable
      */
-    private function prolongAccessToken(AccessTokenInterface $accessToken, $prolong = null)
-    {
-        $prolong = $prolong ? $prolong * 60 : $this->getNow()->diffInSeconds($accessToken->createdAt());
-
-        return $accessToken->prolong($prolong);
-    }
-
-    /**
-     * Get a new access token instance with the given attributes.
-     *
-     * @param array|TokenInterface $token
-     * @param array                $attributes
-     *
-     * @return GenericAccessToken
-     */
-    private function makeAccessToken($token, array $attributes = [])
-    {
-        if (! $token instanceof TokenInterface) {
-            $attributes = $token;
-
-            $token = $this->makeTokenFromEncryptedText(array_pull($attributes, 'token'));
-        }
-
-        return new GenericAccessToken($token, $attributes);
-    }
-
-    /**
-     * Get the current UNIX timestamp.
-     *
-     * @return Carbon
-     */
-    private function getNow()
-    {
-        return Carbon::now();
+    private function getPasswordGenerator(): callable {
+        return $this->passwordGenerator ?: $this->passwordGenerator = $this->manager->get($this->defaultGenerator);
     }
 }

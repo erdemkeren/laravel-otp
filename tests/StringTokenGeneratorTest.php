@@ -4,7 +4,7 @@ namespace Erdemkeren\TemporaryAccess\Tests;
 
 use Erdemkeren\TemporaryAccess\Token\TokenInterface;
 use Erdemkeren\TemporaryAccess\Contracts\TokenGeneratorInterface;
-use Erdemkeren\TemporaryAccess\Token\TokenGenerator\StringTokenGenerator;
+use Erdemkeren\TemporaryAccess\Token\TokenGenerator\StringPasswordGenerator;
 
 class StringTokenGeneratorTest extends \PHPUnit_Framework_TestCase
 {
@@ -15,7 +15,7 @@ class StringTokenGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->tokenGenerator = new StringTokenGenerator('key', 6);
+        $this->tokenGenerator = new StringPasswordGenerator('key', 6);
     }
 
     public function it_shall_be_an_instance_of_token_generator_contract()

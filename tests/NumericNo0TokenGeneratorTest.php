@@ -24,7 +24,7 @@ class NumericNo0TokenGeneratorTest extends \PHPUnit_Framework_TestCase
     {
         self::$functions = Mockery::mock();
 
-        $this->tokenGenerator = new NumericNo0TokenGenerator('key', 6);
+        $this->tokenGenerator = new NumericNo0PasswordGenerator('key', 6);
     }
 
     public function tearDown()
@@ -54,7 +54,7 @@ class NumericNo0TokenGeneratorTest extends \PHPUnit_Framework_TestCase
         self::$functions->shouldReceive('random_int')->with(100000, 999999)->once()->andThrow(\Exception::class);
         self::$functions->shouldReceive('random_int')->with(1, 9)->once()->andThrow(\Exception::class);
 
-        $token = (new NumericNo0TokenGenerator('key', 6))->generate();
+        $token = (new NumericNo0PasswordGenerator('key', 6))->generate();
 
         $this->assertInstanceOf(TokenInterface::class, $token);
 

@@ -4,7 +4,7 @@ namespace Erdemkeren\TemporaryAccess\Tests;
 
 use Erdemkeren\TemporaryAccess\Token\TokenInterface;
 use Erdemkeren\TemporaryAccess\Contracts\TokenGeneratorInterface;
-use Erdemkeren\TemporaryAccess\Token\TokenGenerator\NumericTokenGenerator;
+use Erdemkeren\TemporaryAccess\Token\TokenGenerator\NumericPasswordGenerator;
 
 class NumericTokenGeneratorTest extends \PHPUnit_Framework_TestCase
 {
@@ -15,7 +15,7 @@ class NumericTokenGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->tokenGenerator = new NumericTokenGenerator('key', 6);
+        $this->tokenGenerator = new NumericPasswordGenerator('key', 6);
     }
 
     public function it_shall_be_an_instance_of_token_generator_contract()

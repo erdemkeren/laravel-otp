@@ -15,8 +15,9 @@ class CreateTemporaryAccessTokensTable extends Migration
     {
         Schema::create('temporary_access_tokens', function (Blueprint $table) {
             $table->unsignedInteger('authenticatable_id');
-            $table->string('token', 64);
+            $table->string('cipher_text', 64);
             $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent();
             $table->timestamp('expires_at')->nullable();
 
             $table->unique(['authenticatable_id', 'token']);

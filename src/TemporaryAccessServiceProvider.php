@@ -2,67 +2,71 @@
 
 namespace Erdemkeren\TemporaryAccess;
 
-use UnexpectedValueException;
 use Illuminate\Support\ServiceProvider;
-use Erdemkeren\TemporaryAccess\Token\TokenGenerator;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
-use Erdemkeren\TemporaryAccess\Token\TokenGenerator\TokenGeneratorInterface;
+use Erdemkeren\TemporaryAccess\PasswordGenerators as Generators;
 
 class TemporaryAccessServiceProvider extends ServiceProvider
 {
+    /**
+     * Indicates if loading of the provider is deferred.
+     *
+     * @var bool
+     */
     protected $defer = true;
 
-    public function boot()
+    /**
+     * Register the temporary access service.
+     *
+     * @return void
+     */
+    public function register(): void
     {
-        $this->publishes([
-            __DIR__.'/../database/migrations/' => database_path('migrations'),
-        ], 'migrations');
+        $service = $this->createServiceInstance();
 
-        $this->publishes([
-            __DIR__.'/../config/temporary_access.php' => config_path('temporary_access.php'),
-        ]);
-    }
+        $this->registerDefaultPasswordGenerators($service);
 
-    public function register()
-    {
-        $this->app->singleton(AccessTokenRepositoryInterface::class, function () {
-            return new DatabaseAccessTokenRepository($this->app['db']->connection(),
-                config('temporary_access.table', 'temporary_access_tokens'), config('temporary_access.expires', 15));
-        });
-
-        $this->app->singleton(TokenGeneratorInterface::class, function () {
-            $generator = config('temporary_access.token_generator', 'string');
-            $generators = $this->getTokenGenerators();
-            if (! array_key_exists($generator, $generators)) {
-                throw new UnexpectedValueException(
-                    "The access token generator [$generator] could not be found."
-                );
-            }
-
-            return $generators[$generator](config('app.secret'));
+        $this->app->singleton('temporary-access', function () use ($service) {
+            return $service;
         });
     }
 
-    public function provides()
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array
+     */
+    public function provides(): array
     {
         return [
-            TokenGeneratorInterface::class,
-            AccessTokenRepositoryInterface::class,
+            'temporary-access'
         ];
     }
 
-    private function getTokenGenerators()
+    /**
+     * Create a new temporary access service instance.
+     *
+     * @return TemporaryAccessService
+     */
+    private function createServiceInstance(): TemporaryAccessService
     {
-        return [
-            'string' => function ($key) {
-                return new TokenGenerator\StringTokenGenerator($key);
-            },
-            'numeric' => function ($key) {
-                return new TokenGenerator\NumericTokenGenerator($key);
-            },
-            'numeric-no-0' => function ($key) {
-                return new TokenGenerator\NumericNo0TokenGenerator($key);
-            },
-        ];
+        return new TemporaryAccessService(
+            new PasswordGeneratorManager(),
+            new Encryptor(config('app.secret')),
+            'string',
+            6
+        );
+    }
+
+    /**
+     * Register default password generators to the
+     * given temporary access service instance.
+     *
+     * @param  TemporaryAccessService $service
+     */
+    private function registerDefaultPasswordGenerators($service): void
+    {
+        $service->addPasswordGenerator('string', Generators\StringPasswordGenerator::class);
+        $service->addPasswordGenerator('numeric', Generators\NumericPasswordGenerator::class);
+        $service->addPasswordGenerator('numeric-no-0', Generators\NumericNo0PasswordGenerator::class);
     }
 }
