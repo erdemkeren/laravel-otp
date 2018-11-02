@@ -63,6 +63,20 @@ final class TemporaryAccessService
         $this->defaultGenerator = $defaultGenerator;
     }
 
+    /**
+     * Check the temporary access of the authenticable
+     * with the given cipher text.
+     *
+     * @param mixed  $authenticableId
+     * @param string $token
+     *
+     * @return bool
+     */
+    public function check($authenticableId, string $token): bool {
+        $token = $this->retrieveByCipherText($authenticableId, $token);
+
+        return !! $token && ! $token->expired();
+    }
 
     /**
      * Set the active password generator of the temporary access service.
@@ -79,29 +93,55 @@ final class TemporaryAccessService
     /**
      * Create a new temporary access token.
      *
-     * @param  Authenticatable $authenticatable
+     * @param  Authenticatable|mixed $authenticatableId
      * @param  int             $length
      *
      * @return Token
      */
-    public function create(Authenticatable $authenticatable, ?int $length = null): TokenInterface
+    public function create($authenticatableId, ?int $length = null): TokenInterface
     {
         $plainText = $this->getPasswordGenerator()($length ?: $this->passwordLength);
 
         $cipherText = $this->encryptor->encrypt($plainText);
 
-        return Token::create($authenticatable->getAuthIdentifier(), $cipherText, $plainText);
+        if($authenticatableId instanceof Authenticatable) {
+            $authenticatableId = $authenticatableId->getAuthIdentifier();
+        }
+
+        return Token::create($authenticatableId, $cipherText, $plainText);
     }
 
-    public function findByPlainText(string $plainText): ?TokenInterface
+    /**
+     * Retrieve the token of the authenticable
+     * by the given plain text.
+     *
+     * @param mixed  $authenticableId
+     * @param string $plainText
+     *
+     * @return TokenInterface|null
+     */
+    public function retrieveByPlainText($authenticableId, string $plainText): ?TokenInterface
     {
-        return $this->findByCipherText($this->encryptor->encrypt($plainText));
+        return $this->retrieveByCipherText($authenticableId, $this->encryptor->encrypt($plainText));
     }
 
-    public function findByCipherText(string $cipherText): ?TokenInterface
+    /**
+     * Retrieve the token of the authenticable
+     * by the given cipher text.
+     *
+     * @param mixed  $authenticableId
+     * @param string $cipherText
+     *
+     * @return TokenInterface|null
+     */
+    public function retrieveByCipherText($authenticableId, string $cipherText): ?TokenInterface
     {
-        return Token::findByAttributes([
-            'cipher_text' => $cipherText
+        if($authenticableId instanceof Authenticatable) {
+            $authenticableId = $authenticableId->getAuthIdentifier();
+        }
+        return Token::retrieveByAttributes([
+            'authenticable_id' => $authenticableId,
+            'cipher_text'      => $cipherText,
         ]);
     }
 

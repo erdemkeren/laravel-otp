@@ -7,9 +7,9 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
- * Class TokenGenerated.
+ * Class TokenNotification.
  */
-final class TokenGenerated extends Notification implements ShouldQueue
+final class TokenNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

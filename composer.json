@@ -1,5 +1,5 @@
 {
-    "name": "erdemkeren/temporary-access",
+    "name": "erdemkeren/temporary-access-3",
     "description": "This package allows you to create temporary access tokens for your users in your Laravel applications.",
     "homepage": "https://github.com/erdemkeren/temporary-access",
     "keywords": ["temporary", "access", "grant"],
@@ -13,8 +13,9 @@
     "require": {
         "php": ">=7.1",
         "illuminate/database": "^5.3",
-        "illuminate/notifications": "^5.7",
-        "illuminate/support": "^5.7",
+        "illuminate/http": "^5.7",
+        "illuminate/notifications": "^5.5",
+        "illuminate/support": "^5.5",
         "nesbot/carbon": " ~1.21"
     },
     "require-dev": {
