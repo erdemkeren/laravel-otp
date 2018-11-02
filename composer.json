@@ -13,8 +13,9 @@
     "require": {
         "php": ">=7.1",
         "illuminate/database": "^5.3",
-        "illuminate/http": "^5.7",
+        "illuminate/http": "^5.5",
         "illuminate/notifications": "^5.5",
+        "illuminate/routing": "^5.5",
         "illuminate/support": "^5.5",
         "nesbot/carbon": " ~1.21"
     },

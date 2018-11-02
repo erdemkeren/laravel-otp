@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# The hook script to verify what is about to be committed.
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+#
+# This file is automatically enabled by post-install-cmd composer
+# scripts. If you disabled executing scripts when installing
+# simply move this file under .git/hooks/pre-commit
+echo "Checking PHP Lint..."
+git status --porcelain | grep -e '^[AM]\(.*\).php$' | cut -c 3- | while read line; do
+    echo "$line"
+	php -l -d display_errors=0 $line 1> /dev/null
+
+	if [ $? != 0 ];
+	then
+		echo "Fix the error before commit."
+		exit 1
+	fi
+
+    ./scripts/php-cs-fixer/php-cs-fixer fix -q "$line";
+    git add "$line";
+done
+
+exit $?

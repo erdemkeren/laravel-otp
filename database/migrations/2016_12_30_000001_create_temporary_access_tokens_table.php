@@ -18,7 +18,7 @@ class CreateTemporaryAccessTokensTable extends Migration
             $table->string('cipher_text', 64);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
-            $table->timestamp('expires_at')->nullable();
+            $table->unsignedSmallInteger('expiry_time')->nullable();
 
             $table->unique(['authenticatable_id', 'token']);
         });

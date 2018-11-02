@@ -6,26 +6,43 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Notifications\Notification;
 
+/**
+ * Class Token.
+ */
 final class Token implements TokenInterface
 {
+    /**
+     * The attributes of the token.
+     *
+     * @var array
+     */
     public $attributes = [
         'authenticable_id' => null,
         'plain_text' => null,
+        'expiry_time' => null,
         'cipher_text' => null,
         'created_at' => null,
         'updated_at' => null,
-        'expires_at' => null,
     ];
 
+    /**
+     * Token constructor.
+     *
+     * @param int|string|mixed $authenticableId
+     * @param string           $cipherText
+     * @param null|string      $plainText
+     * @param Carbon|null      $expiryTime
+     * @param Carbon|null      $createdAt
+     * @param Carbon|null      $updatedAt
+     */
     public function __construct(
         $authenticableId,
         string $cipherText,
         ?string $plainText = null,
+        ?Carbon $expiryTime = null,
         ?Carbon $createdAt = null,
-        ?Carbon $updatedAt = null,
-        ?Carbon $expiresAt = null
-    )
-    {
+        ?Carbon $updatedAt = null
+    ) {
         $now = $this->getNow();
 
         $this->attributes['authenticable_id'] = $authenticableId;
@@ -33,7 +50,7 @@ final class Token implements TokenInterface
         $this->attributes['cipher_text'] = $cipherText;
         $this->attributes['created_at'] = $createdAt ?: $now;
         $this->attributes['updated_at'] = $updatedAt ?: $now;
-        $this->attributes['expires_at'] = $expiresAt ?: $this->getNow()->addSeconds($this->getDefaultExpiryTime());
+        $this->attributes['expiry_time'] = $expiryTime ?: $this->getDefaultExpiryTime();
     }
 
     /**
@@ -88,13 +105,23 @@ final class Token implements TokenInterface
     }
 
     /**
+     * Get the expiry time of the token in seconds.
+     *
+     * @return int
+     */
+    public function expiryTime(): int
+    {
+        return $this->attributes['expiry_time'];
+    }
+
+    /**
      * Get the date time the token will expire.
      *
      * @return Carbon
      */
     public function expiresAt(): Carbon
     {
-        return $this->attributes['expires_at'];
+        return $this->createdAt()->addSeconds($this->expiryTime());
     }
 
     /**
@@ -134,7 +161,7 @@ final class Token implements TokenInterface
      */
     public function invalidate(): void
     {
-        $this->attributes['expires_at'] = Carbon::createFromTimestamp(0);
+        $this->attributes['expiry_time'] = 0;
 
         $this->persist();
     }
@@ -149,7 +176,7 @@ final class Token implements TokenInterface
     {
         $seconds = $seconds ?: $this->getDefaultExpiryTime();
 
-        $this->attributes['expires_at']->addSeconds($seconds);
+        $this->attributes['expiry_time'] += $seconds;
 
         return $this->persist();
     }
@@ -161,7 +188,9 @@ final class Token implements TokenInterface
      */
     public function refresh(): bool
     {
-        return $this->extend($this->getNow()->diffInSeconds($this->updatedAt()));
+        return $this->extend(
+            $this->getNow()->diffInSeconds($this->updatedAt())
+        );
     }
 
     /**
@@ -176,8 +205,7 @@ final class Token implements TokenInterface
         $authenticableId,
         string $cipherText,
         ?string $plainText = null
-    ): TokenInterface
-    {
+    ): TokenInterface {
         $token = new Token($authenticableId, $cipherText, $plainText);
 
         $token->persist();
@@ -210,7 +238,7 @@ final class Token implements TokenInterface
             null,
             new Carbon($entity->created_at),
             new Carbon($entity->updated_at),
-            new Carbon($entity->expires_at)
+            new Carbon($entity->expiry_time)
         );
     }
 
@@ -254,7 +282,9 @@ final class Token implements TokenInterface
             DB::rollBack();
 
             throw new \RuntimeException(
-                'Something went wrong while updating the access token.', 0, $e
+                'Something went wrong while saving the access token.',
+                0,
+                $e
             );
         }
 
@@ -282,7 +312,7 @@ final class Token implements TokenInterface
     }
 
     /**
-     * Get the default expiry time.
+     * Get the default expiry time in seconds.
      *
      * @return int
      */

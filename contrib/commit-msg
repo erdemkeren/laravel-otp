@@ -1,0 +1,13 @@
+#!/bin/sh
+
+COMMIT_FILE=$1
+COMMIT_MSG=$(cat $1)
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+ISSUE_ID=$(echo "$CURRENT_BRANCH" | grep -Eo "[A-Z0-9]{1,10}-?[A-Z0-9]+-\d+")
+
+if [ ! -z "$ISSUE_ID" ]; then
+	COMMIT_MSG="${COMMIT_MSG/_issue_id_/$ISSUE_ID}"
+
+	echo "$COMMIT_MSG" > $COMMIT_FILE
+	echo "The _issue_id_ placeholder has been replaced the one which matches the current branches' issue id: $ISSUE_ID"
+fi

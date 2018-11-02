@@ -1,0 +1,38 @@
+_type_: _subject_
+
+# _body_
+
+Resolves: _issue_id_
+# See also:
+
+########################################################################################
+# A) Type: The type is contained within the title and can be one of these types:
+########################################################################################
+# feat: a new feature
+# fix: a bug fix
+# docs: changes to documentation
+# style: formatting, missing semi colons, etc; no code change
+# refactor: refactoring production code
+# test: adding tests, refactoring test; no production code change
+# chore: updating build tasks, package manager configs, etc; no production code change
+########################################################################################
+# B) Subject: Subjects should be no greater than 50 characters,
+#          (!) Should begin with a capital letter and do not end with a period.
+########################################################################################
+# Describe what exactly the issue does, rather than what it did.
+# Example: Adds bla bla.
+########################################################################################
+# C) Body
+########################################################################################
+# Not all commits are complex enough to warrant a body,
+# therefore it is optional and only used when a commit requires a bit of
+# explanation and context.
+#
+# Use the body to explain the what and why of a commit, not the how.
+#
+# When writing a body, the blank line between the title and the body is required
+# and you should limit the length of each line to no more than 72 characters.
+########################################################################################
+# D) Footer
+########################################################################################
+# The footer is used to reference issue tracker IDs.

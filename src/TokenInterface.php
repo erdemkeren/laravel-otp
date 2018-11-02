@@ -3,7 +3,6 @@
 namespace Erdemkeren\TemporaryAccess;
 
 use Carbon\Carbon;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Notifications\Notification;
 
 interface TokenInterface
@@ -43,6 +42,13 @@ interface TokenInterface
      * @return Carbon
      */
     public function updatedAt(): Carbon;
+
+    /**
+     * Get the expiry time of the token in seconds.
+     *
+     * @return int
+     */
+    public function expiryTime(): int;
 
     /**
      * Get the date time the token will expire.
