@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * @copyright 2018 Hilmi Erdem KEREN
+ * @license MIT
+ */
+
 namespace Erdemkeren\TemporaryAccess\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -24,7 +29,7 @@ class OtpController extends Controller
             $validator->getMessageBag()->add('password', 'Password wrong');
 
             redirect()->back()->withErrors();
-        };
+        }
 
         return redirect()
             ->to($request->input('redirect_path'))

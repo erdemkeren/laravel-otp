@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * @copyright 2018 Hilmi Erdem KEREN
+ * @license MIT
+ */
+
 namespace Erdemkeren\TemporaryAccess\PasswordGenerators;
 
 use Exception;
@@ -10,7 +15,8 @@ class NumericPasswordGenerator implements PasswordGeneratorInterface
     /**
      * Generate a numeric password.
      *
-     * @param  int $length
+     * @param int $length
+     *
      * @return string
      */
     public function generate(int $length): string
@@ -29,7 +35,8 @@ class NumericPasswordGenerator implements PasswordGeneratorInterface
     /**
      * Generate the required range for the given length.
      *
-     * @param  int $length
+     * @param int $length
+     *
      * @return array
      */
     protected function generateRangeForLength(int $length): array
@@ -41,7 +48,7 @@ class NumericPasswordGenerator implements PasswordGeneratorInterface
             $min .= 0;
             $max .= 9;
 
-            $length--;
+            --$length;
         }
 
         return [

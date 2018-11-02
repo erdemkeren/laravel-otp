@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * @copyright 2018 Hilmi Erdem KEREN
+ * @license MIT
+ */
+
 namespace Erdemkeren\TemporaryAccess\Http\Middleware;
 
 use Closure;
@@ -14,16 +19,17 @@ class OtpAccess
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @param  string|null  $guard
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure                 $next
+     * @param null|string              $guard
+     *
      * @return mixed
      */
     public function handle($request, Closure $next, $guard = null)
     {
         if (! $user = $this->getAuthUser($guard)) {
             throw new \LogicException(
-                "The otp access control middleware requires user authentication via laravel guards."
+                'The otp access control middleware requires user authentication via laravel guards.'
             );
         }
 
@@ -57,7 +63,7 @@ class OtpAccess
     /**
      * Get the guard by the given name.
      *
-     * @param  string $guard
+     * @param string $guard
      *
      * @return Guard
      */
@@ -70,9 +76,9 @@ class OtpAccess
      * Get the authenticated user from
      * the guard by the given name.
      *
-     * @param  string $guard
+     * @param string $guard
      *
-     * @return Authenticatable|null
+     * @return null|Authenticatable
      */
     private function getAuthUser($guard): ?Authenticatable
     {

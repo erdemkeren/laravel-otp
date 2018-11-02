@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * @copyright 2018 Hilmi Erdem KEREN
+ * @license MIT
+ */
+
 namespace Erdemkeren\TemporaryAccess\PasswordGenerators;
 
 use Erdemkeren\TemporaryAccess\PasswordGeneratorInterface;

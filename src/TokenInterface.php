@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * @copyright 2018 Hilmi Erdem KEREN
+ * @license MIT
+ */
+
 namespace Erdemkeren\TemporaryAccess;
 
 use Carbon\Carbon;
@@ -25,7 +30,7 @@ interface TokenInterface
     /**
      * Get the token as plain text.
      *
-     * @return string|null
+     * @return null|string
      */
     public function plainText(): ?string;
 
@@ -73,15 +78,11 @@ interface TokenInterface
 
     /**
      * Alias for invalidate.
-     *
-     * @return void
      */
     public function revoke(): void;
 
     /**
      * Invalidate the token.
-     *
-     * @return void
      */
     public function invalidate(): void;
 
@@ -95,7 +96,8 @@ interface TokenInterface
     /**
      * Extend the validity of the token.
      *
-     * @param int|null $seconds
+     * @param null|int $seconds
+     *
      * @return bool
      */
     public function extend(?int $seconds = null): bool;
@@ -111,22 +113,23 @@ interface TokenInterface
      * Create a new token.
      *
      * @param $authenticableId
-     * @param string $cipherText
+     * @param string      $cipherText
      * @param null|string $plainText
+     *
      * @return TokenInterface
      */
     public static function create(
         $authenticableId,
         string $cipherText,
         ?string $plainText = null
-    ): TokenInterface;
+    ): self;
 
     /**
      * Retrieve a token by the given attributes from the storage.
      *
-     * @param  array $attributes
+     * @param array $attributes
      *
-     * @return TokenInterface|null
+     * @return null|TokenInterface
      */
-    public static function retrieveByAttributes(array $attributes): ?TokenInterface;
+    public static function retrieveByAttributes(array $attributes): ?self;
 }

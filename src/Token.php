@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * @copyright 2018 Hilmi Erdem KEREN
+ * @license MIT
+ */
+
 namespace Erdemkeren\TemporaryAccess;
 
 use Carbon\Carbon;
@@ -18,22 +23,22 @@ final class Token implements TokenInterface
      */
     public $attributes = [
         'authenticable_id' => null,
-        'plain_text' => null,
-        'expiry_time' => null,
-        'cipher_text' => null,
-        'created_at' => null,
-        'updated_at' => null,
+        'plain_text'       => null,
+        'expiry_time'      => null,
+        'cipher_text'      => null,
+        'created_at'       => null,
+        'updated_at'       => null,
     ];
 
     /**
      * Token constructor.
      *
-     * @param int|string|mixed $authenticableId
+     * @param int|mixed|string $authenticableId
      * @param string           $cipherText
      * @param null|string      $plainText
-     * @param Carbon|null      $expiryTime
-     * @param Carbon|null      $createdAt
-     * @param Carbon|null      $updatedAt
+     * @param null|Carbon      $expiryTime
+     * @param null|Carbon      $createdAt
+     * @param null|Carbon      $updatedAt
      */
     public function __construct(
         $authenticableId,
@@ -51,6 +56,16 @@ final class Token implements TokenInterface
         $this->attributes['created_at'] = $createdAt ?: $now;
         $this->attributes['updated_at'] = $updatedAt ?: $now;
         $this->attributes['expiry_time'] = $expiryTime ?: $this->getDefaultExpiryTime();
+    }
+
+    /**
+     * Convert the token to string.
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->cipherText();
     }
 
     /**
@@ -77,7 +92,7 @@ final class Token implements TokenInterface
     /**
      * Get the token as plain text.
      *
-     * @return string|null
+     * @return null|string
      */
     public function plainText(): ?string
     {
@@ -146,8 +161,6 @@ final class Token implements TokenInterface
 
     /**
      * Alias for invalidate.
-     *
-     * @return void
      */
     public function revoke(): void
     {
@@ -156,8 +169,6 @@ final class Token implements TokenInterface
 
     /**
      * Invalidate the token.
-     *
-     * @return void
      */
     public function invalidate(): void
     {
@@ -169,7 +180,8 @@ final class Token implements TokenInterface
     /**
      * Extend the validity of the token.
      *
-     * @param int|null $seconds
+     * @param null|int $seconds
+     *
      * @return bool
      */
     public function extend(?int $seconds = null): bool
@@ -197,8 +209,9 @@ final class Token implements TokenInterface
      * Create a new token.
      *
      * @param $authenticableId
-     * @param string $cipherText
+     * @param string      $cipherText
      * @param null|string $plainText
+     *
      * @return TokenInterface
      */
     public static function create(
@@ -206,7 +219,7 @@ final class Token implements TokenInterface
         string $cipherText,
         ?string $plainText = null
     ): TokenInterface {
-        $token = new Token($authenticableId, $cipherText, $plainText);
+        $token = new self($authenticableId, $cipherText, $plainText);
 
         $token->persist();
 
@@ -216,9 +229,9 @@ final class Token implements TokenInterface
     /**
      * Retrieve a token by the given attributes from the storage.
      *
-     * @param  array $attributes
+     * @param array $attributes
      *
-     * @return TokenInterface|null
+     * @return null|TokenInterface
      */
     public static function retrieveByAttributes(array $attributes): ?TokenInterface
     {
@@ -241,7 +254,6 @@ final class Token implements TokenInterface
             new Carbon($entity->expiry_time)
         );
     }
-
 
     /**
      * Convert the token to a token notification.
@@ -274,7 +286,7 @@ final class Token implements TokenInterface
 
             DB::table(self::getTable())->updateOrInsert([
                 'authenticable_id' => $this->authenticableId(),
-                'cipher_text' => $this->cipherText(),
+                'cipher_text'      => $this->cipherText(),
             ], $attributes);
 
             DB::commit();
@@ -319,15 +331,5 @@ final class Token implements TokenInterface
     private function getDefaultExpiryTime(): int
     {
         return config('temporary_access.expires') * 60;
-    }
-
-    /**
-     * Convert the token to string.
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->cipherText();
     }
 }

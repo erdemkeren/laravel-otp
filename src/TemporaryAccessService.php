@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * @copyright 2018 Hilmi Erdem KEREN
+ * @license MIT
+ */
+
 namespace Erdemkeren\TemporaryAccess;
 
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -46,10 +51,11 @@ final class TemporaryAccessService
 
     /**
      * TemporaryAccessService constructor.
+     *
      * @param PasswordGeneratorManager $manager
-     * @param EncryptorInterface $encryptor
-     * @param string $defaultGenerator
-     * @param int $passwordLength
+     * @param EncryptorInterface       $encryptor
+     * @param string                   $defaultGenerator
+     * @param int                      $passwordLength
      */
     public function __construct(
         PasswordGeneratorManager $manager,
@@ -72,18 +78,17 @@ final class TemporaryAccessService
      *
      * @return bool
      */
-    public function check($authenticableId, string $token): bool {
+    public function check($authenticableId, string $token): bool
+    {
         $token = $this->retrieveByCipherText($authenticableId, $token);
 
-        return !! $token && ! $token->expired();
+        return (bool) $token && ! $token->expired();
     }
 
     /**
      * Set the active password generator of the temporary access service.
      *
      * @param string $name
-     *
-     * @return void
      */
     public function setPasswordGenerator(string $name): void
     {
@@ -93,8 +98,8 @@ final class TemporaryAccessService
     /**
      * Create a new temporary access token.
      *
-     * @param  Authenticatable|mixed $authenticatableId
-     * @param  int             $length
+     * @param Authenticatable|mixed $authenticatableId
+     * @param int                   $length
      *
      * @return Token
      */
@@ -104,7 +109,7 @@ final class TemporaryAccessService
 
         $cipherText = $this->encryptor->encrypt($plainText);
 
-        if($authenticatableId instanceof Authenticatable) {
+        if ($authenticatableId instanceof Authenticatable) {
             $authenticatableId = $authenticatableId->getAuthIdentifier();
         }
 
@@ -118,7 +123,7 @@ final class TemporaryAccessService
      * @param mixed  $authenticableId
      * @param string $plainText
      *
-     * @return TokenInterface|null
+     * @return null|TokenInterface
      */
     public function retrieveByPlainText($authenticableId, string $plainText): ?TokenInterface
     {
@@ -132,13 +137,14 @@ final class TemporaryAccessService
      * @param mixed  $authenticableId
      * @param string $cipherText
      *
-     * @return TokenInterface|null
+     * @return null|TokenInterface
      */
     public function retrieveByCipherText($authenticableId, string $cipherText): ?TokenInterface
     {
-        if($authenticableId instanceof Authenticatable) {
+        if ($authenticableId instanceof Authenticatable) {
             $authenticableId = $authenticableId->getAuthIdentifier();
         }
+
         return Token::retrieveByAttributes([
             'authenticable_id' => $authenticableId,
             'cipher_text'      => $cipherText,
@@ -150,8 +156,6 @@ final class TemporaryAccessService
      *
      * @param string                                     $name
      * @param callable|PasswordGeneratorInterface|string $generator
-     *
-     * @return void
      */
     public function addPasswordGenerator(string $name, $generator): void
     {
@@ -163,7 +167,8 @@ final class TemporaryAccessService
      *
      * @return callable
      */
-    private function getPasswordGenerator(): callable {
+    private function getPasswordGenerator(): callable
+    {
         return $this->passwordGenerator ?: $this->passwordGenerator = $this->manager->get($this->defaultGenerator);
     }
 }

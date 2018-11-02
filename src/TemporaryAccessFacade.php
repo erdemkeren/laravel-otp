@@ -1,11 +1,16 @@
 <?php
 
+/*
+ * @copyright 2018 Hilmi Erdem KEREN
+ * @license MIT
+ */
+
 namespace Erdemkeren\TemporaryAccess;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Class TemporaryAccessFacade
+ * Class TemporaryAccessFacade.
  *
  * @method static setPasswordGenerator(string $name): void
  * @method static check($authenticableId, string $token): bool

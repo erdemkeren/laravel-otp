@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * @copyright 2018 Hilmi Erdem KEREN
+ * @license MIT
+ */
+
 namespace Erdemkeren\TemporaryAccess;
 
 use Illuminate\Routing\Router;
@@ -26,8 +31,6 @@ class TemporaryAccessServiceProvider extends ServiceProvider
 
     /**
      * Register the temporary access service.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -43,7 +46,7 @@ class TemporaryAccessServiceProvider extends ServiceProvider
         $router->aliasMiddleware('otp-access', OtpAccess::class);
 
         $router->resource('otp', OtpController::class, [
-            'only' => ['create', 'store']
+            'only' => ['create', 'store'],
         ]);
     }
 
@@ -55,7 +58,7 @@ class TemporaryAccessServiceProvider extends ServiceProvider
     public function provides(): array
     {
         return [
-            'temporary-access'
+            'temporary-access',
         ];
     }
 
@@ -78,7 +81,7 @@ class TemporaryAccessServiceProvider extends ServiceProvider
      * Register default password generators to the
      * given temporary access service instance.
      *
-     * @param  TemporaryAccessService $service
+     * @param TemporaryAccessService $service
      */
     private function registerDefaultPasswordGenerators($service): void
     {
@@ -94,7 +97,7 @@ class TemporaryAccessServiceProvider extends ServiceProvider
      */
     private function configPath()
     {
-        return __DIR__ . '/../config/temporary_access.php';
+        return __DIR__.'/../config/temporary_access.php';
     }
 
     /**
@@ -104,7 +107,7 @@ class TemporaryAccessServiceProvider extends ServiceProvider
      */
     private function migrationPath()
     {
-        return __DIR__ . '/../database/migrations/';
+        return __DIR__.'/../database/migrations/';
     }
 
     /**
@@ -114,6 +117,6 @@ class TemporaryAccessServiceProvider extends ServiceProvider
      */
     private function viewPath()
     {
-        return __DIR__ . '/../views/';
+        return __DIR__.'/../views/';
     }
 }
