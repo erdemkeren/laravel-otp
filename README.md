@@ -15,7 +15,9 @@ $route->get('secret', function (): string {
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
-	- [Available methods](#available-methods)
+	- [Basic Usage](#basic-usage)
+	- [Advanced Usage](#advanced-usage)
+	- [Deeper Knowledge](#deeper-knowledge)
 - [Changelog](#changelog)
 - [Testing](#testing)
 - [Credits](#credits)
@@ -87,19 +89,30 @@ default: 15
 
 ### Basic Usage
 
-After configuring your instance of the package, you can use the built-in `otp-access` middleware alias to secure your endpoints:
+After configuring your instance of the package,
+you can use the built-in `otp-access` middleware alias to secure your endpoints:
 
 ```php
-$route->get('secret', function (): string {
+$route->get('secret', function (Request $request): string {
+    $request->otpToken()->refresh();
+
     return 'The secret of immortality';
 })->middleware('otp-access');
 ```
 
-This middleware will redirect any unauthenticated request to `otp/create` endpoint which we have registered in the installation process. After a successful authentication; the user will be redirected back to the original route. You can change the appearence of the view under your `resources/views/otp` directory, inside `create.blade.php` file.
+This middleware will redirect any unauthenticated request to the `otp/create` endpoint
+which we have registered in the installation process:
 
-## Advanced Usage
+- A password will be generated using the configured password generator.
+- The authenticated user will be notified about the password via the configured notification channel.
+- The user will see a form to submit their password.
+- You can change the appearance of the view under your `resources/views/otp` directory, modifying `create.blade.php` file.
+- After a successful authentication; the user will be redirected back to the original route they requested at the first step.
+- The redirected request will also include the `otpToken()` instance being used by the user.
 
-### Adding the notification channel method:
+### Advanced Usage
+
+#### Adding the notification channel method:
 
 If you are not using the `mail` channel, or your notification channel is expecting a method different than `mail` or `sms`, you can register your own method like:
 
@@ -111,7 +124,7 @@ TokenNotification::macro('AcmeSms', function () {
 ```
 _Don't forget to change your configuration file as well._
 
-### Using your own password generator:
+#### Using your own password generator:
 
 To add your own password generator implemetation, you can call `addPasswordGenerator` method on `TemporaryAccess` service like:
 
@@ -222,7 +235,7 @@ public function invalidate(): void;
 ```php
 public function show(Request $request, $id) {
     if($request->input('revoke_session', false)) {
-        $request->otpToken->revoke();
+        $request->otpToken()->revoke();
     }
 
     return view('heaven');
