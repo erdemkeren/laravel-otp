@@ -10,6 +10,9 @@ namespace Erdemkeren\TemporaryAccess\PasswordGenerators;
 use Exception;
 use Erdemkeren\TemporaryAccess\PasswordGeneratorInterface;
 
+/**
+ * Class NumericPasswordGenerator.
+ */
 class NumericPasswordGenerator implements PasswordGeneratorInterface
 {
     /**

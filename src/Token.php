@@ -112,7 +112,7 @@ final class Token implements TokenInterface
      */
     public function createdAt(): Carbon
     {
-        return $this->attributes['created_at'];
+        return clone $this->attributes['created_at'];
     }
 
     /**
@@ -122,7 +122,7 @@ final class Token implements TokenInterface
      */
     public function updatedAt(): Carbon
     {
-        return $this->attributes['updated_at'];
+        return clone $this->attributes['updated_at'];
     }
 
     /**
@@ -142,7 +142,7 @@ final class Token implements TokenInterface
      */
     public function expiresAt(): Carbon
     {
-        return $this->createdAt()->addSeconds($this->expiryTime());
+        return (clone $this->createdAt())->addSeconds($this->expiryTime());
     }
 
     /**
