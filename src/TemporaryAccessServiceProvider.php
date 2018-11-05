@@ -10,7 +10,6 @@ namespace Erdemkeren\TemporaryAccess;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Erdemkeren\TemporaryAccess\Http\Middleware\OtpAccess;
-use Erdemkeren\TemporaryAccess\Http\Controllers\OtpController;
 use Erdemkeren\TemporaryAccess\PasswordGenerators as Generators;
 
 class TemporaryAccessServiceProvider extends ServiceProvider
@@ -26,7 +25,7 @@ class TemporaryAccessServiceProvider extends ServiceProvider
     {
         $this->publishes([$this->configPath() => config_path('temporary_access.php')]);
         $this->publishes([$this->migrationPath() => database_path('migrations')]);
-        $this->publishes([$this->viewPath() => resource_path('views/otp')]);
+        $this->publishes([$this->viewPath() => resource_path('views')]);
     }
 
     /**
@@ -44,10 +43,6 @@ class TemporaryAccessServiceProvider extends ServiceProvider
         /** @var Router $router */
         $router = $this->app['router'];
         $router->aliasMiddleware('otp-access', OtpAccess::class);
-
-        $router->resource('otp', OtpController::class, [
-            'only' => ['create', 'store'],
-        ]);
     }
 
     /**

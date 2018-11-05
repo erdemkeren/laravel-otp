@@ -106,7 +106,6 @@ final class TemporaryAccessService
     public function create($authenticatableId, ?int $length = null): TokenInterface
     {
         $plainText = $this->getPasswordGenerator()($length ?: $this->passwordLength);
-
         $cipherText = $this->encryptor->encrypt($plainText);
 
         if ($authenticatableId instanceof Authenticatable) {

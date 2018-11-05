@@ -57,7 +57,7 @@ class OtpAccess
      */
     protected function redirectToOtpPage(): RedirectResponse
     {
-        return redirect()->to('otp/create');
+        return redirect()->route('otp.create');
     }
 
     /**

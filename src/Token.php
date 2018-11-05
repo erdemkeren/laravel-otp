@@ -50,6 +50,12 @@ final class Token implements TokenInterface
     ) {
         $now = $this->getNow();
 
+        if (null === $authenticableId) {
+            throw new \LogicException(
+                'The unique identifier of token owner shall not be null.'
+            );
+        }
+
         $this->attributes['authenticable_id'] = $authenticableId;
         $this->attributes['plain_text'] = $plainText;
         $this->attributes['cipher_text'] = $cipherText;

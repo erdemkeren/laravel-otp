@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * @copyright 2018 Hilmi Erdem KEREN
+ * @license MIT
+ */
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -8,8 +13,6 @@ class CreateTemporaryAccessTokensTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
@@ -20,14 +23,12 @@ class CreateTemporaryAccessTokensTable extends Migration
             $table->timestamp('updated_at')->useCurrent();
             $table->unsignedSmallInteger('expiry_time')->nullable();
 
-            $table->unique(['authenticatable_id', 'token']);
+            $table->unique(['authenticatable_id', 'cipher_text']);
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {
