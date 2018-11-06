@@ -22,7 +22,7 @@
     "require-dev": {
         "illuminate/config": "^5.5",
         "mockery/mockery": "^0.9.5",
-        "phpunit/phpunit": "4.*"
+        "phpunit/phpunit": "7.*"
     },
     "autoload": {
         "psr-4": {

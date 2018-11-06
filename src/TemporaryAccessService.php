@@ -50,23 +50,54 @@ final class TemporaryAccessService
     private $passwordGenerator;
 
     /**
+     * The name of the token class being used
+     * by the temporary access service.
+     *
+     * @var string
+     */
+    private $tokenClass;
+
+    /**
      * TemporaryAccessService constructor.
      *
      * @param PasswordGeneratorManagerInterface $manager
      * @param EncryptorInterface                $encryptor
      * @param string                            $defaultGenerator
      * @param int                               $passwordLength
+     * @param string                            $tokenClass
      */
     public function __construct(
         PasswordGeneratorManagerInterface $manager,
         EncryptorInterface $encryptor,
         string $defaultGenerator,
-        int $passwordLength
+        int $passwordLength,
+        string $tokenClass
     ) {
         $this->manager = $manager;
         $this->encryptor = $encryptor;
         $this->passwordLength = $passwordLength;
         $this->defaultGenerator = $defaultGenerator;
+
+        if (!class_exists($tokenClass)) {
+            throw new \RuntimeException(
+                "The token implementation [{$tokenClass}] could not be found."
+            );
+        }
+
+        $generatorReflection = new \ReflectionClass($tokenClass);
+        if (!$generatorReflection->isInstantiable()) {
+            throw new \RuntimeException(
+                "The token implementation [{$tokenClass}] is not instantiable."
+            );
+        }
+
+        if (! is_subclass_of($tokenClass, TokenInterface::class)) {
+            throw new \TypeError(
+                'The token class should be an instance of '.TokenInterface::class
+            );
+        }
+
+        $this->tokenClass = $tokenClass;
     }
 
     /**
@@ -112,7 +143,7 @@ final class TemporaryAccessService
             $authenticatableId = $authenticatableId->getAuthIdentifier();
         }
 
-        return Token::create($authenticatableId, $cipherText, $plainText);
+        return $this->tokenClass::create($authenticatableId, $cipherText, $plainText);
     }
 
     /**
@@ -144,7 +175,7 @@ final class TemporaryAccessService
             $authenticableId = $authenticableId->getAuthIdentifier();
         }
 
-        return Token::retrieveByAttributes([
+        return $this->tokenClass::retrieveByAttributes([
             'authenticable_id' => $authenticableId,
             'cipher_text'      => $cipherText,
         ]);

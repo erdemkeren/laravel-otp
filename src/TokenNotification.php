@@ -21,18 +21,18 @@ final class TokenNotification extends Notification implements ShouldQueue
     use Queueable, Macroable;
 
     /**
-     * The token generated.
+     * The token implementation.
      *
-     * @var Token
+     * @var TokenInterface
      */
     public $token;
 
     /**
      * TokenGenerated constructor.
      *
-     * @param Token $token
+     * @param TokenInterface $token
      */
-    public function __construct(Token $token)
+    public function __construct(TokenInterface $token)
     {
         $this->token = $token;
     }
@@ -78,7 +78,7 @@ final class TokenNotification extends Notification implements ShouldQueue
     public function toSms(): string
     {
         return 'Somebody recently requested a one-time password.'
-        ." You can enter the following reset code: {$this->code}"
-        ." If you didn't request the password, simply ignore this message.";
+        ." You can enter the following reset code: {$this->token->plainText()}"
+        .' If you didn\'t request the password, simply ignore this message.';
     }
 }

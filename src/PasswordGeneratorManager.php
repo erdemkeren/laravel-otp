@@ -70,7 +70,7 @@ final class PasswordGeneratorManager implements PasswordGeneratorManagerInterfac
      *
      * @return PasswordGeneratorInterface
      */
-    public function createGeneratorFromString(string $className): PasswordGeneratorInterface
+    private function createGeneratorFromString(string $className): PasswordGeneratorInterface
     {
         if (! class_exists($className)) {
             throw new \RuntimeException(

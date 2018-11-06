@@ -9,6 +9,7 @@ namespace Erdemkeren\TemporaryAccess;
 
 use Mockery as M;
 use Carbon\Carbon;
+use PHPUnit\Framework\TestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
@@ -16,15 +17,19 @@ use Illuminate\Database\DatabaseManager;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Connectors\ConnectionFactory;
 
-function config($key)
-{
-    return TemporaryAccessServiceTest::$functions->config($key);
+if (! \function_exists('\Erdemkeren\TemporaryAccess\config')) {
+    function config($key)
+    {
+        global $testerClass;
+
+        return $testerClass::$functions->config($key);
+    }
 }
 
 /**
- * @coversNothing
+ * @covers \Erdemkeren\TemporaryAccess\TemporaryAccessService
  */
-class TemporaryAccessServiceTest extends \PHPUnit\Framework\TestCase
+class TemporaryAccessServiceTest extends TestCase
 {
     public static $functions = [];
 
@@ -67,6 +72,9 @@ class TemporaryAccessServiceTest extends \PHPUnit\Framework\TestCase
     {
         self::$functions = M::mock();
 
+        global $testerClass;
+        $testerClass = self::class;
+
         $app = new Container();
         $app->singleton('app', 'Illuminate\Container\Container');
         $app->singleton('config', 'Illuminate\Config\Repository');
@@ -89,7 +97,8 @@ class TemporaryAccessServiceTest extends \PHPUnit\Framework\TestCase
             $this->pwdGenManager,
             $this->encryptor,
             $this->defaultGeneratorName,
-            $this->pwdLength
+            $this->pwdLength,
+            FakeToken::class
         );
     }
 
@@ -97,7 +106,49 @@ class TemporaryAccessServiceTest extends \PHPUnit\Framework\TestCase
     {
         M::close();
 
+        global $testerClass;
+        $testerClass = null;
+
         parent::tearDown();
+    }
+
+    public function testItThrowRuntimeExceptionIfTokenClassNotFound(): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        $this->service = new TemporaryAccessService(
+            $this->pwdGenManager,
+            $this->encryptor,
+            $this->defaultGeneratorName,
+            $this->pwdLength,
+            AcmeToken::class
+        );
+    }
+
+    public function testItThrowRuntimeExceptionIfTokenIsNotInstantiable(): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        $this->service = new TemporaryAccessService(
+            $this->pwdGenManager,
+            $this->encryptor,
+            $this->defaultGeneratorName,
+            $this->pwdLength,
+            AbstractToken::class
+        );
+    }
+
+    public function testItThrowTypeErrorIfTokenIsNotAnInstanceOfTokenInterface(): void
+    {
+        $this->expectException(\TypeError::class);
+
+        $this->service = new TemporaryAccessService(
+            $this->pwdGenManager,
+            $this->encryptor,
+            $this->defaultGeneratorName,
+            $this->pwdLength,
+            NotImplementingToken::class
+        );
     }
 
     public function testItCreatesTokens(): void
@@ -138,21 +189,19 @@ class TemporaryAccessServiceTest extends \PHPUnit\Framework\TestCase
     {
         $this->authenticable->shouldReceive('getAuthIdentifier')
             ->once()
-            ->andReturn('1');
+            ->andReturn($authenticableId = 1);
 
-        $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.table')
-            ->andReturn($tableName = 'foes');
-
-        DB::shouldReceive('table')->once()->with($tableName)->andReturnSelf();
-        DB::shouldReceive('where')->twice()->andReturnSelf();
-        DB::shouldReceive('first')->once()->andReturn((object) [
-            'authenticable_id' => 1,
-            'cipher_text'      => $cipherText = 'foo',
-            'created_at'       => '2018-11-06 14:44:00',
-            'updated_at'       => '2018-11-06 14:44:00',
-            'expiry_time'      => 10,
-        ]);
+        $this::$functions->shouldReceive('retrieveByAttributes')
+            ->once()
+            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar'])
+            ->andReturn(new FakeToken(
+                1,
+                $cipherText,
+                null,
+                10,
+                new Carbon('2018-11-06 14:44:00'),
+                new Carbon('2018-11-06 14:44:00')
+            ));
 
         Carbon::setTestNow('2018-11-06 14:44:09');
 
@@ -168,45 +217,38 @@ class TemporaryAccessServiceTest extends \PHPUnit\Framework\TestCase
 
         $this->encryptor->shouldReceive('encrypt')
             ->once()->with($plainText = 'foo')
-            ->andReturn('bar');
+            ->andReturn($cipherText = 'bar');
 
-        $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.table')
-            ->andReturn($tableName = 'foes');
-
-        DB::shouldReceive('table')->once()->with($tableName)->andReturnSelf();
-        DB::shouldReceive('where')->once()->with('authenticable_id', $authenticableId)->andReturnSelf();
-        DB::shouldReceive('where')->once()->with('plain_text', $plainText)->andReturnSelf();
-        DB::shouldReceive('first')->once()->andReturn((object) [
-            'authenticable_id' => 1,
-            'cipher_text'      => $token = 'bar',
-            'created_at'       => '2018-11-06 14:44:00',
-            'updated_at'       => '2018-11-06 14:44:00',
-            'expiry_time'      => 10,
-        ]);
+        $this::$functions->shouldReceive('retrieveByAttributes')
+            ->once()
+            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar'])
+            ->andReturn(new FakeToken(
+                1,
+                $cipherText,
+                null,
+                10,
+                new Carbon('2018-11-06 14:44:00'),
+                new Carbon('2018-11-06 14:44:00')
+            ));
 
         $token = $this->service->retrieveByPlainText($this->authenticable, $plainText);
         $this->assertInstanceOf(TokenInterface::class, $token);
     }
 
-    public function testAddPasswordGenerator(): void
-    {
-        $this->pwdGenManager->shouldReceive('register')
-            ->once()->with('acme', $generator = 'acme_generator')
-            ->andReturnNull();
-
-        $this->service->addPasswordGenerator('acme', 'acme_generator');
-    }
-
-    public function testSetPasswordGenerator(): void
+    public function testAddSetPasswordGenerator(): void
     {
         $generatorResult = 'acme_generator_result';
 
+        $this->pwdGenManager->shouldReceive('register')
+            ->once()->with('acme', $generator = function () use ($generatorResult) {
+                return $generatorResult;
+            })->andReturnNull();
+
         $this->pwdGenManager->shouldReceive('get')
             ->once()->with('acme')
-            ->andReturn(function () use ($generatorResult) {
-                return $generatorResult;
-            });
+            ->andReturn($generator);
+
+        $this->service->addPasswordGenerator('acme', $generator);
 
         $this->encryptor->shouldReceive('encrypt')
             ->once()->with($generatorResult)
@@ -239,20 +281,17 @@ class TemporaryAccessServiceTest extends \PHPUnit\Framework\TestCase
             ->once()
             ->andReturn($authenticableId = 1);
 
-        $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.table')
-            ->andReturn($tableName = 'foes');
-
-        DB::shouldReceive('table')->once()->with($tableName)->andReturnSelf();
-        DB::shouldReceive('where')->once()->with('authenticable_id', $authenticableId)->andReturnSelf();
-        DB::shouldReceive('where')->once()->with('cipher_text', $cipherText = 'bar')->andReturnSelf();
-        DB::shouldReceive('first')->once()->andReturn((object) [
-            'authenticable_id' => 1,
-            'cipher_text'      => $cipherText,
-            'created_at'       => '2018-11-06 14:44:00',
-            'updated_at'       => '2018-11-06 14:44:00',
-            'expiry_time'      => 10,
-        ]);
+        $this::$functions->shouldReceive('retrieveByAttributes')
+            ->once()
+            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar'])
+            ->andReturn(new FakeToken(
+                1,
+                $cipherText,
+                null,
+                10,
+                new Carbon('2018-11-06 14:44:00'),
+                new Carbon('2018-11-06 14:44:00')
+            ));
 
         $token = $this->service->retrieveByCipherText($this->authenticable, $cipherText);
         $this->assertInstanceOf(TokenInterface::class, $token);
@@ -264,4 +303,25 @@ class TemporaryAccessServiceTest extends \PHPUnit\Framework\TestCase
             return 'foo';
         };
     }
+}
+
+class FakeToken extends Token implements TokenInterface
+{
+    public static function retrieveByAttributes(array $attributes): ?TokenInterface
+    {
+        return TemporaryAccessServiceTest::$functions->retrieveByAttributes($attributes);
+    }
+
+    protected function persist(): bool
+    {
+        return true;
+    }
+}
+
+abstract class AbstractToken implements TokenInterface
+{
+}
+
+class NotImplementingToken
+{
 }

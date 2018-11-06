@@ -68,7 +68,8 @@ class TemporaryAccessServiceProvider extends ServiceProvider
             new PasswordGeneratorManager(),
             new Encryptor(config('app.secret')),
             config('temporary_access.password_generator', 'string'),
-            6
+            6,
+            Token::class
         );
     }
 

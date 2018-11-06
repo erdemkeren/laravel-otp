@@ -14,7 +14,7 @@ use Illuminate\Notifications\Notification;
 /**
  * Class Token.
  */
-final class Token implements TokenInterface
+class Token implements TokenInterface
 {
     /**
      * The attributes of the token.
@@ -276,7 +276,7 @@ final class Token implements TokenInterface
      *
      * @return bool
      */
-    private function persist(): bool
+    protected function persist(): bool
     {
         $this->attributes['created_at'] = $this->attributes['created_at'] ?: $this->getNow();
         $this->attributes['updated_at'] = $this->getNow();

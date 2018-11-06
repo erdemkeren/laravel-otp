@@ -28,14 +28,4 @@ interface PasswordGeneratorManagerInterface
      * @return callable
      */
     public function get(?string $generatorName = null): callable;
-
-    /**
-     * Create a new password generator instance using the given
-     * fully qualified password generator class name.
-     *
-     * @param string $className
-     *
-     * @return PasswordGeneratorInterface
-     */
-    public function createGeneratorFromString(string $className): PasswordGeneratorInterface;
 }
