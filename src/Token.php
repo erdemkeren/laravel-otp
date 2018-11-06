@@ -36,7 +36,7 @@ final class Token implements TokenInterface
      * @param int|mixed|string $authenticableId
      * @param string           $cipherText
      * @param null|string      $plainText
-     * @param null|Carbon      $expiryTime
+     * @param null|int         $expiryTime
      * @param null|Carbon      $createdAt
      * @param null|Carbon      $updatedAt
      */
@@ -44,7 +44,7 @@ final class Token implements TokenInterface
         $authenticableId,
         string $cipherText,
         ?string $plainText = null,
-        ?Carbon $expiryTime = null,
+        ?int    $expiryTime = null,
         ?Carbon $createdAt = null,
         ?Carbon $updatedAt = null
     ) {
@@ -61,7 +61,7 @@ final class Token implements TokenInterface
         $this->attributes['cipher_text'] = $cipherText;
         $this->attributes['created_at'] = $createdAt ?: $now;
         $this->attributes['updated_at'] = $updatedAt ?: $now;
-        $this->attributes['expiry_time'] = $expiryTime ?: $this->getDefaultExpiryTime();
+        $this->attributes['expiry_time'] = null === $expiryTime ? $this->getDefaultExpiryTime() : $expiryTime;
     }
 
     /**
@@ -152,7 +152,7 @@ final class Token implements TokenInterface
      */
     public function timeLeft(): int
     {
-        return $this->expiresAt()->diffInSeconds($this->getNow(), false);
+        return $this->getNow()->diffInSeconds($this->expiresAt(), false);
     }
 
     /**
@@ -162,7 +162,7 @@ final class Token implements TokenInterface
      */
     public function expired(): bool
     {
-        return $this->timeLeft() > 0;
+        return $this->timeLeft() <= 0;
     }
 
     /**
@@ -192,7 +192,7 @@ final class Token implements TokenInterface
      */
     public function extend(?int $seconds = null): bool
     {
-        $seconds = $seconds ?: $this->getDefaultExpiryTime();
+        $seconds = null === $seconds ? $this->getDefaultExpiryTime() : $seconds;
 
         $this->attributes['expiry_time'] += $seconds;
 
@@ -255,9 +255,9 @@ final class Token implements TokenInterface
             $entity->authenticable_id,
             $entity->cipher_text,
             null,
+            $entity->expiry_time,
             new Carbon($entity->created_at),
-            new Carbon($entity->updated_at),
-            new Carbon($entity->expiry_time)
+            new Carbon($entity->updated_at)
         );
     }
 

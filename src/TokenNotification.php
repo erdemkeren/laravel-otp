@@ -63,6 +63,7 @@ final class TokenNotification extends Notification implements ShouldQueue
     public function toMail(): MailMessage
     {
         return (new MailMessage())
+            ->subject(config('app.name').' One Time Password')
             ->greeting('Hello!')
             ->line('Somebody recently requested for a one-time password in behalf of you.')
             ->line('You can enter the following reset code: '.$this->token->plainText())
@@ -76,10 +77,8 @@ final class TokenNotification extends Notification implements ShouldQueue
      */
     public function toSms(): string
     {
-        $message = 'Somebody recently requested a one-time password.';
-        $message .= "You can enter the following reset code: {$this->code} ";
-        $message .= "If you didn't request the password, simply ignore this message.";
-
-        return $message;
+        return 'Somebody recently requested a one-time password.'
+        ." You can enter the following reset code: {$this->code}"
+        ." If you didn't request the password, simply ignore this message.";
     }
 }

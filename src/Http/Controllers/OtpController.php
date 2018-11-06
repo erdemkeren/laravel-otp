@@ -10,10 +10,11 @@ namespace Erdemkeren\TemporaryAccess\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use App\Http\Controllers\Controller;
+use Illuminate\Validation\Validator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Validator;
 use Erdemkeren\TemporaryAccess\TokenInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Validator as ValidatorFacade;
 use Erdemkeren\TemporaryAccess\TemporaryAccessFacade as TemporaryAccess;
 
 /**
@@ -30,11 +31,6 @@ class OtpController extends Controller
      */
     public function create(Request $request): View
     {
-        $user = $request->user();
-        $token = TemporaryAccess::create($user, 6);
-
-        $user->notify($token->toNotification());
-
         return view('otp.create', $request->only(['redirect_path']));
     }
 
@@ -48,15 +44,22 @@ class OtpController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $validator = $this->validateOtpSubmissionRequest($request);
+        $validator = $this->getOtpSubmissionRequestValidator($request);
 
-        if (! $token = $this->retrieveOtpTokenByPlainText($request)) {
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator);
+        }
+
+        if (! $token = $this->retrieveOtpTokenByPlainText(
+            $request->user(),
+            $request->input('password')
+        )) {
             $validator->getMessageBag()->add(
                 'password',
                 'The password is not valid.'
             );
 
-            redirect()->back()->withErrors($validator);
+            return redirect()->back()->withErrors($validator);
         }
 
         if ($token->expired()) {
@@ -70,25 +73,23 @@ class OtpController extends Controller
 
         return redirect()
             ->to($request->input('redirect_path'))
-            ->withCookies(['otp_token' => (string) $token]);
+            ->withCookie(
+                cookie()->make('otp_token', (string) $token, $token->expiryTime() / 60)
+            );
     }
 
     /**
+     * Validate the given otp submission request.
+     *
      * @param Request $request
      *
-     * @return \Illuminate\Contracts\Validation\Validator
+     * @return Validator
      */
-    private function validateOtpSubmissionRequest(Request $request): \Illuminate\Contracts\Validation\Validator
+    private function getOtpSubmissionRequestValidator(Request $request): Validator
     {
-        $validator = Validator::make($request->all(), [
+        return ValidatorFacade::make($request->all(), [
             'password' => 'required|string',
         ]);
-
-        if ($validator->fails()) {
-            redirect()->back()->withErrors($validator);
-        }
-
-        return $validator;
     }
 
     /**

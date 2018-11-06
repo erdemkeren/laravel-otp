@@ -20,6 +20,6 @@ class OtpRoutes
         Route::resource('otp', OtpController::class, [
             'only'       => ['create', 'store'],
             'prefix'     => 'otp',
-        ])->middleware('auth');
+        ])->middleware(['web', 'auth']);
     }
 }

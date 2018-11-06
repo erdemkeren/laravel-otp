@@ -33,13 +33,20 @@ class OtpAccess
             );
         }
 
-        if (! $cipherText = $request->input('otp-token')) {
+        if (! $request->hasCookie('otp_token')) {
+            $this->sendNewOtpToUser($request->user());
+
             return $this->redirectToOtpPage();
         }
 
-        /** @var Token $token */
-        $token = TemporaryAccess::retrieveByCipherText($user->getAuthIdentifier(), $cipherText);
+        $token = TemporaryAccess::retrieveByCipherText(
+            $user->getAuthIdentifier(),
+            $request->cookie('otp_token')
+        );
+
         if (! $token || $token->expired()) {
+            $this->sendNewOtpToUser($request->user());
+
             return $this->redirectToOtpPage();
         }
 
@@ -83,5 +90,17 @@ class OtpAccess
     private function getAuthUser($guard): ?Authenticatable
     {
         return $this->getGuard($guard)->user();
+    }
+
+    /**
+     * Create a new otp and notify the user.
+     *
+     * @param Authenticatable $user
+     */
+    private function sendNewOtpToUser(Authenticatable $user): void
+    {
+        $token = TemporaryAccess::create($user, 6);
+
+        $user->notify($token->toNotification());
     }
 }
