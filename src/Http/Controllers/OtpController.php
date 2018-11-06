@@ -27,11 +27,15 @@ class OtpController extends Controller
      *
      * @param Request $request
      *
-     * @return View
+     * @return RedirectResponse|View
      */
-    public function create(Request $request): View
+    public function create(Request $request)
     {
-        return view('otp.create', $request->only(['redirect_path']));
+        if (! session('otp_requested', false)) {
+            return redirect('/');
+        }
+
+        return view('otp.create');
     }
 
     /**
@@ -71,8 +75,10 @@ class OtpController extends Controller
             redirect()->back()->withErrors($validator);
         }
 
+        session()->forget('otp_requested');
+
         return redirect()
-            ->to($request->input('redirect_path'))
+            ->to(session()->pull('otp_redirect_url'))
             ->withCookie(
                 cookie()->make('otp_token', (string) $token, $token->expiryTime() / 60)
             );

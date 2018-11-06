@@ -64,6 +64,11 @@ class OtpAccess
      */
     protected function redirectToOtpPage(): RedirectResponse
     {
+        session([
+            'otp_requested'    => true,
+            'otp_redirect_url' => url()->current(),
+        ]);
+
         return redirect()->route('otp.create');
     }
 
