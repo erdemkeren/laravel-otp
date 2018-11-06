@@ -1,32 +1,57 @@
 <?php
 
-namespace Erdemkeren\TemporaryAccess\Tests;
+/*
+ * @copyright 2018 Hilmi Erdem KEREN
+ * @license MIT
+ */
+
+namespace Erdemkeren\TemporaryAccess;
 
 use Mockery as M;
 use Carbon\Carbon;
-use Erdemkeren\TemporaryAccess\Token\TokenInterface;
-use Erdemkeren\TemporaryAccess\TemporaryAccessService;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenInterface;
-use Erdemkeren\TemporaryAccess\Contracts\AccessTokenRepositoryInterface;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Erdemkeren\TemporaryAccess\Token\TokenGenerator\TokenGeneratorInterface;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Container\Container;
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Database\DatabaseManager;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Connectors\ConnectionFactory;
 
-class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
+function config($key)
 {
+    return TemporaryAccessServiceTest::$functions->config($key);
+}
+
+/**
+ * @coversNothing
+ */
+class TemporaryAccessServiceTest extends \PHPUnit\Framework\TestCase
+{
+    public static $functions = [];
+
+    /**
+     * @var int
+     */
+    private $pwdLength;
+
+    /**
+     * @var string
+     */
+    private $defaultGeneratorName;
+
     /**
      * @var TemporaryAccessService
      */
     private $service;
 
     /**
-     * @var AccessTokenRepositoryInterface
+     * @var PasswordGeneratorManagerInterface
      */
-    private $repository;
+    private $pwdGenManager;
 
     /**
-     * @var TokenGeneratorInterface
+     * @var Authenticatable
      */
-    private $generator;
+    private $authenticable;
 
     /**
      * @var TokenInterface
@@ -34,447 +59,209 @@ class TemporaryAccessServiceTest extends \PHPUnit_Framework_TestCase
     private $token;
 
     /**
-     * @var AuthenticatableContract
+     * @var EncryptorInterface
      */
-    private $authenticatable;
+    private $encryptor;
 
-    /**
-     * @var AccessTokenInterface
-     */
-    private $accessToken;
-
-    /**
-     * @var AccessTokenInterface
-     */
-    private $accessTokenClone;
-
-    public function setUp()
+    public function setUp(): void
     {
-        $this->authenticatable = M::mock(AuthenticatableContract::class);
-        $this->repository = $repository = M::mock(AccessTokenRepositoryInterface::class);
-        $this->generator = $generator = M::mock(TokenGeneratorInterface::class);
+        self::$functions = M::mock();
+
+        $app = new Container();
+        $app->singleton('app', 'Illuminate\Container\Container');
+        $app->singleton('config', 'Illuminate\Config\Repository');
+
+        $app->bind('db', function ($app) {
+            return new DatabaseManager($app, new ConnectionFactory($app));
+        });
+
+        Facade::setFacadeApplication($app);
+
+        $this->pwdGenManager = M::mock(PasswordGeneratorManagerInterface::class);
+        $this->encryptor = M::mock(EncryptorInterface::class);
+        $this->defaultGeneratorName = 'foo';
+        $this->pwdLength = 6;
+
+        $this->authenticable = M::mock(Authenticatable::class);
         $this->token = M::mock(TokenInterface::class);
-        $this->accessToken = M::mock(AccessTokenInterface::class);
-        $this->accessTokenClone = M::mock(AccessTokenInterface::class);
-        $this->service = new TemporaryAccessService($repository, $generator);
+
+        $this->service = new TemporaryAccessService(
+            $this->pwdGenManager,
+            $this->encryptor,
+            $this->defaultGeneratorName,
+            $this->pwdLength
+        );
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         M::close();
 
         parent::tearDown();
     }
 
-    /** @test */
-    public function it_shall_generate_access_tokens_with_default_expire_dates()
+    public function testItCreatesTokens(): void
     {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->once()->andReturn(1);
-        $this->generator->shouldReceive('generate')->once()->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->once()->andReturn('bar');
+        $this->pwdGenManager->shouldReceive('get')
+            ->once()->with($this->defaultGeneratorName)
+            ->andReturn($this->fooGenerator());
 
-        $this->repository->shouldReceive('store')->once()->with(1, 'bar', null)->andReturn((object) [
-            'authenticatable_id' => 1,
-            'id'                 => 1,
-            'token'              => 'bar',
-            'created_at'         => (string) $createdAt = Carbon::now(),
-            'expires_at'         => (string) $expiresAt = Carbon::now(),
+        $this->encryptor->shouldReceive('encrypt')
+            ->once()->with('foo')
+            ->andReturn('bar');
+
+        $this->authenticable->shouldReceive('getAuthIdentifier')
+            ->once()
+            ->andReturn(1);
+
+        $this::$functions->shouldReceive('config')
+            ->once()->with('temporary_access.table')
+            ->andReturn($tableName = 'foes');
+
+        $this::$functions->shouldReceive('config')
+            ->once()->with('temporary_access.expires')
+            ->andReturn('900');
+
+        DB::shouldReceive('beginTransaction')->once();
+        DB::shouldReceive('table')->with($tableName)->once()->andReturnSelf();
+        DB::shouldReceive('updateOrInsert')->once()->andReturn(true);
+        DB::shouldReceive('commit')->once();
+
+        $token = $this->service->create($this->authenticable);
+
+        $this->assertInstanceOf(TokenInterface::class, $token);
+        $this->assertSame('foo', $token->plainText());
+        $this->assertSame('bar', $token->cipherText());
+    }
+
+    public function testCheck(): void
+    {
+        $this->authenticable->shouldReceive('getAuthIdentifier')
+            ->once()
+            ->andReturn('1');
+
+        $this::$functions->shouldReceive('config')
+            ->once()->with('temporary_access.table')
+            ->andReturn($tableName = 'foes');
+
+        DB::shouldReceive('table')->once()->with($tableName)->andReturnSelf();
+        DB::shouldReceive('where')->twice()->andReturnSelf();
+        DB::shouldReceive('first')->once()->andReturn((object) [
+            'authenticable_id' => 1,
+            'cipher_text'      => $cipherText = 'foo',
+            'created_at'       => '2018-11-06 14:44:00',
+            'updated_at'       => '2018-11-06 14:44:00',
+            'expiry_time'      => 10,
         ]);
 
-        $accessToken = $this->service->generate($this->authenticatable);
-        $this->assertInstanceOf(AccessTokenInterface::class, $accessToken);
+        Carbon::setTestNow('2018-11-06 14:44:09');
+
+        $result = $this->service->check($this->authenticable, $cipherText);
+        $this->assertTrue($result);
     }
 
-    /** @test */
-    public function it_shall_generate_access_tokens_with_explicit_expire_dates()
+    public function testRetrieveByPlainText(): void
     {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->once()->andReturn(1);
-        $this->generator->shouldReceive('generate')->once()->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->once()->andReturn('bar');
+        $this->authenticable->shouldReceive('getAuthIdentifier')
+            ->once()
+            ->andReturn($authenticableId = 1);
 
-        $this->repository->shouldReceive('store')->once()->with(1, 'bar', '2016-12-29 13:35:00')->andReturn((object) [
-            'authenticatable_id' => 1,
-            'id'                 => 1,
-            'token'              => 'bar',
-            'created_at'         => (string) Carbon::now(),
-            'expires_at'         => (string) Carbon::now(),
+        $this->encryptor->shouldReceive('encrypt')
+            ->once()->with($plainText = 'foo')
+            ->andReturn('bar');
+
+        $this::$functions->shouldReceive('config')
+            ->once()->with('temporary_access.table')
+            ->andReturn($tableName = 'foes');
+
+        DB::shouldReceive('table')->once()->with($tableName)->andReturnSelf();
+        DB::shouldReceive('where')->once()->with('authenticable_id', $authenticableId)->andReturnSelf();
+        DB::shouldReceive('where')->once()->with('plain_text', $plainText)->andReturnSelf();
+        DB::shouldReceive('first')->once()->andReturn((object) [
+            'authenticable_id' => 1,
+            'cipher_text'      => $token = 'bar',
+            'created_at'       => '2018-11-06 14:44:00',
+            'updated_at'       => '2018-11-06 14:44:00',
+            'expiry_time'      => 10,
         ]);
 
-        Carbon::setTestNow(Carbon::create(2016, 12, 29, 13, 20));
-
-        $accessToken = $this->service->generate($this->authenticatable, Carbon::now()->addMinutes(15));
-        $this->assertInstanceOf(AccessTokenInterface::class, $accessToken);
-    }
-
-    /** @test */
-    public function it_shall_update_access_tokens()
-    {
-        $this->accessToken->shouldReceive('authenticatableId')->once()->andReturn(1);
-        $this->accessToken->shouldReceive('__toString')->once()->andReturn('foo');
-        $this->accessToken->shouldReceive('expiresAt')->once()->andReturn('2016-12-29 13:35:00');
-        $this->repository->shouldReceive('update')->once()->withArgs([1, 'foo', '2016-12-29 13:35:00'])->andReturn(1);
-
-        $result = $this->service->update($this->accessToken);
-        $this->assertEquals(true, $result);
-    }
-
-    /** @test */
-    public function it_shall_revive_tokens_from_plain_texts()
-    {
-        $this->generator->shouldReceive('fromPlain')->once()->andReturn($this->token);
-
-        $token = $this->service->makeTokenFromPlainText('foo');
-
+        $token = $this->service->retrieveByPlainText($this->authenticable, $plainText);
         $this->assertInstanceOf(TokenInterface::class, $token);
     }
 
-    /** @test */
-    public function it_shall_retrieve_an_access_token()
+    public function testAddPasswordGenerator(): void
     {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->generator->shouldReceive('fromEncrypted')->once()->with('bar')->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->andReturn('foo');
+        $this->pwdGenManager->shouldReceive('register')
+            ->once()->with('acme', $generator = 'acme_generator')
+            ->andReturnNull();
 
-        $this->repository->shouldReceive('retrieve')->once()->with(1, 'foo')->andReturn((object) [
-            'authenticatable_id' => 1,
-            'id'                 => 1,
-            'token'              => 'bar',
-            'created_at'         => (string) Carbon::now(),
-            'expires_at'         => (string) Carbon::now(),
+        $this->service->addPasswordGenerator('acme', 'acme_generator');
+    }
+
+    public function testSetPasswordGenerator(): void
+    {
+        $generatorResult = 'acme_generator_result';
+
+        $this->pwdGenManager->shouldReceive('get')
+            ->once()->with('acme')
+            ->andReturn(function () use ($generatorResult) {
+                return $generatorResult;
+            });
+
+        $this->encryptor->shouldReceive('encrypt')
+            ->once()->with($generatorResult)
+            ->andReturn('bar');
+
+        $this->service->setPasswordGenerator('acme');
+
+        $this->authenticable->shouldReceive('getAuthIdentifier')->once()->andReturn($authId = 1);
+
+        $this::$functions->shouldReceive('config')
+            ->once()->with('temporary_access.expires')
+            ->andReturn(900);
+
+        $this::$functions->shouldReceive('config')
+            ->once()->with('temporary_access.table')
+            ->andReturn($tableName = 'foes');
+
+        DB::shouldReceive('beginTransaction')->once();
+        DB::shouldReceive('table')->with($tableName)->once()->andReturnSelf();
+        DB::shouldReceive('updateOrInsert')->once()->andReturn(true);
+        DB::shouldReceive('commit')->once();
+
+        $token = $this->service->create($this->authenticable);
+        $this->assertSame($generatorResult, $token->plainText());
+    }
+
+    public function testRetrieveByCipherText(): void
+    {
+        $this->authenticable->shouldReceive('getAuthIdentifier')
+            ->once()
+            ->andReturn($authenticableId = 1);
+
+        $this::$functions->shouldReceive('config')
+            ->once()->with('temporary_access.table')
+            ->andReturn($tableName = 'foes');
+
+        DB::shouldReceive('table')->once()->with($tableName)->andReturnSelf();
+        DB::shouldReceive('where')->once()->with('authenticable_id', $authenticableId)->andReturnSelf();
+        DB::shouldReceive('where')->once()->with('cipher_text', $cipherText = 'bar')->andReturnSelf();
+        DB::shouldReceive('first')->once()->andReturn((object) [
+            'authenticable_id' => 1,
+            'cipher_text'      => $cipherText,
+            'created_at'       => '2018-11-06 14:44:00',
+            'updated_at'       => '2018-11-06 14:44:00',
+            'expiry_time'      => 10,
         ]);
 
-        $result = $this->service->retrieve($this->authenticatable, $this->token);
-        $this->assertInstanceOf(AccessTokenInterface::class, $result);
+        $token = $this->service->retrieveByCipherText($this->authenticable, $cipherText);
+        $this->assertInstanceOf(TokenInterface::class, $token);
     }
 
-    /** @test */
-    public function it_shall_return_null_if_it_cant_retrieve_an_access_token()
+    private function fooGenerator(): callable
     {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->token->shouldReceive('__toString')->andReturn('foo');
-
-        $this->repository->shouldReceive('retrieve')->once()->with(1, 'foo')->andReturn(null);
-
-        $result = $this->service->retrieve($this->authenticatable, $this->token);
-        $this->assertNull($result);
-    }
-
-    /** @test */
-    public function it_shall_retrieve_an_access_token_from_plain_text()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->generator->shouldReceive('fromPlain')->once()->with('foo')->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->andReturn('bar');
-
-        $this->repository->shouldReceive('retrieve')->once()->with(1, 'bar')->andReturn((object) [
-            'authenticatable_id' => 1,
-            'id'                 => 1,
-            'token'              => 'bar',
-            'created_at'         => (string) Carbon::now(),
-            'expires_at'         => (string) Carbon::now(),
-        ]);
-
-        $this->generator->shouldReceive('fromEncrypted')->once()->with('bar')->andReturn($this->token);
-
-        $result = $this->service->retrieveUsingPlainText($this->authenticatable, 'foo');
-        $this->assertInstanceOf(AccessTokenInterface::class, $result);
-    }
-
-    /** @test */
-    public function it_shall_retrieve_an_access_token_from_encrypted_text()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-
-        $this->repository->shouldReceive('retrieve')->once()->with(1, 'bar')->andReturn((object) [
-            'authenticatable_id' => 1,
-            'id'                 => 1,
-            'token'              => 'bar',
-            'created_at'         => (string) Carbon::now(),
-            'expires_at'         => (string) Carbon::now(),
-        ]);
-
-        $this->generator->shouldReceive('fromEncrypted')->once()->with('bar')->andReturn($this->token);
-
-        $result = $this->service->retrieve($this->authenticatable, 'bar');
-        $this->assertInstanceOf(AccessTokenInterface::class, $result);
-    }
-
-    /** @test */
-    public function it_shall_determine_if_an_access_token_is_valid_using_plain_text()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->generator->shouldReceive('fromPlain')->once()->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->once()->andReturn('bar');
-
-        $this->repository->shouldReceive('retrieve')->once()->with(1, 'bar')->andReturn((object) [
-            'authenticatable_id' => 1,
-            'id'                 => 1,
-            'token'              => 'bar',
-            'created_at'         => (string) Carbon::now(),
-            'expires_at'         => (string) Carbon::now(),
-        ]);
-
-        $this->generator->shouldReceive('fromEncrypted')->once()->andReturn($this->token);
-
-        $result = $this->service->checkUsingPlainText($this->authenticatable, $this->accessToken);
-        $this->assertEquals(true, $result);
-    }
-
-    /** @test */
-    public function it_shall_determine_if_an_access_token_is_valid_by_encrypted_text()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->generator->shouldReceive('fromEncrypted')->once()->andReturn($this->token);
-
-        $this->repository->shouldReceive('retrieve')->once()->with(1, 'bar')->andReturn((object) [
-            'authenticatable_id' => 1,
-            'id'                 => 1,
-            'token'              => 'bar',
-            'created_at'         => (string) Carbon::now(),
-            'expires_at'         => (string) Carbon::now(),
-        ]);
-
-        $result = $this->service->check($this->authenticatable, 'bar');
-        $this->assertEquals(true, $result);
-    }
-
-    /** @test */
-    public function it_shall_determine_if_an_access_token_is_valid()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->accessToken->shouldReceive('__toString')->once()->andReturn('bar');
-
-        $this->repository->shouldReceive('retrieve')->once()->with(1, 'bar')->andReturn((object) [
-            'authenticatable_id' => 1,
-            'id'                 => 1,
-            'token'              => 'bar',
-            'created_at'         => (string) Carbon::now(),
-            'expires_at'         => (string) Carbon::now(),
-        ]);
-
-        $this->generator->shouldReceive('fromEncrypted')->once()->andReturn($this->token);
-
-        $result = $this->service->check($this->authenticatable, $this->accessToken);
-        $this->assertEquals(true, $result);
-    }
-
-    /** @test */
-    public function it_shall_determine_the_access_token_does_not_exist_from_plain_text_and_return_false()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->generator->shouldReceive('fromPlain')->once()->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->once()->andReturn('foo');
-        $this->repository->shouldReceive('retrieve')->once()->with(1, 'foo')->andReturn(null);
-
-        $result = $this->service->checkUsingPlainText($this->authenticatable, 'foo', 5);
-        $this->assertFalse($result);
-    }
-
-    /** @test */
-    public function it_shall_determine_the_access_token_does_not_exist_and_return_false()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->accessToken->shouldReceive('__toString')->once()->andReturn('foo');
-        $this->repository->shouldReceive('retrieve')->once()->with(1, 'foo')->andReturn(null);
-
-        $result = $this->service->check($this->authenticatable, $this->accessToken, 5);
-        $this->assertFalse($result);
-    }
-
-    /** @test */
-    public function it_shall_determine_the_access_token_does_not_exist_by_access_token_and_return_false()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->repository->shouldReceive('retrieve')->once()->with(1, 'bar')->andReturn(null);
-
-        $result = $this->service->check($this->authenticatable, 'bar', 5);
-        $this->assertFalse($result);
-    }
-
-    /** @test */
-    public function it_shall_determine_if_an_access_token_exists_and_prolong_the_expire_time()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->accessToken->shouldReceive('__toString')->andReturn('foo');
-
-        $this->repository->shouldReceive('retrieve')->once()->andReturn((object) [
-            'id'                 => 1,
-            'authenticatable_id' => 1,
-            'token'              => 'foo',
-            'created_at'         => '2016-12-29 16:35:00',
-            'expires_at'         => '2016-12-29 16:50:00',
-        ]);
-
-        $this->generator->shouldReceive('fromEncrypted')->once()->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->once()->andReturn('foo');
-        $this->repository->shouldReceive('update')->once()->with(1, 'foo', '2016-12-29 16:55:00')->andReturn(true);
-
-        $result = $this->service->checkAndProlong($this->authenticatable, $this->accessToken, 5);
-        $this->assertInstanceOf(AccessTokenInterface::class, $result);
-    }
-
-    /** @test */
-    public function it_shall_determine_if_an_access_token_does_not_exist_and_return_false()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-
-        $this->repository->shouldReceive('retrieve')->once()->with(1, 'bar')->andReturn(null);
-
-        $result = $this->service->checkAndProlong($this->authenticatable, 'bar', 5);
-        $this->assertFalse($result);
-    }
-
-    /** @test */
-    public function it_shall_determine_if_an_access_token_exists_with_plaintext_and_prolong_the_expire_time()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->generator->shouldReceive('fromPlain')->once()->with('foo')->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->once()->andReturn('bar');
-        $this->repository->shouldReceive('retrieve')->once()->andReturn((object) [
-            'id'                 => 1,
-            'authenticatable_id' => 1,
-            'token'              => 'bar',
-            'created_at'         => '2016-12-29 16:35:00',
-            'expires_at'         => '2016-12-29 16:50:00',
-        ]);
-
-        $this->generator->shouldReceive('fromEncrypted')->once()->with('bar')->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->once()->andReturn('bar');
-        $this->repository->shouldReceive('update')->once()->with(1, 'bar', '2016-12-29 16:55:00')->andReturn(true);
-
-        $result = $this->service->checkUsingPlainTextAndProlong($this->authenticatable, 'foo', 5);
-        $this->assertInstanceOf(AccessTokenInterface::class, $result);
-    }
-
-    /** @test */
-    public function it_shall_determine_if_an_access_token_exists_and_prolong_the_expire_time_with_the_lost_time()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-        $this->accessToken->shouldReceive('__toString')->once()->andReturn('foo');
-
-        Carbon::setTestNow(Carbon::create(2016, 12, 29, 16, 40));
-        $this->repository->shouldReceive('retrieve')->once()->andReturn((object) [
-            'id'                 => 1,
-            'authenticatable_id' => 1,
-            'token'              => 'foo',
-            'created_at'         => '2016-12-29 16:35:00',
-            'expires_at'         => '2016-12-29 16:50:00',
-        ]);
-
-        $this->generator->shouldReceive('fromEncrypted')->once()->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->once()->andReturn('foo');
-        $this->repository->shouldReceive('update')->once()->with(1, 'foo', '2016-12-29 16:55:00')->andReturn(true);
-
-        $result = $this->service->checkAndProlong($this->authenticatable, $this->accessToken);
-        $this->assertInstanceOf(AccessTokenInterface::class, $result);
-    }
-
-    /** @test */
-    public function it_shall_determine_if_an_access_token_exists_by_encrypted_text_and_prolong_the_expire_time_with_the_lost_time()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-
-        Carbon::setTestNow(Carbon::create(2016, 12, 29, 16, 40));
-        $this->repository->shouldReceive('retrieve')->once()->andReturn((object) [
-            'id'                 => 1,
-            'authenticatable_id' => 1,
-            'token'              => 'foo',
-            'created_at'         => '2016-12-29 16:35:00',
-            'expires_at'         => '2016-12-29 16:50:00',
-        ]);
-
-        $this->generator->shouldReceive('fromEncrypted')->once()->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->once()->andReturn('foo');
-        $this->repository->shouldReceive('update')->once()->with(1, 'foo', '2016-12-29 16:55:00')->andReturn(true);
-
-        $result = $this->service->checkAndProlong($this->authenticatable, 'foo');
-        $this->assertInstanceOf(AccessTokenInterface::class, $result);
-    }
-
-    /** @test */
-    public function it_shall_return_false_if_the_update_was_unsuccessful()
-    {
-        $this->authenticatable->shouldReceive('getAuthIdentifier')->andReturn(1);
-
-        $this->accessToken->shouldReceive('__toString')->once()->andReturn('foo');
-        $this->repository->shouldReceive('retrieve')->once()->andReturn((object) [
-            'id'                 => 1,
-            'authenticatable_id' => 1,
-            'token'              => 'foo',
-            'created_at'         => '2016-12-29 16:35:00',
-            'expires_at'         => '2016-12-29 16:50:00',
-        ]);
-
-        $this->generator->shouldReceive('fromEncrypted')->with('foo')->once()->andReturn($this->token);
-        $this->token->shouldReceive('__toString')->once()->andReturn('foo');
-        $this->repository->shouldReceive('update')->once()->with(1, 'foo', '2016-12-29 16:55:00')->andReturn(false);
-
-        $result = $this->service->checkAndProlong($this->authenticatable, $this->accessToken, 5);
-        $this->assertFalse($result);
-    }
-
-    /** @test */
-    public function it_shall_retrieve_access_tokens_by_attributes()
-    {
-        $this->repository->shouldReceive('retrieveByAttributes')->once()->with([
-            'authenticatable_id' => 1,
-            'token'              => 'foo',
-        ], [
-            'token',
-        ])->andReturn((object) [
-            'id'                 => 1,
-            'authenticatable_id' => 1,
-            'token'              => 'foo',
-            'created_at'         => '2016-12-29 16:35:00',
-            'expires_at'         => '2016-12-29 16:50:00',
-        ]);
-
-        $this->generator->shouldReceive('fromEncrypted')->once()->andReturn($this->token);
-
-        $accessToken = $this->service->retrieveByAttributes(['authenticatable_id' => 1, 'token' => 'foo'], ['token']);
-
-        $this->assertInstanceOf(AccessTokenInterface::class, $accessToken);
-    }
-
-    /** @test */
-    public function it_shall_return_null_if_it_cant_retrieve_token_by_attributes()
-    {
-        $this->repository->shouldReceive('retrieveByAttributes')->once()->with([
-            'authenticatable_id' => 1,
-            'token'              => 'foo',
-        ], [
-            'token',
-        ])->andReturn(null);
-
-        $accessToken = $this->service->retrieveByAttributes(['authenticatable_id' => 1, 'token' => 'foo'], ['token']);
-
-        $this->assertNull($accessToken);
-    }
-
-    /** @test */
-    public function it_shall_delete_access_tokens()
-    {
-        $this->accessToken->shouldReceive('__toString')->once()->andReturn('foo');
-        $this->repository->shouldReceive('delete')->once()->with('foo')->andReturn(1);
-
-        $result = $this->service->delete($this->accessToken);
-        $this->assertTrue($result);
-    }
-
-    /** @test */
-    public function it_shall_delete_string_access_tokens()
-    {
-        $this->repository->shouldReceive('delete')->once()->with('foo')->andReturn(1);
-
-        $result = $this->service->delete('foo');
-        $this->assertTrue($result);
-    }
-
-    /** @test */
-    public function it_shall_delete_expired_access_tokens()
-    {
-        $this->repository->shouldReceive('deleteExpired')->once();
-
-        $this->service->deleteExpired();
+        return function (): string {
+            return 'foo';
+        };
     }
 }

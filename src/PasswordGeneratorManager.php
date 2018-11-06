@@ -10,7 +10,7 @@ namespace Erdemkeren\TemporaryAccess;
 /**
  * Class PasswordGeneratorManager.
  */
-final class PasswordGeneratorManager
+final class PasswordGeneratorManager implements PasswordGeneratorManagerInterface
 {
     /**
      * The password generator registry.
@@ -70,7 +70,7 @@ final class PasswordGeneratorManager
      *
      * @return PasswordGeneratorInterface
      */
-    private function createGeneratorFromString(string $className): PasswordGeneratorInterface
+    public function createGeneratorFromString(string $className): PasswordGeneratorInterface
     {
         if (! class_exists($className)) {
             throw new \RuntimeException(

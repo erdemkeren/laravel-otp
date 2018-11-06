@@ -17,7 +17,7 @@ final class TemporaryAccessService
     /**
      * The password generator manager.
      *
-     * @var PasswordGeneratorManager
+     * @var PasswordGeneratorManagerInterface
      */
     private $manager;
 
@@ -52,13 +52,13 @@ final class TemporaryAccessService
     /**
      * TemporaryAccessService constructor.
      *
-     * @param PasswordGeneratorManager $manager
-     * @param EncryptorInterface       $encryptor
-     * @param string                   $defaultGenerator
-     * @param int                      $passwordLength
+     * @param PasswordGeneratorManagerInterface $manager
+     * @param EncryptorInterface                $encryptor
+     * @param string                            $defaultGenerator
+     * @param int                               $passwordLength
      */
     public function __construct(
-        PasswordGeneratorManager $manager,
+        PasswordGeneratorManagerInterface $manager,
         EncryptorInterface $encryptor,
         string $defaultGenerator,
         int $passwordLength
