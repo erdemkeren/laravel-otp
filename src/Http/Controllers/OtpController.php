@@ -28,7 +28,7 @@ class OtpController
      */
     public function create()
     {
-        if (!$this->otpHasBeenRequested()) {
+        if (! $this->otpHasBeenRequested()) {
             return redirect('/');
         }
 
@@ -45,7 +45,7 @@ class OtpController
      */
     public function store(Request $request): RedirectResponse
     {
-        if (!$this->otpHasBeenRequested()) {
+        if (! $this->otpHasBeenRequested()) {
             return redirect('/');
         }
 

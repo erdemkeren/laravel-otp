@@ -78,14 +78,14 @@ class TemporaryAccessService
         $this->passwordLength = $passwordLength;
         $this->defaultGenerator = $defaultGenerator;
 
-        if (!class_exists($tokenClass)) {
+        if (! class_exists($tokenClass)) {
             throw new \RuntimeException(
                 "The token implementation [{$tokenClass}] could not be found."
             );
         }
 
         $generatorReflection = new \ReflectionClass($tokenClass);
-        if (!$generatorReflection->isInstantiable()) {
+        if (! $generatorReflection->isInstantiable()) {
             throw new \RuntimeException(
                 "The token implementation [{$tokenClass}] is not instantiable."
             );

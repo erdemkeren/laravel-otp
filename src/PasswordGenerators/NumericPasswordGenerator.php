@@ -51,7 +51,7 @@ class NumericPasswordGenerator implements PasswordGeneratorInterface
             $min .= 0;
             $max .= 9;
 
-            --$length;
+            $length--;
         }
 
         return [

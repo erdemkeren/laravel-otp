@@ -247,7 +247,7 @@ class Token implements TokenInterface
             $query->where($key, $value);
         }
 
-        if (!$entity = $query->first()) {
+        if (! $entity = $query->first()) {
             return null;
         }
 
