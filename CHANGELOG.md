@@ -4,10 +4,10 @@ All notable changes to `erdemkeren/temporary-access` will be documented in this 
 
 ## 3.0.0 - 2018-11-08
 
+- OtpController and OtpAccess middleware are introduced
 - Token generators are now password generators
 - Token creation is now being handled by Encryptor implementations
 - Repository pattern is not used anymore. Token persistence is a part of token itself
-- OtpController and OtpAccess middleware are introduced
 
 v2 to v3 service method mapping:
 
