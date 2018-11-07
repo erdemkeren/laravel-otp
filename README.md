@@ -1,5 +1,14 @@
 # Temporary Access
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/erdemkeren/temporary-access.svg?style=flat-square)](https://packagist.org/packages/erdemkeren/temporary-access)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![Build Status](https://img.shields.io/travis/erdemkeren/temporary-access/master.svg?style=flat-square)](https://travis-ci.org/erdemkeren/temporary-access)
+[![StyleCI](https://styleci.io/repos/77648231/shield?branch=master)](https://styleci.io/repos/77648231)
+[![SensioLabsInsight](https://img.shields.io/sensiolabs/i/2caf0c8e-2f92-4b09-851a-873989dbe0ee.svg?style=flat-square)](https://insight.sensiolabs.com/projects/2caf0c8e-2f92-4b09-851a-873989dbe0ee)
+[![Quality Score](https://img.shields.io/scrutinizer/g/erdemkeren/temporary-access.svg?style=flat-square)](https://scrutinizer-ci.com/g/erdemkeren/temporary-access)
+[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/erdemkeren/temporary-access/master.svg?style=flat-square)](https://scrutinizer-ci.com/g/erdemkeren/temporary-access/?branch=master)
+[![Total Downloads](https://img.shields.io/packagist/dt/erdemkeren/temporary-access.svg?style=flat-square)](https://packagist.org/packages/erdemkeren/temporary-access)
+
 This package allows you to secure your resources with one time password access (otp).
 
 Example Usage:
