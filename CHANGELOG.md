@@ -9,21 +9,21 @@ All notable changes to `erdemkeren/temporary-access` will be documented in this 
 - Token creation is now being handled by Encryptor implementations
 - Repository pattern is not used anymore. Token persistence is a part of token itself
 
-v2 to v3 service method mapping:
+### v2 to v3 service method mapping:
 
-retrieve -> retrieveByCipherText\
-retrieveUsingPlainText -> retrieveByPlainText\
-check -> check\
-checkUsingPlainText -> none. Token should be retrieved and then checked like `TemporaryAccess::retrieveByPlainText()->expired()`\
-checkAndProlong -> none. Token should be retrieved and then extended like `TemporaryAccess::retrieveByPlainText()->extend(10)`\
-checkUsingPlainTextAndProlong -> none. Above usages applies as well\
-generate -> create\
-update -> none. Use token methods to modify token state (`Token::extend()`, `Token::invalidate()` etc.)\
-makeTokenFromPlainText -> no need anymore\
-makeTokenFromEncryptedText -> no need anymore\
-retrieveByAttributes -> no need anymore. But moved to `Token::retrieveByAttributes()\
-delete -> will be implemented later. Not really needed since `Token::invalidate()` does the job\
-deleteExpired -> will be implemented later\
+- retrieve -> retrieveByCipherText
+- retrieveUsingPlainText -> retrieveByPlainText
+- check -> check
+- checkUsingPlainText -> none. Token should be retrieved and then checked like `TemporaryAccess::retrieveByPlainText()->expired()`
+- checkAndProlong -> none. Token should be retrieved and then extended like `TemporaryAccess::retrieveByPlainText()->extend(10)`
+- checkUsingPlainTextAndProlong -> none. Above usages applies as well
+- generate -> create
+- update -> none. Use token methods to modify token state (`Token::extend()`, `Token::invalidate()` etc.)
+- makeTokenFromPlainText -> no need anymore
+- makeTokenFromEncryptedText -> no need anymore
+- retrieveByAttributes -> no need anymore. But moved to `Token::retrieveByAttributes()
+- delete -> will be implemented later. Not really needed since `Token::invalidate()` does the job
+- deleteExpired -> will be implemented later
 
 ## 2.1.0 - 2018-02-06
 
