@@ -221,6 +221,22 @@ $token = TemporaryAccess::retrieveByPlainText(auth()->id(), $otpPassword);
 $token = TemporaryAccess::retrieveByCipherText(auth()->id(), $otpPassword);
 // See what can be done with tokens below.
 ```
+##### Changing the behavior of the Service
+
+The package comes with a `ServiceProvider` which registers the TemporaryAccess
+service to your application's container.
+
+The TemporaryAccess orchestrates the method calls made to the 3 interface implementations below.
+
+- PasswordGeneratorManagerInterface
+- EncryptorInterface and
+- TokenInterface
+
+You can write your service provider and register the `TemporaryAccessService`
+with your version of the dependencies.
+
+_Note: Because the token class is being used with static calls,
+you have to send the fully qualified name of your TokenInterface implementation._
 
 #### Token API:
 
