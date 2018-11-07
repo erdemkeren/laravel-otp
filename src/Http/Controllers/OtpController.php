@@ -24,11 +24,9 @@ class OtpController
     /**
      * * Show the form for the otp submission.
      *
-     * @param Request $request
-     *
      * @return RedirectResponse|View
      */
-    public function create(Request $request)
+    public function create()
     {
         if (!$this->otpHasBeenRequested()) {
             return redirect('/');

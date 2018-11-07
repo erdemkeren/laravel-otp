@@ -47,11 +47,11 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Controllers\view')) {
 }
 
 if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Controllers\redirect')) {
-    function redirect()
+    function redirect($a = null)
     {
         global $testerClass;
 
-        return $testerClass::$functions->redirect();
+        return $testerClass::$functions->redirect($a);
     }
 }
 
@@ -106,8 +106,6 @@ class OtpControllerTest extends TestCase
     {
         $controller = new OtpController();
 
-        $request = M::mock(Request::class);
-
         $this::$functions->shouldReceive('session')
             ->once()->with('otp_requested', false)
             ->andReturn(true);
@@ -116,7 +114,7 @@ class OtpControllerTest extends TestCase
             ->once()->with('otp.create')
             ->andReturn('view');
 
-        $this->assertSame('view', $controller->create($request));
+        $this->assertSame('view', $controller->create());
     }
 
     public function testCreateRedirectsWhenNotRedirectedByMiddleware()
