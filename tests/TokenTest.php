@@ -7,6 +7,7 @@
 
 namespace Erdemkeren\TemporaryAccess;
 
+use Mockery as M;
 use Carbon\Carbon;
 use PHPUnit\Framework\TestCase;
 

@@ -12,7 +12,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 /**
  * Class TemporaryAccessService.
  */
-final class TemporaryAccessService
+class TemporaryAccessService
 {
     /**
      * The password generator manager.

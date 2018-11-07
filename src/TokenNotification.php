@@ -16,7 +16,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 /**
  * Class TokenNotification.
  */
-final class TokenNotification extends Notification implements ShouldQueue
+class TokenNotification extends Notification implements ShouldQueue
 {
     use Queueable, Macroable;
 

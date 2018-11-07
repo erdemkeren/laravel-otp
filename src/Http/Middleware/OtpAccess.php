@@ -8,9 +8,8 @@
 namespace Erdemkeren\TemporaryAccess\Http\Middleware;
 
 use Closure;
-use Illuminate\Contracts\Auth\Guard;
-use Erdemkeren\TemporaryAccess\Token;
 use Illuminate\Http\RedirectResponse;
+use Erdemkeren\TemporaryAccess\TokenInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Erdemkeren\TemporaryAccess\TemporaryAccessFacade as TemporaryAccess;
 
@@ -27,14 +26,14 @@ class OtpAccess
      */
     public function handle($request, Closure $next, $guard = null)
     {
-        if (! $user = $this->getAuthUser($guard)) {
+        if (! $user = $request->user($guard)) {
             throw new \LogicException(
                 'The otp access control middleware requires user authentication via laravel guards.'
             );
         }
 
         if (! $request->hasCookie('otp_token')) {
-            $this->sendNewOtpToUser($request->user());
+            $this->sendNewOtpToUser($user);
 
             return $this->redirectToOtpPage();
         }
@@ -45,12 +44,12 @@ class OtpAccess
         );
 
         if (! $token || $token->expired()) {
-            $this->sendNewOtpToUser($request->user());
+            $this->sendNewOtpToUser($user);
 
             return $this->redirectToOtpPage();
         }
 
-        $request->macro('otpToken', function () use ($token): Token {
+        $request->macro('otpToken', function () use ($token): TokenInterface {
             return $token;
         });
 
@@ -70,31 +69,6 @@ class OtpAccess
         ]);
 
         return redirect()->route('otp.create');
-    }
-
-    /**
-     * Get the guard by the given name.
-     *
-     * @param string $guard
-     *
-     * @return Guard
-     */
-    private function getGuard($guard): Guard
-    {
-        return auth()->guard($guard);
-    }
-
-    /**
-     * Get the authenticated user from
-     * the guard by the given name.
-     *
-     * @param string $guard
-     *
-     * @return null|Authenticatable
-     */
-    private function getAuthUser($guard): ?Authenticatable
-    {
-        return $this->getGuard($guard)->user();
     }
 
     /**
