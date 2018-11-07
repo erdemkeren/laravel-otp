@@ -98,6 +98,19 @@ class TokenNotificationTest extends TestCase
         $this->assertSame(['mail', 'sms'], $this->notification->via($notifiable));
     }
 
+    public function testTokenNotificationMacro()
+    {
+        $testedThis = null;
+
+        $this->notification::macro('acme', function () use (&$testedThis) {
+            $testedThis = $this;
+        });
+
+        $this->notification->acme();
+
+        $this->assertInstanceOf(TokenNotification::class, $testedThis);
+    }
+
     public function testToSms()
     {
         $this->token->shouldReceive('plainText')
