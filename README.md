@@ -128,6 +128,7 @@ If you are not using the `mail` channel, or your notification channel is expecti
 ```php
 // AppServiceProvider::register():
 TokenNotification::macro('AcmeSms', function () {
+    // $this is TokenNotification class.
     return $this->notification->code;
 });
 ```
@@ -174,6 +175,11 @@ TemporaryAccess::addPasswordGenerator('acme', AcmePasswordGenerator::class);
 ```
 
 _Don't forget to change your configuration file as well._
+
+#### Determining the otp channel per notifiable
+
+The `Notification` class checks `otpChannels` existence inside the `notifiable` being notified.
+If so, this method is being called to determine which notification channel is going to be used to notify the notifiable.
 
 ### Deeper Knowledge:
 
