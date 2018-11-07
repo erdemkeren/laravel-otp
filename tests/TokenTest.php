@@ -22,7 +22,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\config')) {
 /** @covers \Erdemkeren\TemporaryAccess\Token */
 class TokenTest extends TestCase
 {
-    public static $functions = [];
+    public static $functions;
 
     /**
      * @var Token
@@ -41,6 +41,11 @@ class TokenTest extends TestCase
             Carbon::now(),
             Carbon::now()
         );
+
+        static::$functions = M::mock();
+        global $testerClass;
+
+        $testerClass = self::class;
     }
 
     public function testRefresh()
