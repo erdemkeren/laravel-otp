@@ -8,6 +8,7 @@
 namespace Erdemkeren\TemporaryAccess\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Erdemkeren\TemporaryAccess\TokenInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -24,7 +25,7 @@ class OtpAccess
      *
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null)
+    public function handle(Request $request, Closure $next, $guard = null)
     {
         if (! $user = $request->user($guard)) {
             throw new \LogicException(
