@@ -75,7 +75,7 @@ class OtpController
                 'The password is expired.'
             );
 
-            redirect()->back()->withErrors($validator);
+            return redirect()->back()->withErrors($validator);
         }
 
         session()->forget('otp_requested');

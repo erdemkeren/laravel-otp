@@ -10,6 +10,7 @@ namespace Erdemkeren\TemporaryAccess\Http\Controllers;
 use Mockery as M;
 use Illuminate\Http\Request;
 use PHPUnit\Framework\TestCase;
+use Illuminate\Support\MessageBag;
 use Illuminate\Container\Container;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Facade;
@@ -55,7 +56,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Controllers\redirect'))
 }
 
 /**
- * @coversNothing
+ * @covers \Erdemkeren\TemporaryAccess\Http\Controllers\OtpController
  */
 class OtpControllerTest extends TestCase
 {
@@ -265,6 +266,227 @@ class OtpControllerTest extends TestCase
                     return $this->funcs->make($n, $v, $t);
                 }
             });
+
+        $this->assertSame($response, $controller->store($request));
+    }
+
+    public function testStoreShouldRedirectBackWithErrorsOnValidationError()
+    {
+        $controller = new OtpController();
+
+        $request = M::mock(Request::class);
+
+        $this::$functions->shouldReceive('session')
+            ->once()->with('otp_requested', false)
+            ->andReturn(true);
+
+        $request->shouldReceive('all')
+            ->once()
+            ->andReturn([
+                'password' => $password = '12345',
+            ]);
+
+        $this->validator->shouldReceive('make')
+            ->once()->with([
+                'password' => $password,
+            ], [
+                'password' => 'required|string',
+            ])->andReturn($this->validator);
+
+        $this->validator->shouldReceive('fails')
+            ->once()
+            ->andReturn(true);
+
+        $this::$functions->shouldReceive('redirect')
+            ->once()
+            ->andReturn($c = new class(self::$functions) {
+                private $funcs;
+
+                public function __construct($funcs)
+                {
+                    $this->funcs = $funcs;
+                }
+
+                public function back()
+                {
+                    return $this->funcs->redirectBack();
+                }
+
+                public function withErrors($arg)
+                {
+                    return $this->funcs->redirectBackWithErrors($arg);
+                }
+            });
+
+        $this::$functions->shouldReceive('redirectBack')
+            ->once()
+            ->andReturn($c);
+
+        $this::$functions->shouldReceive('redirectBackWithErrors')
+            ->once()
+            ->andReturn($response = M::mock(RedirectResponse::class));
+
+        $this->assertSame($response, $controller->store($request));
+    }
+
+    public function testStoreShouldRedirectBackWithErrorsOnInvalidPassword()
+    {
+        $controller = new OtpController();
+
+        $request = M::mock(Request::class);
+
+        $this::$functions->shouldReceive('session')
+            ->once()->with('otp_requested', false)
+            ->andReturn(true);
+
+        $request->shouldReceive('all')
+            ->once()
+            ->andReturn([
+                'password' => $password = '12345',
+            ]);
+
+        $this->validator->shouldReceive('make')
+            ->once()->with([
+                'password' => $password,
+            ], [
+                'password' => 'required|string',
+            ])->andReturn($this->validator);
+
+        $this->validator->shouldReceive('fails')
+            ->once()
+            ->andReturn(false);
+
+        $request->shouldReceive('user')
+            ->once()
+            ->andReturn($authenticable = M::mock(Authenticatable::class));
+
+        $request->shouldReceive('input')
+            ->once()->with('password')
+            ->andReturn($password);
+
+        $this->service->shouldReceive('retrieveByPlainText')
+            ->once()->with($authenticable, $password)
+            ->andReturnNull();
+
+        $this->validator->shouldReceive('getMessageBag')
+            ->once()
+            ->andReturn($msgBag = M::mock(MessageBag::class));
+
+        $msgBag->shouldReceive('add')
+            ->once()->with('password', 'The password is not valid.')
+            ->andReturnNull();
+
+        $this::$functions->shouldReceive('redirect')
+            ->once()
+            ->andReturn($c = new class(self::$functions) {
+                private $funcs;
+
+                public function __construct($funcs)
+                {
+                    $this->funcs = $funcs;
+                }
+
+                public function back()
+                {
+                    return $this->funcs->redirectBack();
+                }
+
+                public function withErrors($arg)
+                {
+                    return $this->funcs->redirectBackWithErrors($arg);
+                }
+            });
+
+        $this::$functions->shouldReceive('redirectBack')
+            ->once()
+            ->andReturn($c);
+
+        $this::$functions->shouldReceive('redirectBackWithErrors')
+            ->once()
+            ->andReturn($response = M::mock(RedirectResponse::class));
+
+        $this->assertSame($response, $controller->store($request));
+    }
+
+    public function testStoreShouldRedirectBackWithErrorsOnExpiredToken()
+    {
+        $controller = new OtpController();
+
+        $request = M::mock(Request::class);
+
+        $this::$functions->shouldReceive('session')
+            ->once()->with('otp_requested', false)
+            ->andReturn(true);
+
+        $request->shouldReceive('all')
+            ->once()
+            ->andReturn([
+                'password' => $password = '12345',
+            ]);
+
+        $this->validator->shouldReceive('make')
+            ->once()->with([
+                'password' => $password,
+            ], [
+                'password' => 'required|string',
+            ])->andReturn($this->validator);
+
+        $this->validator->shouldReceive('fails')
+            ->once()
+            ->andReturn(false);
+
+        $request->shouldReceive('user')
+            ->once()
+            ->andReturn($authenticable = M::mock(Authenticatable::class));
+
+        $request->shouldReceive('input')
+            ->once()->with('password')
+            ->andReturn($password);
+
+        $this->service->shouldReceive('retrieveByPlainText')
+            ->once()->with($authenticable, $password)
+            ->andReturn($token = M::mock(TokenInterface::class));
+
+        $token->shouldReceive('expired')
+            ->once()
+            ->andReturn(true);
+
+        $this->validator->shouldReceive('getMessageBag')
+            ->once()
+            ->andReturn($msgBag = M::mock(MessageBag::class));
+
+        $msgBag->shouldReceive('add')
+            ->once()->with('password', 'The password is expired.')
+            ->andReturnNull();
+
+        $this::$functions->shouldReceive('redirect')
+            ->once()
+            ->andReturn($c = new class(self::$functions) {
+                private $funcs;
+
+                public function __construct($funcs)
+                {
+                    $this->funcs = $funcs;
+                }
+
+                public function back()
+                {
+                    return $this->funcs->redirectBack();
+                }
+
+                public function withErrors($arg)
+                {
+                    return $this->funcs->redirectBackWithErrors($arg);
+                }
+            });
+
+        $this::$functions->shouldReceive('redirectBack')
+            ->once()
+            ->andReturn($c);
+
+        $this::$functions->shouldReceive('redirectBackWithErrors')
+            ->once()
+            ->andReturn($response = M::mock(RedirectResponse::class));
 
         $this->assertSame($response, $controller->store($request));
     }
