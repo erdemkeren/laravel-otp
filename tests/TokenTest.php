@@ -33,7 +33,7 @@ class TokenTest extends TestCase
 
     public function setUp(): void
     {
-        Carbon::setTestNow('2018-11-06 00:00:00');
+        Carbon::setTestNow(new Carbon('2018-11-06 00:00:00'));
 
         $this->token = new Token(
             1,
@@ -57,7 +57,7 @@ class TokenTest extends TestCase
 
     public function testRefresh()
     {
-        Carbon::setTestNow('2018-11-06 00:00:01');
+        Carbon::setTestNow(new Carbon('2018-11-06 00:00:01'));
 
         $this->persistShouldBeCalled();
 
@@ -102,7 +102,7 @@ class TokenTest extends TestCase
 
     public function testCreate()
     {
-        Carbon::setTestNow('2018-11-06 00:00:00');
+        Carbon::setTestNow(new Carbon('2018-11-06 00:00:00'));
 
         $this::$functions->shouldReceive('config')
             ->once()->with('temporary_access.table')
@@ -142,7 +142,7 @@ class TokenTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
 
-        Carbon::setTestNow('2018-11-06 00:00:00');
+        Carbon::setTestNow(new Carbon('2018-11-06 00:00:00'));
 
         $this::$functions->shouldReceive('config')
             ->once()->with('temporary_access.table')
@@ -197,11 +197,11 @@ class TokenTest extends TestCase
 
     public function testExpired()
     {
-        Carbon::setTestNow('2018-11-06 00:00:11');
+        Carbon::setTestNow(new Carbon('2018-11-06 00:00:11'));
 
         $this->assertTrue($this->token->expired());
 
-        Carbon::setTestNow('2018-11-06 00:00:05');
+        Carbon::setTestNow(new Carbon('2018-11-06 00:00:05'));
 
         $this->assertFalse($this->token->expired());
     }
@@ -261,7 +261,7 @@ class TokenTest extends TestCase
 
     public function testTimeLeft()
     {
-        Carbon::setTestNow('2018-11-06 00:00:05');
+        Carbon::setTestNow(new Carbon('2018-11-06 00:00:05'));
 
         $this->assertSame(5, $this->token->timeLeft());
     }

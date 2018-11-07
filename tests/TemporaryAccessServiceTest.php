@@ -203,7 +203,7 @@ class TemporaryAccessServiceTest extends TestCase
                 new Carbon('2018-11-06 14:44:00')
             ));
 
-        Carbon::setTestNow('2018-11-06 14:44:09');
+        Carbon::setTestNow(new Carbon('2018-11-06 14:44:09'));
 
         $result = $this->service->check($this->authenticable, $cipherText);
         $this->assertTrue($result);
