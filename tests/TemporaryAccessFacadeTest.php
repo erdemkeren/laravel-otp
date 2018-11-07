@@ -33,7 +33,9 @@ class TemporaryAccessFacadeTest extends TestCase
 
         Facade::setFacadeApplication($app);
 
-        $result = TemporaryAccessFacade::create('suc', 6);
-        $this->assertSame('success', $result);
+        $result = TemporaryAccessFacade::create('foo', 6);
+        $this->assertSame('foo6', $result);
+
+        Facade::clearResolvedInstances();
     }
 }

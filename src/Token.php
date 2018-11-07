@@ -278,8 +278,8 @@ class Token implements TokenInterface
      */
     protected function persist(): bool
     {
-        $this->attributes['created_at'] = $this->attributes['created_at'] ?: $this->getNow();
-        $this->attributes['updated_at'] = $this->getNow();
+        $this->attributes['created_at'] = $this->attributes['created_at']->toDateTimeString();
+        $this->attributes['updated_at'] = $this->getNow()->toDateTimeString();
 
         $attributes = $this->attributes;
 
