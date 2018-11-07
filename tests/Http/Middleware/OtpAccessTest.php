@@ -183,6 +183,27 @@ class OtpAccessTest extends TestCase
         $this->assertInstanceOf(RedirectResponse::class, $response);
     }
 
+    public function testItThrowsUnexpectedValueExceptionIfTheAuthenticableIsNotNotifiable(): void
+    {
+        $this->service->shouldReceive('create')
+            ->once()
+            ->andReturn($this->token);
+
+        $this->expectException(\UnexpectedValueException::class);
+
+        $middleware = new OtpAccess();
+        $request = Request::create('/');
+        $request->setUserResolver(function () {
+            return $this->authenticable;
+        });
+
+        $response = $middleware->handle($request, function () {
+            return 'response';
+        });
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+    }
+
     public function testRequestIsRedirectedToOtpCreateEndpointIfTokenIsExpired(): void
     {
         $middleware = new OtpAccess();
