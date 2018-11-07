@@ -11,7 +11,7 @@ All notable changes to `erdemkeren/temporary-access` will be documented in this 
 
 v2 to v3 service method mapping:
 
-retrieve -> retrieveByCipherText
+retrieve -> retrieveByCipherText 
 retrieveUsingPlainText -> retrieveByPlainText
 check -> check
 checkUsingPlainText -> none. Token should be retrieved and then checked like `TemporaryAccess::retrieveByPlainText()->expired()`
