@@ -1,13 +1,17 @@
 {
-    "name": "erdemkeren/temporary-access-3",
-    "description": "This package allows you to create temporary access tokens for your users in your Laravel applications.",
+    "name": "erdemkeren/temporary-access",
+    "description": "This package allows you to secure your routes with one-time passwords (otp).",
     "homepage": "https://github.com/erdemkeren/temporary-access",
-    "keywords": ["temporary", "access", "grant"],
+    "keywords": ["temporary", "access", "grant", "otp"],
     "license": "MIT",
     "authors": [
         {
             "name": "Hilmi Erdem KEREN",
             "email": "erdemkeren@gmail.com"
+        },
+        {
+            "name": "Berkay Güre",
+            "email": "bgure@hotmail.com.tr"
         }
     ],
     "require": {

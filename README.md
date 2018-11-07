@@ -322,3 +322,4 @@ $ composer test
 ## Credits
 
 - Hilmi Erdem KEREN
+- Berkay Güre

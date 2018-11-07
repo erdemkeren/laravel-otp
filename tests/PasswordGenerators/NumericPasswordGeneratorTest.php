@@ -63,7 +63,7 @@ class NumericPasswordGeneratorTest extends TestCase
             ->once()->with(10000, 99999)->andReturn(10345);
 
         $password = $this->passwordGenerator->generate(5);
-        $this->assertSame(10345, $password);
+        $this->assertSame('10345', $password);
     }
 
     public function testGenerateUsesRandWhenRandomIntDontWork()
@@ -75,6 +75,6 @@ class NumericPasswordGeneratorTest extends TestCase
             ->once()->with(10000, 99999)->andReturn(10345);
 
         $password = $this->passwordGenerator->generate(5);
-        $this->assertSame(10345, $password);
+        $this->assertSame('10345', $password);
     }
 }

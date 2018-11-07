@@ -9,18 +9,17 @@ namespace Erdemkeren\TemporaryAccess\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
-use App\Http\Controllers\Controller;
-use Illuminate\Validation\Validator;
 use Illuminate\Http\RedirectResponse;
 use Erdemkeren\TemporaryAccess\TokenInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
+use Illuminate\Contracts\Validation\Validator as ValidatorInterface;
 use Erdemkeren\TemporaryAccess\TemporaryAccessFacade as TemporaryAccess;
 
 /**
  * Class OtpController.
  */
-class OtpController extends Controller
+class OtpController
 {
     /**
      * * Show the form for the otp submission.
@@ -31,7 +30,7 @@ class OtpController extends Controller
      */
     public function create(Request $request)
     {
-        if (! session('otp_requested', false)) {
+        if (!$this->otpHasBeenRequested()) {
             return redirect('/');
         }
 
@@ -48,6 +47,10 @@ class OtpController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        if (!$this->otpHasBeenRequested()) {
+            return redirect('/');
+        }
+
         $validator = $this->getOtpSubmissionRequestValidator($request);
 
         if ($validator->fails()) {
@@ -89,9 +92,9 @@ class OtpController extends Controller
      *
      * @param Request $request
      *
-     * @return Validator
+     * @return ValidatorInterface
      */
-    private function getOtpSubmissionRequestValidator(Request $request): Validator
+    private function getOtpSubmissionRequestValidator(Request $request): ValidatorInterface
     {
         return ValidatorFacade::make($request->all(), [
             'password' => 'required|string',
@@ -109,5 +112,15 @@ class OtpController extends Controller
     private function retrieveOtpTokenByPlainText(Authenticatable $user, string $password): ?TokenInterface
     {
         return TemporaryAccess::retrieveByPlainText($user, $password);
+    }
+
+    /**
+     * Determine if an otp requested or not.
+     *
+     * @return mixed
+     */
+    private function otpHasBeenRequested()
+    {
+        return session('otp_requested', false);
     }
 }
