@@ -123,7 +123,7 @@ Route::get('secret', function (Request $request): string {
     $request->otpToken()->refresh();
 
     return 'The secret of immortality';
-})->middleware('otp-access');
+})->middleware('auth', 'otp-access');
 ```
 
 This middleware will redirect any unauthenticated request to the `otp/create` endpoint
