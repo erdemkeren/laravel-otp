@@ -1,4 +1,4 @@
-# otp
+# Laravel OTP
 
 This package allows you to secure your resources with one time password access (otp).
 
