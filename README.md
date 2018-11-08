@@ -28,7 +28,7 @@ Route::get('secret', function (): string {
 1- Add the package to your dependencies.
 
 ```
-$ composer require erdemkeren/otp;
+$ composer require erdemkeren/laravel-otp;
 ```
 
 2- Register the package in your `config/app.php` file:

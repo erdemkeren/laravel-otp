@@ -1,6 +1,10 @@
 # Changelog
 
-All notable changes to `erdemkeren/otp` will be documented in this file.
+All notable changes to `erdemkeren/laravel-otp` will be documented in this file.
+
+## Laravel OTP 1.0.0
+
+Renames the package as laravel-otp. Was temporary-access before.
 
 ## 3.0.0 - 2018-11-08
 
