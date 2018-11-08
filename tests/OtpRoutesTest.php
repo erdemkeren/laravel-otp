@@ -5,15 +5,15 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use Mockery as M;
 use PHPUnit\Framework\TestCase;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
-use Erdemkeren\TemporaryAccess\Http\Controllers\OtpController;
+use Erdemkeren\Otp\Http\Controllers\OtpController;
 
-/** @covers \Erdemkeren\TemporaryAccess\OtpRoutes */
+/** @covers \Erdemkeren\Otp\OtpRoutes */
 class OtpRoutesTest extends TestCase
 {
     public function testRegister()

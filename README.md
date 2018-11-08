@@ -1,13 +1,4 @@
-# Temporary Access
-
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/erdemkeren/temporary-access.svg?style=flat-square)](https://packagist.org/packages/erdemkeren/temporary-access)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Build Status](https://img.shields.io/travis/erdemkeren/temporary-access/master.svg?style=flat-square)](https://travis-ci.org/erdemkeren/temporary-access)
-[![StyleCI](https://styleci.io/repos/77648231/shield?branch=master)](https://styleci.io/repos/77648231)
-[![SensioLabsInsight](https://img.shields.io/sensiolabs/i/2caf0c8e-2f92-4b09-851a-873989dbe0ee.svg?style=flat-square)](https://insight.sensiolabs.com/projects/2caf0c8e-2f92-4b09-851a-873989dbe0ee)
-[![Quality Score](https://img.shields.io/scrutinizer/g/erdemkeren/temporary-access.svg?style=flat-square)](https://scrutinizer-ci.com/g/erdemkeren/temporary-access)
-[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/erdemkeren/temporary-access/master.svg?style=flat-square)](https://scrutinizer-ci.com/g/erdemkeren/temporary-access/?branch=master)
-[![Total Downloads](https://img.shields.io/packagist/dt/erdemkeren/temporary-access.svg?style=flat-square)](https://packagist.org/packages/erdemkeren/temporary-access)
+# otp
 
 This package allows you to secure your resources with one time password access (otp).
 
@@ -16,7 +7,7 @@ Example Usage:
 ```php
 Route::get('secret', function (): string {
     return 'The secret of immortality';
-})->middleware('auth', 'otp-access');
+})->middleware('auth', 'otp');
 ```
 
 ## Contents
@@ -37,7 +28,7 @@ Route::get('secret', function (): string {
 1- Add the package to your dependencies.
 
 ```
-$ composer require erdemkeren/temporary-access;
+$ composer require erdemkeren/otp;
 ```
 
 2- Register the package in your `config/app.php` file:
@@ -45,7 +36,7 @@ $ composer require erdemkeren/temporary-access;
 _only if you are using Laravel <=5.4 or your auto package discovery off._
 
 ```php
-Erdemkeren\TemporaryAccess\TemporaryAccessServiceProvider::class,
+Erdemkeren\Otp\OtpServiceProvider::class,
 ```
 
 3- Publish the components:
@@ -58,7 +49,7 @@ $ php artisan vendor:publish
 
 4- Apply the migrations:
 
-_Will create a table called `temporary_access_tokens` to store generated token information._
+_Will create a table called `otp_tokens` to store generated token information._
 
 ```
 $ php artisan migrate
@@ -66,18 +57,18 @@ $ php artisan migrate
 
 5- Register the routes:
 
-_These routes are required if you are planning to use `otp-access` middleware._
+_These routes are required if you are planning to use `otp` middleware._
 
 In your RouteServiceProvider, append the following line inside the `map` method:
 
 ```php
 // App\RouteServiceProvider@map:
-\Erdemkeren\TemporaryAccess\OtpRoutes::register();
+\Erdemkeren\Otp\OtpRoutes::register();
 ```
 
 6- Register the route middleware:
 
-_Register the otp-access route middleware inside your `App\Http\Kernel`._
+_Register the otp route middleware inside your `App\Http\Kernel`._
 
 ```php
 /**
@@ -89,7 +80,7 @@ _Register the otp-access route middleware inside your `App\Http\Kernel`._
  */
 protected $routeMiddleware = [
     // [...]
-    'otp-access' => \Erdemkeren\TemporaryAccess\Http\Middleware\OtpAccess::class,
+    'otp' => \Erdemkeren\Otp\Http\Middleware\Otp::class,
 ];
 ```
 ## Configuration
@@ -101,9 +92,9 @@ This package comes with a set of handy configuration options:
 Available built-in options: string, numeric and numeric-no-0.
 default: string
 
-**table**: The name of the table to be used to store the temporary access tokens.
+**table**: The name of the table to be used to store the otp tokens.
 
-default: temporary_access_tokens
+default: otp_tokens
 
 **expiry_time**: The expiry time of the tokens in minutes.
 
@@ -116,14 +107,14 @@ default: 15
 ### Basic Usage
 
 After configuring your instance of the package,
-you can use the built-in `otp-access` middleware alias to secure your endpoints:
+you can use the built-in `otp` middleware alias to secure your endpoints:
 
 ```php
 Route::get('secret', function (Request $request): string {
     $request->otpToken()->refresh();
 
     return 'The secret of immortality';
-})->middleware('auth', 'otp-access');
+})->middleware('auth', 'otp');
 ```
 
 This middleware will redirect any unauthenticated request to the `otp/create` endpoint
@@ -153,11 +144,11 @@ _Don't forget to change your configuration file as well._
 
 #### Using your own password generator:
 
-To add your own password generator implemetation, you can call `addPasswordGenerator` method on `TemporaryAccess` service like:
+To add your own password generator implemetation, you can call `addPasswordGenerator` method on `Otp` service like:
 
 ```php
 // AppServiceProvider::register():
-app('temporary-access')->addPasswordGenerator('acme', function (int $length): string {
+app('otp')->addPasswordGenerator('acme', function (int $length): string {
     return 'your_implementation';
 });
 ```
@@ -167,7 +158,7 @@ If you need more power, you can also create your own password generator class to
 ```php
 <?php namespace App\Acme\PasswordGenerators;
 
-use Erdemkeren\TemporaryAccess\PasswordGeneratorInterface;
+use Erdemkeren\Otp\PasswordGeneratorInterface;
 
 class AcmePasswordGenerator implements PasswordGeneratorInterface
 {
@@ -188,7 +179,7 @@ You can register you password generator like the previous one:
 
 ```php
 // AppServiceProvider::register():
-TemporaryAccess::addPasswordGenerator('acme', AcmePasswordGenerator::class);
+Otp::addPasswordGenerator('acme', AcmePasswordGenerator::class);
 ```
 
 _Don't forget to change your configuration file as well._
@@ -200,56 +191,56 @@ If so, this method is being called to determine which notification channel is go
 
 ### Deeper Knowledge:
 
-The public API consists of two main components: `TemporaryAccessService` and the `Token` which generally is being returned by the service.
+The public API consists of two main components: `OtpService` and the `Token` which generally is being returned by the service.
 
-#### TemporaryAccess Service:
+#### Otp Service:
 
-If you are planning to create your own API or the basic functionality is not enough four you, you can use the TemporaryAccess Service API:
+If you are planning to create your own API or the basic functionality is not enough four you, you can use the Otp Service API:
 
 ##### Chencking the validity of a given token:
 
 ```php
-$isTokenValid = TemporaryAccess::check($authenticableId, $token);
+$isTokenValid = Otp::check($authenticableId, $token);
 ```
 
 ##### Setting the password generator:
 
 ```php
-TemporaryAccess::setPasswordGenerator('string');
+Otp::setPasswordGenerator('string');
 ```
 
 ##### Creating a new token for a given user:
 
 ```php
-$token = TemporaryAccess::create(auth()->user(), $length = 6);
+$token = Otp::create(auth()->user(), $length = 6);
 // See what can be done with tokens below.
 ```
 
 ##### Retrieveing an existing token from the storage by the given plain password:
 
 ```php
-$token = TemporaryAccess::retrieveByPlainText(auth()->id(), $otpPassword);
+$token = Otp::retrieveByPlainText(auth()->id(), $otpPassword);
 // See what can be done with tokens below.
 ```
 
 ##### Retrieveing an existing token from the storage by the given cipher text (token):
 
 ```php
-$token = TemporaryAccess::retrieveByCipherText(auth()->id(), $otpPassword);
+$token = Otp::retrieveByCipherText(auth()->id(), $otpPassword);
 // See what can be done with tokens below.
 ```
 ##### Changing the behavior of the Service
 
-The package comes with a `ServiceProvider` which registers the TemporaryAccess
+The package comes with a `ServiceProvider` which registers the Otp
 service to your application's container.
 
-The TemporaryAccess orchestrates the method calls made to the 3 interface implementations below.
+The Otp orchestrates the method calls made to the 3 interface implementations below.
 
 - PasswordGeneratorManagerInterface
 - EncryptorInterface and
 - TokenInterface
 
-You can write your service provider and register the `TemporaryAccessService`
+You can write your service provider and register the `OtpService`
 with your version of the dependencies.
 
 _Note: Because the token class is being used with static calls,
@@ -302,7 +293,7 @@ public function refresh(): bool;
 **e.g.**
 
 ```php
-$token = TemporaryAccess::retrieveByCipherText(
+$token = Otp::retrieveByCipherText(
     auth()->id(),
     $request->input('otp_token')
 );

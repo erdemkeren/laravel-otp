@@ -5,13 +5,13 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use Mockery as M;
 use PHPUnit\Framework\TestCase;
 use Illuminate\Notifications\Messages\MailMessage;
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\config')) {
+if (! \function_exists('\Erdemkeren\Otp\config')) {
     function config($key)
     {
         global $testerClass;
@@ -21,7 +21,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\config')) {
 }
 
 /**
- * @covers \Erdemkeren\TemporaryAccess\TokenNotification
+ * @covers \Erdemkeren\Otp\TokenNotification
  */
 class TokenNotificationTest extends TestCase
 {
@@ -80,7 +80,7 @@ class TokenNotificationTest extends TestCase
     public function testViaReturnsDefaultChannels()
     {
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.default_channels')
+            ->once()->with('otp.default_channels')
             ->andReturn('mail,sms,acme_sms');
 
         $this->assertSame(['mail', 'sms', 'acme_sms'], $this->notification->via(null));

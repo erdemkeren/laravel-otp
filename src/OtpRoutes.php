@@ -5,10 +5,10 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use Illuminate\Support\Facades\Route;
-use Erdemkeren\TemporaryAccess\Http\Controllers\OtpController;
+use Erdemkeren\Otp\Http\Controllers\OtpController;
 
 class OtpRoutes
 {

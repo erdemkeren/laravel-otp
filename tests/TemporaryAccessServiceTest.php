@@ -5,7 +5,7 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use Mockery as M;
 use Carbon\Carbon;
@@ -17,7 +17,7 @@ use Illuminate\Database\DatabaseManager;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Connectors\ConnectionFactory;
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\config')) {
+if (! \function_exists('\Erdemkeren\Otp\config')) {
     function config($key)
     {
         global $testerClass;
@@ -27,9 +27,9 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\config')) {
 }
 
 /**
- * @covers \Erdemkeren\TemporaryAccess\TemporaryAccessService
+ * @covers \Erdemkeren\Otp\OtpService
  */
-class TemporaryAccessServiceTest extends TestCase
+class OtpServiceTest extends TestCase
 {
     public static $functions = [];
 
@@ -44,7 +44,7 @@ class TemporaryAccessServiceTest extends TestCase
     private $defaultGeneratorName;
 
     /**
-     * @var TemporaryAccessService
+     * @var OtpService
      */
     private $service;
 
@@ -93,7 +93,7 @@ class TemporaryAccessServiceTest extends TestCase
         $this->authenticable = M::mock(Authenticatable::class);
         $this->token = M::mock(TokenInterface::class);
 
-        $this->service = new TemporaryAccessService(
+        $this->service = new OtpService(
             $this->pwdGenManager,
             $this->encryptor,
             $this->defaultGeneratorName,
@@ -116,7 +116,7 @@ class TemporaryAccessServiceTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
 
-        $this->service = new TemporaryAccessService(
+        $this->service = new OtpService(
             $this->pwdGenManager,
             $this->encryptor,
             $this->defaultGeneratorName,
@@ -129,7 +129,7 @@ class TemporaryAccessServiceTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
 
-        $this->service = new TemporaryAccessService(
+        $this->service = new OtpService(
             $this->pwdGenManager,
             $this->encryptor,
             $this->defaultGeneratorName,
@@ -142,7 +142,7 @@ class TemporaryAccessServiceTest extends TestCase
     {
         $this->expectException(\TypeError::class);
 
-        $this->service = new TemporaryAccessService(
+        $this->service = new OtpService(
             $this->pwdGenManager,
             $this->encryptor,
             $this->defaultGeneratorName,
@@ -166,11 +166,11 @@ class TemporaryAccessServiceTest extends TestCase
             ->andReturn(1);
 
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.table')
+            ->once()->with('otp.table')
             ->andReturn($tableName = 'foes');
 
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.expires')
+            ->once()->with('otp.expires')
             ->andReturn('900');
 
         DB::shouldReceive('beginTransaction')->once();
@@ -259,11 +259,11 @@ class TemporaryAccessServiceTest extends TestCase
         $this->authenticable->shouldReceive('getAuthIdentifier')->once()->andReturn($authId = 1);
 
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.expires')
+            ->once()->with('otp.expires')
             ->andReturn(900);
 
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.table')
+            ->once()->with('otp.table')
             ->andReturn($tableName = 'foes');
 
         DB::shouldReceive('beginTransaction')->once();
@@ -309,7 +309,7 @@ class FakeToken extends Token implements TokenInterface
 {
     public static function retrieveByAttributes(array $attributes): ?TokenInterface
     {
-        return TemporaryAccessServiceTest::$functions->retrieveByAttributes($attributes);
+        return OtpServiceTest::$functions->retrieveByAttributes($attributes);
     }
 
     protected function persist(): bool

@@ -5,14 +5,14 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
-use Erdemkeren\TemporaryAccess\Http\Middleware\OtpAccess;
-use Erdemkeren\TemporaryAccess\PasswordGenerators as Generators;
+use Erdemkeren\Otp\Http\Middleware\Otp;
+use Erdemkeren\Otp\PasswordGenerators as Generators;
 
-class TemporaryAccessServiceProvider extends ServiceProvider
+class OtpServiceProvider extends ServiceProvider
 {
     /**
      * Indicates if loading of the provider is deferred.
@@ -23,26 +23,26 @@ class TemporaryAccessServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->publishes([$this->configPath() => config_path('temporary_access.php')]);
+        $this->publishes([$this->configPath() => config_path('otp.php')]);
         $this->publishes([$this->migrationPath() => database_path('migrations')]);
         $this->publishes([$this->viewPath() => resource_path('views')]);
     }
 
     /**
-     * Register the temporary access service.
+     * Register the otp service.
      */
     public function register(): void
     {
         $service = $this->createServiceInstance();
         $this->registerDefaultPasswordGenerators($service);
 
-        $this->app->singleton('temporary-access', function () use ($service) {
+        $this->app->singleton('otp', function () use ($service) {
             return $service;
         });
 
         /** @var Router $router */
         $router = $this->app['router'];
-        $router->aliasMiddleware('otp-access', OtpAccess::class);
+        $router->aliasMiddleware('otp', Otp::class);
     }
 
     /**
@@ -53,21 +53,21 @@ class TemporaryAccessServiceProvider extends ServiceProvider
     public function provides(): array
     {
         return [
-            'temporary-access',
+            'otp',
         ];
     }
 
     /**
-     * Create a new temporary access service instance.
+     * Create a new otp service instance.
      *
-     * @return TemporaryAccessService
+     * @return OtpService
      */
-    private function createServiceInstance(): TemporaryAccessService
+    private function createServiceInstance(): OtpService
     {
-        return new TemporaryAccessService(
+        return new OtpService(
             new PasswordGeneratorManager(),
             new Encryptor(config('app.secret')),
-            config('temporary_access.password_generator', 'string'),
+            config('otp.password_generator', 'string'),
             6,
             Token::class
         );
@@ -75,9 +75,9 @@ class TemporaryAccessServiceProvider extends ServiceProvider
 
     /**
      * Register default password generators to the
-     * given temporary access service instance.
+     * given otp service instance.
      *
-     * @param TemporaryAccessService $service
+     * @param OtpService $service
      */
     private function registerDefaultPasswordGenerators($service): void
     {
@@ -93,7 +93,7 @@ class TemporaryAccessServiceProvider extends ServiceProvider
      */
     private function configPath()
     {
-        return __DIR__.'/../config/temporary_access.php';
+        return __DIR__.'/../config/otp.php';
     }
 
     /**

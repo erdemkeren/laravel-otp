@@ -5,24 +5,24 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use PHPUnit\Framework\TestCase;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @covers \Erdemkeren\TemporaryAccess\TemporaryAccessFacade
+ * @covers \Erdemkeren\Otp\OtpFacade
  */
-class TemporaryAccessFacadeTest extends TestCase
+class OtpFacadeTest extends TestCase
 {
-    public function testItProvidesTemporaryAccessFacadeAccessorName(): void
+    public function testItProvidesOtpFacadeAccessorName(): void
     {
         $app = new Container();
 
         $app->singleton('app', 'Illuminate\Container\Container');
         $app->singleton('config', 'Illuminate\Config\Repository');
-        $app->singleton('temporary-access', function () {
+        $app->singleton('otp', function () {
             return new class() {
                 public function create($a, $b): string
                 {
@@ -33,7 +33,7 @@ class TemporaryAccessFacadeTest extends TestCase
 
         Facade::setFacadeApplication($app);
 
-        $result = TemporaryAccessFacade::create('foo', 6);
+        $result = OtpFacade::create('foo', 6);
         $this->assertSame('foo6', $result);
 
         Facade::clearResolvedInstances();

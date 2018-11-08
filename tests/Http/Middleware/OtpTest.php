@@ -5,7 +5,7 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess\Http\Middleware;
+namespace Erdemkeren\Otp\Http\Middleware;
 
 use Mockery as M;
 use Illuminate\Http\Request;
@@ -13,12 +13,12 @@ use PHPUnit\Framework\TestCase;
 use Illuminate\Container\Container;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Facade;
-use Erdemkeren\TemporaryAccess\TokenInterface;
+use Erdemkeren\Otp\TokenInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Erdemkeren\TemporaryAccess\TokenNotification;
-use Erdemkeren\TemporaryAccess\TemporaryAccessService;
+use Erdemkeren\Otp\TokenNotification;
+use Erdemkeren\Otp\OtpService;
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Middleware\session')) {
+if (! \function_exists('\Erdemkeren\Otp\Http\Middleware\session')) {
     function session(array $args)
     {
         global $testerClass;
@@ -27,7 +27,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Middleware\session')) {
     }
 }
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Middleware\url')) {
+if (! \function_exists('\Erdemkeren\Otp\Http\Middleware\url')) {
     function url()
     {
         global $testerClass;
@@ -36,7 +36,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Middleware\url')) {
     }
 }
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Middleware\redirect')) {
+if (! \function_exists('\Erdemkeren\Otp\Http\Middleware\redirect')) {
     function redirect()
     {
         global $testerClass;
@@ -76,8 +76,8 @@ class NotifiableAuthenticable implements Authenticatable
     }
 }
 
-/** @covers \Erdemkeren\TemporaryAccess\Http\Middleware\OtpAccess */
-class OtpAccessTest extends TestCase
+/** @covers \Erdemkeren\Otp\Http\Middleware\Otp */
+class OtpTest extends TestCase
 {
     public static $functions;
 
@@ -100,10 +100,10 @@ class OtpAccessTest extends TestCase
 
         $this->token = M::mock(TokenInterface::class);
         $this->authenticable = M::mock(NotifiableAuthenticable::class);
-        $this->service = M::mock(TemporaryAccessService::class);
+        $this->service = M::mock(OtpService::class);
         $this->tokenNotification = M::mock(TokenNotification::class);
 
-        $app->singleton('temporary-access', function () {
+        $app->singleton('otp', function () {
             return $this->service;
         });
 
@@ -126,7 +126,7 @@ class OtpAccessTest extends TestCase
 
     public function testRequestIsPassedAlongIfTokenIsValid(): void
     {
-        $middleware = new OtpAccess();
+        $middleware = new Otp();
         $request = Request::create('/');
         $request->cookies->set('otp_token', $token = 'token');
         $request->setUserResolver(function () {
@@ -158,7 +158,7 @@ class OtpAccessTest extends TestCase
     {
         $this->expectException(\LogicException::class);
 
-        $middleware = new OtpAccess();
+        $middleware = new Otp();
         $request = Request::create('/');
 
         $middleware->handle($request, function () {
@@ -201,7 +201,7 @@ class OtpAccessTest extends TestCase
                 }
             });
 
-        $middleware = new OtpAccess();
+        $middleware = new Otp();
         $request = Request::create('/');
         $request->setUserResolver(function () {
             return $this->authenticable;
@@ -222,7 +222,7 @@ class OtpAccessTest extends TestCase
 
         $this->expectException(\UnexpectedValueException::class);
 
-        $middleware = new OtpAccess();
+        $middleware = new Otp();
         $request = Request::create('/');
         $request->setUserResolver(function () {
             return M::mock(Authenticatable::class);
@@ -237,7 +237,7 @@ class OtpAccessTest extends TestCase
 
     public function testRequestIsRedirectedToOtpCreateEndpointIfTokenIsExpired(): void
     {
-        $middleware = new OtpAccess();
+        $middleware = new Otp();
         $request = Request::create('/');
         $request->cookies->set('otp_token', $token = 'token');
         $request->setUserResolver(function () {

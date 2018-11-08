@@ -5,7 +5,7 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Traits\Macroable;
@@ -48,7 +48,7 @@ class TokenNotification extends Notification implements ShouldQueue
     {
         $channels = method_exists($notifiable, 'otpChannels') && ! empty($notifiable->otpChannels())
             ? $notifiable->otpChannels()
-            : config('temporary_access.default_channels');
+            : config('otp.default_channels');
 
         return \is_array($channels)
             ? $channels

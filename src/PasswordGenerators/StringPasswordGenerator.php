@@ -5,9 +5,9 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess\PasswordGenerators;
+namespace Erdemkeren\Otp\PasswordGenerators;
 
-use Erdemkeren\TemporaryAccess\PasswordGeneratorInterface;
+use Erdemkeren\Otp\PasswordGeneratorInterface;
 
 /**
  * Class StringPasswordGenerator.

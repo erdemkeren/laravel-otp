@@ -5,14 +5,14 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use Mockery as M;
 use Carbon\Carbon;
 use PHPUnit\Framework\TestCase;
 use Illuminate\Support\Facades\DB;
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\config')) {
+if (! \function_exists('\Erdemkeren\Otp\config')) {
     function config($key)
     {
         global $testerClass;
@@ -21,7 +21,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\config')) {
     }
 }
 
-/** @covers \Erdemkeren\TemporaryAccess\Token */
+/** @covers \Erdemkeren\Otp\Token */
 class TokenTest extends TestCase
 {
     public static $functions;
@@ -105,11 +105,11 @@ class TokenTest extends TestCase
         Carbon::setTestNow(new Carbon('2018-11-06 00:00:00'));
 
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.table')
+            ->once()->with('otp.table')
             ->andReturn($tableName = 'foes');
 
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.expires')
+            ->once()->with('otp.expires')
             ->andReturn($expiryTimeMins = 10);
 
         DB::shouldReceive('beginTransaction')->once();
@@ -145,11 +145,11 @@ class TokenTest extends TestCase
         Carbon::setTestNow(new Carbon('2018-11-06 00:00:00'));
 
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.table')
+            ->once()->with('otp.table')
             ->andReturn($tableName = 'foes');
 
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.expires')
+            ->once()->with('otp.expires')
             ->andReturn($expiryTimeMins = 10);
 
         DB::shouldReceive('beginTransaction')->once();
@@ -223,7 +223,7 @@ class TokenTest extends TestCase
     public function testRetrieveByAttributesCanReturnEmptyResults()
     {
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.table')
+            ->once()->with('otp.table')
             ->andReturn($tableName = 'foes');
 
         DB::shouldReceive('table')->with($tableName)->once()->andReturnSelf();
@@ -236,7 +236,7 @@ class TokenTest extends TestCase
     public function testRetrieveByAttributes()
     {
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.table')
+            ->once()->with('otp.table')
             ->andReturn($tableName = 'foes');
 
         DB::shouldReceive('table')->with($tableName)->once()->andReturnSelf();
@@ -287,7 +287,7 @@ class TokenTest extends TestCase
     private function persistShouldBeCalled(): void
     {
         $this::$functions->shouldReceive('config')
-            ->once()->with('temporary_access.table')
+            ->once()->with('otp.table')
             ->andReturn($tableName = 'foes');
 
         DB::shouldReceive('beginTransaction')->once();

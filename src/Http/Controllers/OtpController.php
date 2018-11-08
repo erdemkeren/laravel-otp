@@ -5,16 +5,16 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess\Http\Controllers;
+namespace Erdemkeren\Otp\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Erdemkeren\Otp\TokenInterface;
 use Illuminate\Contracts\View\View;
+use Erdemkeren\Otp\OtpFacade as Otp;
 use Illuminate\Http\RedirectResponse;
-use Erdemkeren\TemporaryAccess\TokenInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
 use Illuminate\Contracts\Validation\Validator as ValidatorInterface;
-use Erdemkeren\TemporaryAccess\TemporaryAccessFacade as TemporaryAccess;
 
 /**
  * Class OtpController.
@@ -109,7 +109,7 @@ class OtpController
      */
     private function retrieveOtpTokenByPlainText(Authenticatable $user, string $password): ?TokenInterface
     {
-        return TemporaryAccess::retrieveByPlainText($user, $password);
+        return Otp::retrieveByPlainText($user, $password);
     }
 
     /**

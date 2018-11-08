@@ -5,12 +5,12 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Class TemporaryAccessFacade.
+ * Class OtpFacade.
  *
  * @method static setPasswordGenerator(string $name): void
  * @method static check($authenticableId, string $token): bool
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static retrieveByPlainText($authenticableId, string $plainText): ?TokenInterface
  * @method static retrieveByCipherText($authenticableId, string $cipherText): ?TokenInterface
  */
-class TemporaryAccessFacade extends Facade
+class OtpFacade extends Facade
 {
     /**
      * Get the registered name of the component.
@@ -28,6 +28,6 @@ class TemporaryAccessFacade extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'temporary-access';
+        return 'otp';
     }
 }

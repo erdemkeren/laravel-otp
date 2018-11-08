@@ -1,8 +1,8 @@
 {
-    "name": "erdemkeren/temporary-access",
-    "description": "This package allows you to secure your routes with one-time passwords (otp).",
-    "homepage": "https://github.com/erdemkeren/temporary-access",
-    "keywords": ["temporary", "access", "grant", "otp"],
+    "name": "erdemkeren/laravel-otp",
+    "description": "A laravel package to protected your routes with one time passwords (otp)",
+    "homepage": "https://github.com/erdemkeren/otp",
+    "keywords": ["laravel", "otp", "one time passwords", "one time pin", "middleware"],
     "license": "MIT",
     "authors": [
         {
@@ -30,12 +30,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Erdemkeren\\TemporaryAccess\\": "src"
+            "Erdemkeren\\Otp\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Erdemkeren\\TemporaryAccess\\Test\\": "tests"
+            "Erdemkeren\\Otp\\Test\\": "tests"
         }
     },
     "scripts": {
@@ -49,10 +49,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Erdemkeren\\TemporaryAccess\\TemporaryAccessServiceProvider"
+                "Erdemkeren\\Otp\\OtpServiceProvider"
             ],
             "aliases": {
-                "TemporaryAccess": "Erdemkeren\\TemporaryAccess\\TemporaryAccessFacade"
+                "Otp": "Erdemkeren\\Otp\\OtpFacade"
             }
         }
     }

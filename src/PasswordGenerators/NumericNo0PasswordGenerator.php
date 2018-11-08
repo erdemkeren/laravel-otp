@@ -5,10 +5,10 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess\PasswordGenerators;
+namespace Erdemkeren\Otp\PasswordGenerators;
 
 use Exception;
-use Erdemkeren\TemporaryAccess\PasswordGeneratorInterface;
+use Erdemkeren\Otp\PasswordGeneratorInterface;
 
 /**
  * Class NumericNo0PasswordGenerator.

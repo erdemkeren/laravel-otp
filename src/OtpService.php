@@ -5,14 +5,14 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 
 /**
- * Class TemporaryAccessService.
+ * Class OtpService.
  */
-class TemporaryAccessService
+class OtpService
 {
     /**
      * The password generator manager.
@@ -36,7 +36,7 @@ class TemporaryAccessService
     private $passwordLength;
 
     /**
-     * The default temporary access password generator.
+     * The default otp password generator.
      *
      * @var string
      */
@@ -51,14 +51,14 @@ class TemporaryAccessService
 
     /**
      * The name of the token class being used
-     * by the temporary access service.
+     * by the otp service.
      *
      * @var string
      */
     private $tokenClass;
 
     /**
-     * TemporaryAccessService constructor.
+     * OtpService constructor.
      *
      * @param PasswordGeneratorManagerInterface $manager
      * @param EncryptorInterface                $encryptor
@@ -101,7 +101,7 @@ class TemporaryAccessService
     }
 
     /**
-     * Check the temporary access of the authenticable
+     * Check the otp of the authenticable
      * with the given cipher text.
      *
      * @param mixed  $authenticableId
@@ -117,7 +117,7 @@ class TemporaryAccessService
     }
 
     /**
-     * Set the active password generator of the temporary access service.
+     * Set the active password generator of the otp service.
      *
      * @param string $name
      */
@@ -127,7 +127,7 @@ class TemporaryAccessService
     }
 
     /**
-     * Create a new temporary access token.
+     * Create a new otp token.
      *
      * @param Authenticatable|mixed $authenticatableId
      * @param int                   $length

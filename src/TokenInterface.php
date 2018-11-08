@@ -5,7 +5,7 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use Carbon\Carbon;
 use Illuminate\Notifications\Notification;

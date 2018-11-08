@@ -5,7 +5,7 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -326,7 +326,7 @@ class Token implements TokenInterface
      */
     private static function getTable(): string
     {
-        return config('temporary_access.table');
+        return config('otp.table');
     }
 
     /**
@@ -336,6 +336,6 @@ class Token implements TokenInterface
      */
     private function getDefaultExpiryTime(): int
     {
-        return config('temporary_access.expires') * 60;
+        return config('otp.expires') * 60;
     }
 }

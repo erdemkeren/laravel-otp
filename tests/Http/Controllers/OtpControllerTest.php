@@ -5,21 +5,21 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess\Http\Controllers;
+namespace Erdemkeren\Otp\Http\Controllers;
 
 use Mockery as M;
 use Illuminate\Http\Request;
+use Erdemkeren\Otp\OtpService;
 use PHPUnit\Framework\TestCase;
+use Erdemkeren\Otp\TokenInterface;
 use Illuminate\Support\MessageBag;
 use Illuminate\Container\Container;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Facade;
-use Erdemkeren\TemporaryAccess\TokenInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Validation\Validator;
-use Erdemkeren\TemporaryAccess\TemporaryAccessService;
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Controllers\session')) {
+if (! \function_exists('\Erdemkeren\Otp\Http\Controllers\session')) {
     function session($a = null, $b = null)
     {
         global $testerClass;
@@ -28,7 +28,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Controllers\session')) 
     }
 }
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Controllers\cookie')) {
+if (! \function_exists('\Erdemkeren\Otp\Http\Controllers\cookie')) {
     function cookie()
     {
         global $testerClass;
@@ -37,7 +37,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Controllers\cookie')) {
     }
 }
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Controllers\view')) {
+if (! \function_exists('\Erdemkeren\Otp\Http\Controllers\view')) {
     function view($a)
     {
         global $testerClass;
@@ -46,7 +46,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Controllers\view')) {
     }
 }
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Controllers\redirect')) {
+if (! \function_exists('\Erdemkeren\Otp\Http\Controllers\redirect')) {
     function redirect($a = null)
     {
         global $testerClass;
@@ -56,7 +56,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Controllers\redirect'))
 }
 
 /**
- * @covers \Erdemkeren\TemporaryAccess\Http\Controllers\OtpController
+ * @covers \Erdemkeren\Otp\Http\Controllers\OtpController
  */
 class OtpControllerTest extends TestCase
 {
@@ -73,7 +73,7 @@ class OtpControllerTest extends TestCase
         $this::$functions = M::mock();
 
         $this->validator = M::mock(Validator::class);
-        $this->service = M::mock(TemporaryAccessService::class);
+        $this->service = M::mock(OtpService::class);
 
         $app = new Container();
         $app->singleton('app', 'Illuminate\Container\Container');
@@ -83,7 +83,7 @@ class OtpControllerTest extends TestCase
             return $this->validator;
         });
 
-        $app->singleton('temporary-access', function ($app) {
+        $app->singleton('otp', function ($app) {
             return $this->service;
         });
 

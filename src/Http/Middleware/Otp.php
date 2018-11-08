@@ -5,16 +5,16 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess\Http\Middleware;
+namespace Erdemkeren\Otp\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Erdemkeren\TemporaryAccess\TokenInterface;
+use Erdemkeren\Otp\TokenInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Erdemkeren\TemporaryAccess\TemporaryAccessFacade as TemporaryAccess;
+use Erdemkeren\Otp\OtpFacade;
 
-class OtpAccess
+class Otp
 {
     /**
      * Handle an incoming request.
@@ -39,7 +39,7 @@ class OtpAccess
             return $this->redirectToOtpPage();
         }
 
-        $token = TemporaryAccess::retrieveByCipherText(
+        $token = OtpFacade::retrieveByCipherText(
             $user->getAuthIdentifier(),
             $request->cookie('otp_token')
         );
@@ -79,7 +79,7 @@ class OtpAccess
      */
     private function sendNewOtpToUser(Authenticatable $user): void
     {
-        $token = TemporaryAccess::create($user, 6);
+        $token = OtpFacade::create($user, 6);
 
         if (! method_exists($user, 'notify')) {
             throw new \UnexpectedValueException(

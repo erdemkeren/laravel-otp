@@ -5,13 +5,13 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess\PasswordGenerators;
+namespace Erdemkeren\Otp\PasswordGenerators;
 
 use Mockery as M;
 use PHPUnit\Framework\TestCase;
-use Erdemkeren\TemporaryAccess\PasswordGeneratorInterface;
+use Erdemkeren\Otp\PasswordGeneratorInterface;
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\PasswordGenerators\str_random')) {
+if (! \function_exists('\Erdemkeren\Otp\PasswordGenerators\str_random')) {
     function str_random($l)
     {
         global $testerClass;
@@ -20,7 +20,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\PasswordGenerators\str_rando
     }
 }
 
-/** @covers \Erdemkeren\TemporaryAccess\PasswordGenerators\StringPasswordGenerator */
+/** @covers \Erdemkeren\Otp\PasswordGenerators\StringPasswordGenerator */
 class StringPasswordGeneratorTest extends TestCase
 {
     /**

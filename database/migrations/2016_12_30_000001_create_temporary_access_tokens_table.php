@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTemporaryAccessTokensTable extends Migration
+class CreateOtpTokensTable extends Migration
 {
     /**
      * Run the migrations.
      */
     public function up()
     {
-        Schema::create('temporary_access_tokens', function (Blueprint $table) {
+        Schema::create('otp_tokens', function (Blueprint $table) {
             $table->unsignedInteger('authenticable_id');
             $table->string('cipher_text', 64);
             $table->timestamp('created_at')->useCurrent();
@@ -32,6 +32,6 @@ class CreateTemporaryAccessTokensTable extends Migration
      */
     public function down()
     {
-        Schema::drop('temporary_access_tokens');
+        Schema::drop('otp_tokens');
     }
 }

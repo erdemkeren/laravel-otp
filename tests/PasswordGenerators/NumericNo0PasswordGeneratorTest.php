@@ -5,13 +5,13 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess\PasswordGenerators;
+namespace Erdemkeren\Otp\PasswordGenerators;
 
 use Mockery as M;
 use PHPUnit\Framework\TestCase;
-use Erdemkeren\TemporaryAccess\PasswordGeneratorInterface;
+use Erdemkeren\Otp\PasswordGeneratorInterface;
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\PasswordGenerators\random_int')) {
+if (! \function_exists('\Erdemkeren\Otp\PasswordGenerators\random_int')) {
     function random_int($min, $max)
     {
         global $testerClass;
@@ -20,7 +20,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\PasswordGenerators\random_in
     }
 }
 
-if (! \function_exists('\Erdemkeren\TemporaryAccess\PasswordGenerators\rand')) {
+if (! \function_exists('\Erdemkeren\Otp\PasswordGenerators\rand')) {
     function rand($min, $max)
     {
         global $testerClass;
@@ -29,7 +29,7 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\PasswordGenerators\rand')) {
     }
 }
 
-/** @covers \Erdemkeren\TemporaryAccess\PasswordGenerators\NumericNo0PasswordGenerator */
+/** @covers \Erdemkeren\Otp\PasswordGenerators\NumericNo0PasswordGenerator */
 class NumericNo0PasswordGeneratorTest extends TestCase
 {
     /**

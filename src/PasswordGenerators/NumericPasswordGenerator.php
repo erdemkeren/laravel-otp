@@ -5,10 +5,10 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess\PasswordGenerators;
+namespace Erdemkeren\Otp\PasswordGenerators;
 
 use Exception;
-use Erdemkeren\TemporaryAccess\PasswordGeneratorInterface;
+use Erdemkeren\Otp\PasswordGeneratorInterface;
 
 /**
  * Class NumericPasswordGenerator.
@@ -51,7 +51,7 @@ class NumericPasswordGenerator implements PasswordGeneratorInterface
             $min .= 0;
             $max .= 9;
 
-            $length--;
+            --$length;
         }
 
         return [

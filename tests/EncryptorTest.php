@@ -5,12 +5,12 @@
  * @license MIT
  */
 
-namespace Erdemkeren\TemporaryAccess;
+namespace Erdemkeren\Otp;
 
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Erdemkeren\TemporaryAccess\Encryptor
+ * @covers \Erdemkeren\Otp\Encryptor
  */
 class EncryptorTest extends TestCase
 {

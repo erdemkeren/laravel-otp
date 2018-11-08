@@ -21,10 +21,10 @@ return [
 
     /*
      * The name of the table to be used to store
-     * the temporary access tokens.
+     * the otp tokens.
      */
 
-    'table'   => 'temporary_access_tokens',
+    'table'   => 'otp_tokens',
 
     /*
      * The expiry time of the tokens in minutes.
