@@ -9,14 +9,14 @@ namespace Erdemkeren\Otp\Http\Middleware;
 
 use Mockery as M;
 use Illuminate\Http\Request;
+use Erdemkeren\Otp\OtpService;
 use PHPUnit\Framework\TestCase;
+use Erdemkeren\Otp\TokenInterface;
 use Illuminate\Container\Container;
+use Erdemkeren\Otp\TokenNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Facade;
-use Erdemkeren\Otp\TokenInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Erdemkeren\Otp\TokenNotification;
-use Erdemkeren\Otp\OtpService;
 
 if (! \function_exists('\Erdemkeren\Otp\Http\Middleware\session')) {
     function session(array $args)

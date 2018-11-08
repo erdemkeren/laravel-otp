@@ -8,8 +8,8 @@
 namespace Erdemkeren\Otp;
 
 use Illuminate\Routing\Router;
-use Illuminate\Support\ServiceProvider;
 use Erdemkeren\Otp\Http\Middleware\Otp;
+use Illuminate\Support\ServiceProvider;
 use Erdemkeren\Otp\PasswordGenerators as Generators;
 
 class OtpServiceProvider extends ServiceProvider
