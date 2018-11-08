@@ -10,7 +10,6 @@ namespace Erdemkeren\TemporaryAccess\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Notifications\Notifiable;
 use Erdemkeren\TemporaryAccess\TokenInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Erdemkeren\TemporaryAccess\TemporaryAccessFacade as TemporaryAccess;
@@ -82,9 +81,9 @@ class OtpAccess
     {
         $token = TemporaryAccess::create($user, 6);
 
-        if (! $user instanceof Notifiable) {
+        if (! method_exists($user, 'notify')) {
             throw new \UnexpectedValueException(
-                'The otp owner should be an instance of Notifiable in order to be notified about their otp.'
+                'The otp owner should be an instance of notifiable or implement the notify method.'
             );
         }
 

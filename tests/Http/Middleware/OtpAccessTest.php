@@ -45,6 +45,37 @@ if (! \function_exists('\Erdemkeren\TemporaryAccess\Http\Middleware\redirect')) 
     }
 }
 
+class NotifiableAuthenticable implements Authenticatable
+{
+    public function getAuthIdentifierName()
+    {
+    }
+
+    public function getAuthIdentifier()
+    {
+    }
+
+    public function getAuthPassword()
+    {
+    }
+
+    public function getRememberToken()
+    {
+    }
+
+    public function setRememberToken($value)
+    {
+    }
+
+    public function getRememberTokenName()
+    {
+    }
+
+    public function notify()
+    {
+    }
+}
+
 /** @covers \Erdemkeren\TemporaryAccess\Http\Middleware\OtpAccess */
 class OtpAccessTest extends TestCase
 {
@@ -68,7 +99,7 @@ class OtpAccessTest extends TestCase
         $app->singleton('config', 'Illuminate\Config\Repository');
 
         $this->token = M::mock(TokenInterface::class);
-        $this->authenticable = M::mock(Authenticatable::class);
+        $this->authenticable = M::mock(NotifiableAuthenticable::class);
         $this->service = M::mock(TemporaryAccessService::class);
         $this->tokenNotification = M::mock(TokenNotification::class);
 
@@ -194,7 +225,7 @@ class OtpAccessTest extends TestCase
         $middleware = new OtpAccess();
         $request = Request::create('/');
         $request->setUserResolver(function () {
-            return $this->authenticable;
+            return M::mock(Authenticatable::class);
         });
 
         $response = $middleware->handle($request, function () {
