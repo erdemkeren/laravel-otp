@@ -4,7 +4,7 @@
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Build Status](https://img.shields.io/travis/erdemkeren/laravel-otp/master.svg?style=flat-square)](https://travis-ci.org/erdemkeren/laravel-otp)
 [![StyleCI](https://styleci.io/repos/156698769/shield?branch=master)](https://styleci.io/repos/156698769)
-[![SensioLabsInsight](https://img.shields.io/sensiolabs/i/afcbdcb7-b197-4037-9723-7f54cf018d9d.svg?style=flat-square)](https://insight.sensiolabs.com/projects/afcbdcb7-b197-4037-9723-7f54cf018d9d)
+[![SymfonyInsight](https://insight.symfony.com/projects/ce5f111f-1be4-4848-a87d-7b2570d153d4/mini.svg)](https://insight.symfony.com/projects/ce5f111f-1be4-4848-a87d-7b2570d153d4)
 [![Quality Score](https://img.shields.io/scrutinizer/g/erdemkeren/laravel-otp.svg?style=flat-square)](https://scrutinizer-ci.com/g/erdemkeren/laravel-otp)
 [![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/erdemkeren/laravel-otp/master.svg?style=flat-square)](https://scrutinizer-ci.com/g/erdemkeren/laravel-otp/?branch=master)
 [![Total Downloads](https://img.shields.io/packagist/dt/erdemkeren/laravel-otp.svg?style=flat-square)](https://packagist.org/packages/erdemkeren/laravel-otp)
