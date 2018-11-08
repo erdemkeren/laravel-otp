@@ -14,9 +14,9 @@ This package allows you to secure your resources with one time password access (
 Example Usage:
 
 ```php
-$route->get('secret', function (): string {
+Route::get('secret', function (): string {
     return 'The secret of immortality';
-})->middleware('otp-access');
+})->middleware('auth', 'otp-access');
 ```
 
 ## Contents
@@ -75,6 +75,23 @@ In your RouteServiceProvider, append the following line inside the `map` method:
 \Erdemkeren\TemporaryAccess\OtpRoutes::register();
 ```
 
+6- Register the route middleware:
+
+_Register the otp-access route middleware inside your `App\Http\Kernel`._
+
+```php
+/**
+ * The application's route middleware.
+ *
+ * These middleware may be assigned to groups or used individually.
+ *
+ * @var array
+ */
+protected $routeMiddleware = [
+    // [...]
+    'otp-access' => \Erdemkeren\TemporaryAccess\Http\Middleware\OtpAccess::class,
+];
+```
 ## Configuration
 
 This package comes with a set of handy configuration options:
@@ -102,7 +119,7 @@ After configuring your instance of the package,
 you can use the built-in `otp-access` middleware alias to secure your endpoints:
 
 ```php
-$route->get('secret', function (Request $request): string {
+Route::get('secret', function (Request $request): string {
     $request->otpToken()->refresh();
 
     return 'The secret of immortality';
