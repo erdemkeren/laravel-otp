@@ -370,3 +370,5 @@ $ composer test
 
 - Hilmi Erdem KEREN
 - Berkay Güre
+
+[![SymfonyInsight](https://insight.symfony.com/projects/afcbdcb7-b197-4037-9723-7f54cf018d9d/big.svg)](https://insight.symfony.com/projects/afcbdcb7-b197-4037-9723-7f54cf018d9d)
