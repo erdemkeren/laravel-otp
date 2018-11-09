@@ -55,7 +55,6 @@ class Token implements TokenInterface
                 'The unique identifier of token owner shall not be null.'
             );
         }
-
         $this->attributes['authenticable_id'] = $authenticableId;
         $this->attributes['plain_text'] = $plainText;
         $this->attributes['cipher_text'] = $cipherText;
@@ -278,10 +277,11 @@ class Token implements TokenInterface
      */
     protected function persist(): bool
     {
-        $this->attributes['created_at'] = $this->attributes['created_at']->toDateTimeString();
-        $this->attributes['updated_at'] = $this->getNow()->toDateTimeString();
+        $this->attributes['updated_at'] = $this->getNow();
 
         $attributes = $this->attributes;
+        $attributes['created_at'] = $attributes['created_at']->toDateTimeString();
+        $attributes['updated_at'] = $attributes['updated_at']->toDateTimeString();
 
         if (array_key_exists('plain_text', $attributes)) {
             unset($attributes['plain_text']);
