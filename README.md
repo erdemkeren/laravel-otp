@@ -13,8 +13,20 @@ This package allows you to secure your resources with one time password access (
 Example Usage:
 
 ```php
-Route::get('secret', function (): string {
-    return 'The secret of immortality';
+Route::get('secret', function (\Illuminate\Http\Request $request): string {
+    $token = $request->otpToken();
+    $messages[] = "The otp token {$token} has {$token->timeLeft()} out of {$token->expiryTime()} seconds.";
+
+    $token->refresh();
+    $messages[] = "The time left can be reset using the refresh method: {$token->timeLeft()}/{$token->expiryTime()}";
+
+    $token->extend(30);
+    $messages[] = "The expiry time can be increased using the extend method: {$token->timeLeft()}/{$token->expiryTime()}";
+
+    $messages[] = "You can also invalidate the token immediately. Try refreshing the page ;)";
+    $request->otpToken()->invalidate();
+
+    return implode('<br>', $messages);
 })->middleware('auth', 'otp');
 ```
 
