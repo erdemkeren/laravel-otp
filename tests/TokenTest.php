@@ -40,6 +40,7 @@ class TokenTest extends TestCase
             'foo',
             'bar',
             10,
+            null,
             Carbon::now(),
             Carbon::now()
         );
@@ -80,6 +81,7 @@ class TokenTest extends TestCase
             'foo',
             'bar',
             10,
+            null,
             Carbon::now(),
             Carbon::now()
         );
@@ -98,6 +100,26 @@ class TokenTest extends TestCase
     public function testPlainText()
     {
         $this->assertSame('bar', $this->token->plainText());
+    }
+
+    public function testScope()
+    {
+        $this->assertSame('default', $this->token->scope());
+    }
+
+    public function testScopeWithCustomValue()
+    {
+        $scopedToken = new Token(
+            1,
+            'foo',
+            'bar',
+            10,
+            'custom',
+            Carbon::now(),
+            Carbon::now()
+        );
+
+        $this->assertSame('custom', $scopedToken->scope());
     }
 
     public function testCreate()
@@ -138,6 +160,98 @@ class TokenTest extends TestCase
         $this->assertInstanceOf(TokenInterface::class, $newToken);
     }
 
+    public function testCreateWithForcedDefaultScope()
+    {
+        Carbon::setTestNow(
+            new Carbon('2018-11-06 00:00:00')
+        );
+
+        $this::$functions->shouldReceive('config')
+            ->once()->with('otp.table')
+            ->andReturn($tableName = 'foes');
+
+        $this::$functions->shouldReceive('config')
+            ->once()->with('otp.expires')
+            ->andReturn($expiryTimeMins = 10);
+
+        DB::shouldReceive('beginTransaction')->once();
+        DB::shouldReceive('table')->with($tableName)->once()->andReturnSelf();
+        DB::shouldReceive('updateOrInsert')
+            ->once()
+            ->with([
+                'authenticable_id' => $authenticableId = 1,
+                'cipher_text'      => $cipherText = 'foo',
+                'scope'            => null,
+            ], [
+                'authenticable_id' => $authenticableId,
+                'cipher_text'      => $cipherText,
+                'expiry_time'      => $expiryTimeMins * 60,
+                'scope'            => null,
+                'created_at'       => '2018-11-06 00:00:00',
+                'updated_at'       => '2018-11-06 00:00:00',
+            ])
+            ->andReturn(true);
+        DB::shouldReceive('commit')->once();
+
+        $defaultScopedToken = Token::create(
+            1,
+            'foo',
+            'bar',
+            null,
+            'default',
+            Carbon::now(),
+            Carbon::now()
+        );
+
+        $this->assertInstanceOf(TokenInterface::class, $defaultScopedToken);
+    }
+
+    public function testCreateWithCustomScope()
+    {
+        Carbon::setTestNow(
+            new Carbon('2018-11-06 00:00:00')
+        );
+
+        $this::$functions->shouldReceive('config')
+            ->once()->with('otp.table')
+            ->andReturn($tableName = 'foes');
+
+        $this::$functions->shouldReceive('config')
+            ->once()->with('otp.expires')
+            ->andReturn($expiryTimeMins = 10);
+
+        DB::shouldReceive('beginTransaction')->once();
+        DB::shouldReceive('table')->with($tableName)->once()->andReturnSelf();
+        DB::shouldReceive('updateOrInsert')
+            ->once()
+            ->with([
+                'authenticable_id' => $authenticableId = 1,
+                'cipher_text'      => $cipherText = 'foo',
+                'scope'            => 'custom',
+            ], [
+                'authenticable_id' => $authenticableId,
+                'cipher_text'      => $cipherText,
+                'expiry_time'      => $expiryTimeMins * 60,
+                'scope'            => 'custom',
+                'created_at'       => '2018-11-06 00:00:00',
+                'updated_at'       => '2018-11-06 00:00:00',
+            ])
+            ->andReturn(true);
+        DB::shouldReceive('commit')->once();
+
+        $defaultScopedToken = Token::create(
+            1,
+            'foo',
+            'bar',
+            null,
+            'custom',
+            Carbon::now(),
+            Carbon::now()
+        );
+
+        $this->assertInstanceOf(TokenInterface::class, $defaultScopedToken);
+    }
+
     public function testPersistenceShouldHandleErrors()
     {
         $this->expectException(\RuntimeException::class);
@@ -157,12 +271,14 @@ class TokenTest extends TestCase
         DB::shouldReceive('updateOrInsert')
             ->once()
             ->with([
-                'authenticable_id' => $authenticableId = 1,
-                'cipher_text'      => $cipherText = 'foo',
+                'authenticable_id' => $authenticableId = 2,
+                'cipher_text'      => $cipherText = 'zaz',
+                'scope'            => null,
             ], [
                 'authenticable_id' => $authenticableId,
-                'expiry_time'      => $expiryTimeMins * 60,
                 'cipher_text'      => $cipherText,
+                'expiry_time'      => $expiryTimeMins * 60,
+                'scope'            => null,
                 'created_at'       => '2018-11-06 00:00:00',
                 'updated_at'       => '2018-11-06 00:00:00',
             ])
@@ -171,9 +287,8 @@ class TokenTest extends TestCase
         DB::shouldReceive('rollBack')->once();
 
         $newToken = $this->token::create(
-            1,
-            'foo',
-            'bar'
+            $authenticableId,
+            $cipherText
         );
 
         $this->assertInstanceOf(TokenInterface::class, $newToken);

@@ -193,12 +193,13 @@ class OtpServiceTest extends TestCase
 
         $this::$functions->shouldReceive('retrieveByAttributes')
             ->once()
-            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar'])
+            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar', 'scope' => null])
             ->andReturn(new FakeToken(
                 1,
                 $cipherText,
                 null,
                 10,
+                null,
                 new Carbon('2018-11-06 14:44:00'),
                 new Carbon('2018-11-06 14:44:00')
             ));
@@ -221,7 +222,7 @@ class OtpServiceTest extends TestCase
 
         $this::$functions->shouldReceive('retrieveByAttributes')
             ->once()
-            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar'])
+            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar', 'scope' => null])
             ->andReturn(new FakeToken(
                 1,
                 $cipherText,
@@ -283,12 +284,13 @@ class OtpServiceTest extends TestCase
 
         $this::$functions->shouldReceive('retrieveByAttributes')
             ->once()
-            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar'])
+            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar', 'scope' => null])
             ->andReturn(new FakeToken(
                 1,
                 $cipherText,
                 null,
                 10,
+                null,
                 new Carbon('2018-11-06 14:44:00'),
                 new Carbon('2018-11-06 14:44:00')
             ));

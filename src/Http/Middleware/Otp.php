@@ -21,33 +21,55 @@ class Otp
      *
      * @param \Illuminate\Http\Request $request
      * @param \Closure                 $next
-     * @param null|string              $guard
+     * @param null|string              $scope
+     * @param array                    ...$args
      *
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, $guard = null)
+    public function handle(Request $request, Closure $next, ?string $scope = null, array ...$args)
     {
-        if (! $user = $request->user($guard)) {
+        if (! $user = $request->user()) {
             throw new \LogicException(
                 'The otp access control middleware requires user authentication via laravel guards.'
             );
         }
 
-        if (! $request->hasCookie('otp_token')) {
-            $this->sendNewOtpToUser($user);
+        $expires = null;
+        $length = null;
+        foreach ($args as $arg) {
+            if (strpos($arg, 'secs')) {
+                $secs = str_replace('secs', '', $arg);
+                if (\is_int($secs)) {
+                    $expires = $secs;
+                }
 
-            return $this->redirectToOtpPage();
+                continue;
+            }
+
+            if (strpos($arg, 'chars')) {
+                $chars = str_replace('chars', '', $arg);
+                if (\is_int($chars)) {
+                    $length = $chars;
+                }
+            }
+        }
+
+        if (! $request->hasCookie('otp_token')) {
+            $this->sendNewOtpToUser($user, $scope, $length, $expires);
+
+            return $this->redirectToOtpPage($scope);
         }
 
         $token = OtpFacade::retrieveByCipherText(
             $user->getAuthIdentifier(),
-            $request->cookie('otp_token')
+            $request->cookie($scope ? $scope.'_' : 'otp_token'),
+            $scope
         );
 
         if (! $token || $token->expired()) {
-            $this->sendNewOtpToUser($user);
+            $this->sendNewOtpToUser($user, $scope, $length, $expires);
 
-            return $this->redirectToOtpPage();
+            return $this->redirectToOtpPage($scope);
         }
 
         $request->macro('otpToken', function () use ($token): TokenInterface {
@@ -60,11 +82,14 @@ class Otp
     /**
      * Get the redirect url if check do not pass.
      *
+     * @param null|string $scope
+     *
      * @return RedirectResponse
      */
-    protected function redirectToOtpPage(): RedirectResponse
+    protected function redirectToOtpPage(?string $scope = null): RedirectResponse
     {
         session([
+            'otp_scope'        => $scope,
             'otp_requested'    => true,
             'otp_redirect_url' => url()->current(),
         ]);
@@ -76,10 +101,17 @@ class Otp
      * Create a new otp and notify the user.
      *
      * @param Authenticatable $user
+     * @param null|string     $scope
+     * @param null|int        $length
+     * @param null|int        $expires
      */
-    private function sendNewOtpToUser(Authenticatable $user): void
+    private function sendNewOtpToUser(
+        Authenticatable $user,
+        ?string $scope = null,
+        ?int $length = null,
+        ?int $expires = null): void
     {
-        $token = OtpFacade::create($user, 6);
+        $token = OtpFacade::create($user, $scope, $length, $expires);
 
         if (! method_exists($user, 'notify')) {
             throw new \UnexpectedValueException(

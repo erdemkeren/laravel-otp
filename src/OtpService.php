@@ -104,38 +104,35 @@ class OtpService
      * Check the otp of the authenticable
      * with the given cipher text.
      *
-     * @param mixed  $authenticableId
-     * @param string $token
+     * @param mixed       $authenticableId
+     * @param string      $token
+     * @param null|string $scope
      *
      * @return bool
      */
-    public function check($authenticableId, string $token): bool
+    public function check($authenticableId, string $token, ?string $scope = null): bool
     {
-        $token = $this->retrieveByCipherText($authenticableId, $token);
+        $token = $this->retrieveByCipherText($authenticableId, $token, $scope);
 
         return (bool) $token && ! $token->expired();
-    }
-
-    /**
-     * Set the active password generator of the otp service.
-     *
-     * @param string $name
-     */
-    public function setPasswordGenerator(string $name): void
-    {
-        $this->passwordGenerator = $this->manager->get($name);
     }
 
     /**
      * Create a new otp token.
      *
      * @param Authenticatable|mixed $authenticatableId
-     * @param int                   $length
+     * @param null|int              $length
+     * @param null|int              $expires
+     * @param null|string           $scope
      *
      * @return Token
      */
-    public function create($authenticatableId, ?int $length = null): TokenInterface
-    {
+    public function create(
+        $authenticatableId,
+        ?int $length = null,
+        ?int $expires = null,
+        ?string $scope = null
+    ): TokenInterface {
         $plainText = $this->getPasswordGenerator()($length ?: $this->passwordLength);
         $cipherText = $this->encryptor->encrypt($plainText);
 
@@ -143,34 +140,42 @@ class OtpService
             $authenticatableId = $authenticatableId->getAuthIdentifier();
         }
 
-        return $this->tokenClass::create($authenticatableId, $cipherText, $plainText);
+        return $this->tokenClass::create($authenticatableId, $cipherText, $plainText, $expires, $scope);
     }
 
     /**
      * Retrieve the token of the authenticable
      * by the given plain text.
      *
-     * @param mixed  $authenticableId
-     * @param string $plainText
+     * @param mixed       $authenticableId
+     * @param string      $plainText
+     * @param null|string $scope
      *
      * @return null|TokenInterface
      */
-    public function retrieveByPlainText($authenticableId, string $plainText): ?TokenInterface
-    {
-        return $this->retrieveByCipherText($authenticableId, $this->encryptor->encrypt($plainText));
+    public function retrieveByPlainText(
+        $authenticableId,
+        string $plainText,
+        ?string $scope = null
+    ): ?TokenInterface {
+        return $this->retrieveByCipherText($authenticableId, $this->encryptor->encrypt($plainText), $scope);
     }
 
     /**
      * Retrieve the token of the authenticable
      * by the given cipher text.
      *
-     * @param mixed  $authenticableId
-     * @param string $cipherText
+     * @param mixed       $authenticableId
+     * @param string      $cipherText
+     * @param null|string $scope
      *
      * @return null|TokenInterface
      */
-    public function retrieveByCipherText($authenticableId, string $cipherText): ?TokenInterface
-    {
+    public function retrieveByCipherText(
+        $authenticableId,
+        string $cipherText,
+        ?string $scope = null
+    ): ?TokenInterface {
         if ($authenticableId instanceof Authenticatable) {
             $authenticableId = $authenticableId->getAuthIdentifier();
         }
@@ -178,6 +183,7 @@ class OtpService
         return $this->tokenClass::retrieveByAttributes([
             'authenticable_id' => $authenticableId,
             'cipher_text'      => $cipherText,
+            'scope'            => $scope,
         ]);
     }
 
@@ -190,6 +196,16 @@ class OtpService
     public function addPasswordGenerator(string $name, $generator): void
     {
         $this->manager->register($name, $generator);
+    }
+
+    /**
+     * Set the active password generator of the otp service.
+     *
+     * @param string $name
+     */
+    public function setPasswordGenerator(string $name): void
+    {
+        $this->passwordGenerator = $this->manager->get($name);
     }
 
     /**

@@ -23,9 +23,10 @@ class Token implements TokenInterface
      */
     public $attributes = [
         'authenticable_id' => null,
+        'cipher_text'      => null,
         'plain_text'       => null,
         'expiry_time'      => null,
-        'cipher_text'      => null,
+        'scope'            => null,
         'created_at'       => null,
         'updated_at'       => null,
     ];
@@ -37,6 +38,7 @@ class Token implements TokenInterface
      * @param string           $cipherText
      * @param null|string      $plainText
      * @param null|int         $expiryTime
+     * @param null|string      $scope
      * @param null|Carbon      $createdAt
      * @param null|Carbon      $updatedAt
      */
@@ -45,6 +47,7 @@ class Token implements TokenInterface
         string $cipherText,
         ?string $plainText = null,
         ?int    $expiryTime = null,
+        ?string $scope = null,
         ?Carbon $createdAt = null,
         ?Carbon $updatedAt = null
     ) {
@@ -58,9 +61,13 @@ class Token implements TokenInterface
         $this->attributes['authenticable_id'] = $authenticableId;
         $this->attributes['plain_text'] = $plainText;
         $this->attributes['cipher_text'] = $cipherText;
+        $this->attributes['expiry_time'] = null === $expiryTime
+            ? $this->getDefaultExpiryTime()
+            : $expiryTime;
+        $this->attributes['scope'] = $scope;
+
         $this->attributes['created_at'] = $createdAt ?: $now;
         $this->attributes['updated_at'] = $updatedAt ?: $now;
-        $this->attributes['expiry_time'] = null === $expiryTime ? $this->getDefaultExpiryTime() : $expiryTime;
     }
 
     /**
@@ -132,6 +139,16 @@ class Token implements TokenInterface
     public function expiryTime(): int
     {
         return $this->attributes['expiry_time'];
+    }
+
+    /**
+     * Get the scope of the token.
+     *
+     * @return string
+     */
+    public function scope(): string
+    {
+        return $this->attributes['scope'] ?: TokenInterface::SCOPE_DEFAULT;
     }
 
     /**
@@ -216,15 +233,19 @@ class Token implements TokenInterface
      * @param $authenticableId
      * @param string      $cipherText
      * @param null|string $plainText
+     * @param null|int    $expiryTime
+     * @param null|string $scope
      *
      * @return TokenInterface
      */
     public static function create(
         $authenticableId,
         string $cipherText,
-        ?string $plainText = null
+        ?string $plainText = null,
+        ?int $expiryTime = null,
+        ?string $scope = null
     ): TokenInterface {
-        $token = new self($authenticableId, $cipherText, $plainText);
+        $token = new self($authenticableId, $cipherText, $plainText, $expiryTime, $scope);
 
         $token->persist();
 
@@ -291,8 +312,9 @@ class Token implements TokenInterface
             DB::beginTransaction();
 
             DB::table(self::getTable())->updateOrInsert([
-                'authenticable_id' => $this->authenticableId(),
-                'cipher_text'      => $this->cipherText(),
+                'authenticable_id' => $attributes['authenticable_id'],
+                'cipher_text'      => $attributes['cipher_text'],
+                'scope'            => $attributes['scope'],
             ], $attributes);
 
             DB::commit();

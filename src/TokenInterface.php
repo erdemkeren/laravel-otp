@@ -12,6 +12,8 @@ use Illuminate\Notifications\Notification;
 
 interface TokenInterface
 {
+    public const SCOPE_DEFAULT = 'default';
+
     /**
      * Get the unique identifier of the authenticable
      * who owns the token.
@@ -35,6 +37,20 @@ interface TokenInterface
     public function plainText(): ?string;
 
     /**
+     * Get the expiry time of the token in seconds.
+     *
+     * @return int
+     */
+    public function expiryTime(): int;
+
+    /**
+     * Get the scope of the token.
+     *
+     * @return string
+     */
+    public function scope(): string;
+
+    /**
      * Get the date token created.
      *
      * @return Carbon
@@ -47,13 +63,6 @@ interface TokenInterface
      * @return Carbon
      */
     public function updatedAt(): Carbon;
-
-    /**
-     * Get the expiry time of the token in seconds.
-     *
-     * @return int
-     */
-    public function expiryTime(): int;
 
     /**
      * Get the date time the token will expire.
@@ -115,13 +124,17 @@ interface TokenInterface
      * @param $authenticableId
      * @param string      $cipherText
      * @param null|string $plainText
+     * @param null|int    $expiryTime
+     * @param null|string $scope
      *
      * @return TokenInterface
      */
     public static function create(
         $authenticableId,
         string $cipherText,
-        ?string $plainText = null
+        ?string $plainText = null,
+        ?int $expiryTime = null,
+        ?string $scope = null
     ): self;
 
     /**
