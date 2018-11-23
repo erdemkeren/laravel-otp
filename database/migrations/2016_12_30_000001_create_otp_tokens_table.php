@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-final class CreateOtpTokensTable extends Migration
+class CreateOtpTokensTable extends Migration
 {
     /**
      * Run the migrations.
@@ -23,7 +23,7 @@ final class CreateOtpTokensTable extends Migration
             $table->timestamp('updated_at')->useCurrent();
             $table->unsignedSmallInteger('expiry_time')->nullable();
 
-            $table->unique(['authenticatable_id', 'cipher_text']);
+            $table->unique(['authenticable_id', 'cipher_text']);
         });
     }
 
