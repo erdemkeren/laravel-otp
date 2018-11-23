@@ -23,7 +23,7 @@ class CreateOtpTokensTable extends Migration
             $table->timestamp('updated_at')->useCurrent();
             $table->unsignedSmallInteger('expiry_time')->nullable();
 
-            $table->unique(['authenticatable_id', 'cipher_text']);
+            $table->unique(['authenticable_id', 'cipher_text']);
         });
     }
 
