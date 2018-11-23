@@ -34,23 +34,13 @@ class Otp
             );
         }
 
-        $expires = null;
         $length = null;
+        $expires = null;
         foreach ($args as $arg) {
-            if (strpos($arg, 'secs')) {
-                $secs = str_replace('secs', '', $arg);
-                if (\is_int($secs)) {
-                    $expires = $secs;
-                }
+            $parts = explode('=', $arg);
 
-                continue;
-            }
-
-            if (strpos($arg, 'chars')) {
-                $chars = str_replace('chars', '', $arg);
-                if (\is_int($chars)) {
-                    $length = $chars;
-                }
+            if (\in_array($parts[0], ['length', 'expires'], true)) {
+                ${$parts}[0] = $parts[1];
             }
         }
 

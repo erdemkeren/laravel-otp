@@ -27,7 +27,7 @@ Route::get('secret', function (\Illuminate\Http\Request $request): string {
     $request->otpToken()->invalidate();
 
     return implode('<br>', $messages);
-})->middleware('auth', 'otp');
+})->middleware('auth', 'otp:length=6,expires=60');
 ```
 
 ## Contents
@@ -134,7 +134,7 @@ Route::get('secret', function (Request $request): string {
     $request->otpToken()->refresh();
 
     return 'The secret of immortality';
-})->middleware('auth', 'otp');
+})->middleware('auth', 'otp:length=6,expires=60');
 ```
 
 This middleware will redirect any unauthenticated request to the `otp/create` endpoint
