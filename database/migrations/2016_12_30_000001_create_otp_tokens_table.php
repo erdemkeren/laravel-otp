@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateOtpTokensTable extends Migration
+final class CreateOtpTokensTable extends Migration
 {
     /**
      * Run the migrations.

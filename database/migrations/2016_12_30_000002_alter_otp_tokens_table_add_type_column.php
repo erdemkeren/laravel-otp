@@ -9,29 +9,25 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateOtpTokensTable extends Migration
+final class AlterOtpTokensTableAddTypeColumn extends Migration
 {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('otp_tokens', function (Blueprint $table) {
-            $table->unsignedInteger('authenticable_id');
-            $table->string('cipher_text', 64);
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent();
-            $table->unsignedSmallInteger('expiry_time')->nullable();
-
-            $table->unique(['authenticatable_id', 'cipher_text']);
+        Schema::table('otp_tokens', function (Blueprint $table): void {
+            $table->string('scope', 64)->nullable();
         });
     }
 
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
-        Schema::drop('otp_tokens');
+        Schema::table('otp_tokens', function (Blueprint $table): void {
+            $table->dropColumn('scope');
+        });
     }
 }
