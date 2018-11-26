@@ -17,7 +17,7 @@ final class AlterOtpTokensTableAddTypeColumn extends Migration
     public function up(): void
     {
         Schema::table('otp_tokens', function (Blueprint $table): void {
-            $table->string('scope', 64)->nullable();
+            $table->string('scope', 64)->nullable()->after('cipher_text');
         });
     }
 
