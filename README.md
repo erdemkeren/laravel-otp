@@ -27,7 +27,7 @@ Route::get('secret', function (\Illuminate\Http\Request $request): string {
     $request->otpToken()->invalidate();
 
     return implode('<br>', $messages);
-})->middleware('auth', 'otp:length=6,expires=60');
+})->middleware('auth', 'otp');
 ```
 
 ## Contents
@@ -53,7 +53,7 @@ $ composer require erdemkeren/laravel-otp;
 
 2- Register the package in your `config/app.php` file:
 
-_only if you are using Laravel <=5.4 or your auto package discovery off._
+_only if you are using Laravel <=5.4 or your auto package discovery is off._
 
 ```php
 Erdemkeren\Otp\OtpServiceProvider::class,
@@ -134,7 +134,7 @@ Route::get('secret', function (Request $request): string {
     $request->otpToken()->refresh();
 
     return 'The secret of immortality';
-})->middleware('auth', 'otp:length=6,expires=60');
+})->middleware('auth', 'otp:default,length=6,expires=60');
 ```
 
 This middleware will redirect any unauthenticated request to the `otp/create` endpoint
