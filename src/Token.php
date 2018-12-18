@@ -152,7 +152,9 @@ class Token implements TokenInterface
      */
     public function length(): ?int
     {
-        return $this->attributes['length'];
+        return null === $this->attributes['length']
+            ? $this->getDefaultPasswordLength()
+            : $this->attributes['length'];
     }
 
     /**
@@ -162,7 +164,7 @@ class Token implements TokenInterface
      */
     public function generator(): ?string
     {
-        return $this->attributes['generator'];
+        return $this->attributes['generator'] ?: $this->getDefaultPasswordGenerator();
     }
 
     /**
@@ -392,5 +394,25 @@ class Token implements TokenInterface
     private function getDefaultExpiryTime(): int
     {
         return config('otp.expires') * 60;
+    }
+
+    /**
+     * Get the default expiry time in seconds.
+     *
+     * @return int
+     */
+    private function getDefaultPasswordGenerator(): int
+    {
+        return config('otp.password_generator');
+    }
+
+    /**
+     * Get the default expiry time in seconds.
+     *
+     * @return int
+     */
+    private function getDefaultPasswordLength(): int
+    {
+        return config('otp.password_length');
     }
 }

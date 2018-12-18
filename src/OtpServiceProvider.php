@@ -69,8 +69,8 @@ class OtpServiceProvider extends ServiceProvider
         return new OtpService(
             new PasswordGeneratorManager(),
             new Encryptor(config('app.secret')),
-            config('otp.password_generator', 'string'),
-            config('otp.password_length', 6),
+            config('otp.password_generator'),
+            config('otp.password_length'),
             Token::class
         );
     }
