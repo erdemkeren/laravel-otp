@@ -11,22 +11,24 @@ use Closure;
 use Illuminate\Http\Request;
 use Erdemkeren\Otp\OtpFacade;
 use Erdemkeren\Otp\TokenInterface;
+use Erdemkeren\Otp\SendsNewOtpTokens;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Contracts\Auth\Authenticatable;
 
 class Otp
 {
+    use SendsNewOtpTokens;
+
     /**
      * Handle an incoming request.
      *
      * @param \Illuminate\Http\Request $request
      * @param \Closure                 $next
      * @param null|string              $scope
-     * @param array                    ...$args
+     * @param string                   ...$args
      *
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, ?string $scope = null, array ...$args)
+    public function handle(Request $request, Closure $next, ?string $scope = null, ...$args)
     {
         if (! $user = $request->user()) {
             throw new \LogicException(
@@ -40,24 +42,27 @@ class Otp
             $parts = explode('=', $arg);
 
             if (\in_array($parts[0], ['length', 'expires'], true)) {
-                ${$parts}[0] = $parts[1];
+                $varname = $parts[0];
+                ${$varname} = $parts[1];
             }
         }
 
-        if (! $request->hasCookie('otp_token')) {
-            $this->sendNewOtpToUser($user, $scope, $length, $expires);
+        $cookieName = ($scope ?: TokenInterface::SCOPE_DEFAULT).'_otp_token';
+
+        if (! $request->hasCookie($cookieName)) {
+            $this->sendNewOtpTokenToUser($user, $scope, $length, $expires);
 
             return $this->redirectToOtpPage($scope);
         }
 
         $token = OtpFacade::retrieveByCipherText(
             $user->getAuthIdentifier(),
-            $request->cookie($scope ? $scope.'_' : 'otp_token'),
+            $request->cookie($cookieName),
             $scope
         );
 
         if (! $token || $token->expired()) {
-            $this->sendNewOtpToUser($user, $scope, $length, $expires);
+            $this->sendNewOtpTokenToUser($user, $scope, $length, $expires);
 
             return $this->redirectToOtpPage($scope);
         }
@@ -85,30 +90,5 @@ class Otp
         ]);
 
         return redirect()->route('otp.create');
-    }
-
-    /**
-     * Create a new otp and notify the user.
-     *
-     * @param Authenticatable $user
-     * @param null|string     $scope
-     * @param null|int        $length
-     * @param null|int        $expires
-     */
-    private function sendNewOtpToUser(
-        Authenticatable $user,
-        ?string $scope = null,
-        ?int $length = null,
-        ?int $expires = null): void
-    {
-        $token = OtpFacade::create($user, $scope, $length, $expires);
-
-        if (! method_exists($user, 'notify')) {
-            throw new \UnexpectedValueException(
-                'The otp owner should be an instance of notifiable or implement the notify method.'
-            );
-        }
-
-        $user->notify($token->toNotification());
     }
 }

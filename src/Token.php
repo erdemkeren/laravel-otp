@@ -37,17 +37,21 @@ class Token implements TokenInterface
      * @param int|mixed|string $authenticableId
      * @param string           $cipherText
      * @param null|string      $plainText
-     * @param null|int         $expiryTime
      * @param null|string      $scope
+     * @param null|int         $length
+     * @param null|int         $expiryTime
+     * @param null|string      $generator
      * @param null|Carbon      $createdAt
      * @param null|Carbon      $updatedAt
      */
     public function __construct(
         $authenticableId,
-        string $cipherText,
+        string  $cipherText,
         ?string $plainText = null,
-        ?int    $expiryTime = null,
         ?string $scope = null,
+        ?int    $length = null,
+        ?int    $expiryTime = null,
+        ?string $generator = null,
         ?Carbon $createdAt = null,
         ?Carbon $updatedAt = null
     ) {
@@ -61,10 +65,10 @@ class Token implements TokenInterface
         $this->attributes['authenticable_id'] = $authenticableId;
         $this->attributes['plain_text'] = $plainText;
         $this->attributes['cipher_text'] = $cipherText;
-        $this->attributes['expiry_time'] = null === $expiryTime
-            ? $this->getDefaultExpiryTime()
-            : $expiryTime;
         $this->attributes['scope'] = $scope;
+        $this->attributes['length'] = $length;
+        $this->attributes['expiry_time'] = $expiryTime;
+        $this->attributes['generator'] = $generator;
 
         $this->attributes['created_at'] = $createdAt ?: $now;
         $this->attributes['updated_at'] = $updatedAt ?: $now;
@@ -132,16 +136,6 @@ class Token implements TokenInterface
     }
 
     /**
-     * Get the expiry time of the token in seconds.
-     *
-     * @return int
-     */
-    public function expiryTime(): int
-    {
-        return $this->attributes['expiry_time'];
-    }
-
-    /**
      * Get the scope of the token.
      *
      * @return string
@@ -149,6 +143,38 @@ class Token implements TokenInterface
     public function scope(): string
     {
         return $this->attributes['scope'] ?: TokenInterface::SCOPE_DEFAULT;
+    }
+
+    /**
+     * Get the length of the token.
+     *
+     * @return null|int
+     */
+    public function length(): ?int
+    {
+        return $this->attributes['length'];
+    }
+
+    /**
+     * Get the generator name which created the token.
+     *
+     * @return null|string
+     */
+    public function generator(): ?string
+    {
+        return $this->attributes['generator'];
+    }
+
+    /**
+     * Get the expiry time of the token in seconds.
+     *
+     * @return int
+     */
+    public function expiryTime(): int
+    {
+        return null === $this->attributes['expiry_time']
+            ? $this->getDefaultExpiryTime()
+            : $this->attributes['expiry_time'];
     }
 
     /**
@@ -230,22 +256,26 @@ class Token implements TokenInterface
     /**
      * Create a new token.
      *
-     * @param $authenticableId
+     * @param mixed       $authenticableId
      * @param string      $cipherText
      * @param null|string $plainText
-     * @param null|int    $expiryTime
      * @param null|string $scope
+     * @param null|int    $length
+     * @param null|int    $expiryTime
+     * @param null|string $generator
      *
      * @return TokenInterface
      */
     public static function create(
         $authenticableId,
-        string $cipherText,
+        string  $cipherText,
         ?string $plainText = null,
+        ?string $scope = null,
+        ?int $length = null,
         ?int $expiryTime = null,
-        ?string $scope = null
+        ?string $generator = null
     ): TokenInterface {
-        $token = new self($authenticableId, $cipherText, $plainText, $expiryTime, $scope);
+        $token = new static($authenticableId, $cipherText, $plainText, $scope, $length, $expiryTime, $generator);
 
         $token->persist();
 
@@ -275,7 +305,10 @@ class Token implements TokenInterface
             $entity->authenticable_id,
             $entity->cipher_text,
             null,
+            $entity->scope,
+            $entity->length,
             $entity->expiry_time,
+            $entity->generator,
             new Carbon($entity->created_at),
             new Carbon($entity->updated_at)
         );

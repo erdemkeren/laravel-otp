@@ -37,18 +37,25 @@ interface TokenInterface
     public function plainText(): ?string;
 
     /**
-     * Get the expiry time of the token in seconds.
-     *
-     * @return int
-     */
-    public function expiryTime(): int;
-
-    /**
      * Get the scope of the token.
      *
      * @return string
      */
     public function scope(): string;
+
+    /**
+     * Get the length of the token.
+     *
+     * @return null|int
+     */
+    public function length(): ?int;
+
+    /**
+     * Get the generator name which created the token.
+     *
+     * @return null|string
+     */
+    public function generator(): ?string;
 
     /**
      * Get the date token created.
@@ -63,6 +70,13 @@ interface TokenInterface
      * @return Carbon
      */
     public function updatedAt(): Carbon;
+
+    /**
+     * Get the expiry time of the token in seconds.
+     *
+     * @return int
+     */
+    public function expiryTime(): int;
 
     /**
      * Get the date time the token will expire.
@@ -121,20 +135,24 @@ interface TokenInterface
     /**
      * Create a new token.
      *
-     * @param $authenticableId
+     * @param mixed       $authenticableId
      * @param string      $cipherText
      * @param null|string $plainText
-     * @param null|int    $expiryTime
      * @param null|string $scope
+     * @param null|int    $length
+     * @param null|int    $expiryTime
+     * @param null|string $generator
      *
      * @return TokenInterface
      */
     public static function create(
         $authenticableId,
-        string $cipherText,
+        string  $cipherText,
         ?string $plainText = null,
+        ?string $scope = null,
+        ?int $length = null,
         ?int $expiryTime = null,
-        ?string $scope = null
+        ?string $generator = null
     ): self;
 
     /**

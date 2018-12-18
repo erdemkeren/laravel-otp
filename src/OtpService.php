@@ -65,6 +65,10 @@ class OtpService
      * @param string                            $defaultGenerator
      * @param int                               $passwordLength
      * @param string                            $tokenClass
+     *
+     * @throws \ReflectionException
+     * @throws \RuntimeException
+     * @throws \TypeError
      */
     public function __construct(
         PasswordGeneratorManagerInterface $manager,
@@ -121,26 +125,36 @@ class OtpService
      * Create a new otp token.
      *
      * @param Authenticatable|mixed $authenticatableId
-     * @param null|int              $length
-     * @param null|int              $expires
      * @param null|string           $scope
+     * @param null|int              $length
+     * @param null|int              $expiryTime
+     * @param null|string           $generator
      *
      * @return Token
      */
     public function create(
         $authenticatableId,
+        ?string $scope = null,
         ?int $length = null,
-        ?int $expires = null,
-        ?string $scope = null
+        ?int $expiryTime = null,
+        ?string $generator = null
     ): TokenInterface {
-        $plainText = $this->getPasswordGenerator()($length ?: $this->passwordLength);
+        $plainText = $this->getPasswordGenerator($generator)($length ?: $this->passwordLength);
         $cipherText = $this->encryptor->encrypt($plainText);
 
         if ($authenticatableId instanceof Authenticatable) {
             $authenticatableId = $authenticatableId->getAuthIdentifier();
         }
 
-        return $this->tokenClass::create($authenticatableId, $cipherText, $plainText, $expires, $scope);
+        return $this->tokenClass::create(
+            $authenticatableId,
+            $cipherText,
+            $plainText,
+            $scope,
+            $length,
+            $expiryTime,
+            $generator
+        );
     }
 
     /**
@@ -178,6 +192,10 @@ class OtpService
     ): ?TokenInterface {
         if ($authenticableId instanceof Authenticatable) {
             $authenticableId = $authenticableId->getAuthIdentifier();
+        }
+
+        if (! $scope) {
+            $scope = TokenInterface::SCOPE_DEFAULT;
         }
 
         return $this->tokenClass::retrieveByAttributes([

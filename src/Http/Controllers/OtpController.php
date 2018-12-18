@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Erdemkeren\Otp\TokenInterface;
 use Illuminate\Contracts\View\View;
 use Erdemkeren\Otp\OtpFacade as Otp;
+use Erdemkeren\Otp\SendsNewOtpTokens;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
@@ -21,6 +22,8 @@ use Illuminate\Contracts\Validation\Validator as ValidatorInterface;
  */
 class OtpController
 {
+    use SendsNewOtpTokens;
+
     /**
      * * Show the form for the otp submission.
      *
@@ -73,6 +76,8 @@ class OtpController
                 'The password is expired.'
             );
 
+            $this->sendNewOtpTokenToUser($request->user());
+
             return redirect()->back()->withErrors($validator);
         }
 
@@ -81,7 +86,7 @@ class OtpController
         return redirect()
             ->to(session()->pull('otp_redirect_url'))
             ->withCookie(
-                cookie()->make('otp_token', (string) $token, $token->expiryTime() / 60)
+                cookie()->make($token->scope().'_otp_token', (string) $token, $token->expiryTime() / 60)
             );
     }
 

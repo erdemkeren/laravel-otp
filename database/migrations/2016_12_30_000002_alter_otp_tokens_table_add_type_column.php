@@ -18,6 +18,8 @@ final class AlterOtpTokensTableAddTypeColumn extends Migration
     {
         Schema::table('otp_tokens', function (Blueprint $table): void {
             $table->string('scope', 64)->nullable()->after('cipher_text');
+            $table->string('generator', 50)->after('scope')->nullable();
+            $table->unsignedSmallInteger('length')->after('generator')->nullable();
         });
     }
 
@@ -27,7 +29,7 @@ final class AlterOtpTokensTableAddTypeColumn extends Migration
     public function down(): void
     {
         Schema::table('otp_tokens', function (Blueprint $table): void {
-            $table->dropColumn('scope');
+            $table->dropColumn(['scope', 'generator', 'length']);
         });
     }
 }
