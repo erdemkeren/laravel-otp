@@ -60,7 +60,8 @@ class OtpController
 
         if (! $token = $this->retrieveOtpTokenByPlainText(
             $request->user(),
-            $request->input('password')
+            $request->input('password'),
+            $request->session()->get('otp_scope')
         )) {
             $validator->getMessageBag()->add(
                 'password',
@@ -81,6 +82,7 @@ class OtpController
             return redirect()->back()->withErrors($validator);
         }
 
+        session()->forget('otp_scope');
         session()->forget('otp_requested');
 
         return redirect()
@@ -109,12 +111,16 @@ class OtpController
      *
      * @param Authenticatable $user
      * @param string          $password
+     * @param null|string     $scope
      *
      * @return mixed
      */
-    private function retrieveOtpTokenByPlainText(Authenticatable $user, string $password): ?TokenInterface
-    {
-        return Otp::retrieveByPlainText($user, $password);
+    private function retrieveOtpTokenByPlainText(
+        Authenticatable $user,
+        string $password,
+        ?string $scope
+    ): ?TokenInterface {
+        return Otp::retrieveByPlainText($user, $password, $scope);
     }
 
     /**

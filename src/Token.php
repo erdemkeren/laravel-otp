@@ -399,9 +399,9 @@ class Token implements TokenInterface
     /**
      * Get the default expiry time in seconds.
      *
-     * @return int
+     * @return string
      */
-    private function getDefaultPasswordGenerator(): int
+    private function getDefaultPasswordGenerator(): string
     {
         return config('otp.password_generator');
     }
