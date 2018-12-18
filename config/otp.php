@@ -20,6 +20,12 @@ return [
     'password_generator' => 'string',
 
     /*
+     * The default length of the passwords.
+     */
+
+    'password_length' => 6,
+
+    /*
      * The name of the table to be used to store
      * the otp tokens.
      */

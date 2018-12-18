@@ -146,6 +146,11 @@ class OtpService
             $authenticatableId = $authenticatableId->getAuthIdentifier();
         }
 
+        // Save some space.
+        if (TokenInterface::SCOPE_DEFAULT === $scope) {
+            $scope = null;
+        }
+
         return $this->tokenClass::create(
             $authenticatableId,
             $cipherText,
@@ -194,8 +199,9 @@ class OtpService
             $authenticableId = $authenticableId->getAuthIdentifier();
         }
 
-        if (! $scope) {
-            $scope = TokenInterface::SCOPE_DEFAULT;
+        // Save some space.
+        if (TokenInterface::SCOPE_DEFAULT === $scope) {
+            $scope = null;
         }
 
         return $this->tokenClass::retrieveByAttributes([
@@ -220,6 +226,8 @@ class OtpService
      * Set the active password generator of the otp service.
      *
      * @param string $name
+     *
+     * @deprecated
      */
     public function setPasswordGenerator(string $name): void
     {

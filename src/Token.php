@@ -236,7 +236,7 @@ class Token implements TokenInterface
     {
         $seconds = null === $seconds ? $this->getDefaultExpiryTime() : $seconds;
 
-        $this->attributes['expiry_time'] += $seconds;
+        $this->attributes['expiry_time'] = $this->expiryTime() + $seconds;
 
         return $this->persist();
     }

@@ -36,37 +36,37 @@ class Otp
             );
         }
 
-        $length = null;
-        $expires = null;
-        foreach ($args as $arg) {
-            $parts = explode('=', $arg);
-
-            if (\in_array($parts[0], ['length', 'expires'], true)) {
-                $varname = $parts[0];
-                ${$varname} = $parts[1];
-            }
-        }
-
+        // Generate the scoped token cookie name.
         $cookieName = ($scope ?: TokenInterface::SCOPE_DEFAULT).'_otp_token';
 
+        // Check token. If there is no token; send a token to user
+        // and redirect the client browser to the otp page.
         if (! $request->hasCookie($cookieName)) {
-            $this->sendNewOtpTokenToUser($user, $scope, $length, $expires);
+            list($length, $expiryTime) = $this->getOtpOptions($args);
+
+            $this->sendNewOtpTokenToUser($user, $scope, $length, $expiryTime);
 
             return $this->redirectToOtpPage($scope);
         }
 
+        // Try to retrieve the otp token.
         $token = OtpFacade::retrieveByCipherText(
             $user->getAuthIdentifier(),
             $request->cookie($cookieName),
             $scope
         );
 
+        // If there is no token, or the token is expired,
+        // redirect the client browser to the otp page.
         if (! $token || $token->expired()) {
-            $this->sendNewOtpTokenToUser($user, $scope, $length, $expires);
+            list($length, $expiryTime) = $this->getOtpOptions($args);
+
+            $this->sendNewOtpTokenToUser($user, $scope, $length, $expiryTime);
 
             return $this->redirectToOtpPage($scope);
         }
 
+        // Add the otp token to request for further usage.
         $request->macro('otpToken', function () use ($token): TokenInterface {
             return $token;
         });
@@ -90,5 +90,30 @@ class Otp
         ]);
 
         return redirect()->route('otp.create');
+    }
+
+    /**
+     * Get the options from the given arguments.
+     *
+     * @param $args
+     *
+     * @return array
+     */
+    private function getOtpOptions($args)
+    {
+        $options = [
+            'length'     => null,
+            'expiryTime' => null,
+        ];
+
+        foreach ($args as $arg) {
+            $parts = explode('=', $arg);
+
+            if (\in_array($parts[0], ['length', 'expiryTime'], true)) {
+                $options[$parts[0]] = $parts[1];
+            }
+        }
+
+        return array_values($options);
     }
 }

@@ -24,6 +24,8 @@ final class PasswordGeneratorManager implements PasswordGeneratorManagerInterfac
      *
      * @param string                                     $name
      * @param callable|PasswordGeneratorInterface|string $generator
+     *
+     * @throws \ReflectionException
      */
     public function register(string $name, $generator): void
     {
@@ -67,6 +69,8 @@ final class PasswordGeneratorManager implements PasswordGeneratorManagerInterfac
      * fully qualified password generator class name.
      *
      * @param string $className
+     *
+     * @throws \ReflectionException
      *
      * @return PasswordGeneratorInterface
      */

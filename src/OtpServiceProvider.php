@@ -60,6 +60,8 @@ class OtpServiceProvider extends ServiceProvider
     /**
      * Create a new otp service instance.
      *
+     * @throws \ReflectionException
+     *
      * @return OtpService
      */
     private function createServiceInstance(): OtpService
@@ -68,7 +70,7 @@ class OtpServiceProvider extends ServiceProvider
             new PasswordGeneratorManager(),
             new Encryptor(config('app.secret')),
             config('otp.password_generator', 'string'),
-            6,
+            config('otp.password_length', 6),
             Token::class
         );
     }
