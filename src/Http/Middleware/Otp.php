@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use Erdemkeren\Otp\OtpFacade;
 use Erdemkeren\Otp\TokenInterface;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Contracts\Auth\Authenticatable;
 
 class Otp
 {
