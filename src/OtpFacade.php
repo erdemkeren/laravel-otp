@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static check($authenticableId, string $token): bool
  * @method static addPasswordGenerator(string $name, $generator): void
  * @method static create($authenticatableId, ?int $length = null): TokenInterface
+ * @method static sendNewOtpToUser(Authenticatable $user): void
  * @method static retrieveByPlainText($authenticableId, string $plainText): ?TokenInterface
  * @method static retrieveByCipherText($authenticableId, string $cipherText): ?TokenInterface
  */
