@@ -7,9 +7,9 @@
 
 namespace Erdemkeren\Otp\PasswordGenerators;
 
+use Erdemkeren\Otp\PasswordGeneratorInterface;
 use Mockery as M;
 use PHPUnit\Framework\TestCase;
-use Erdemkeren\Otp\PasswordGeneratorInterface;
 
 /** @covers \Erdemkeren\Otp\PasswordGenerators\StringPasswordGenerator */
 class StringPasswordGeneratorTest extends TestCase
