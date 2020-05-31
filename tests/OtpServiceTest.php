@@ -7,15 +7,15 @@
 
 namespace Erdemkeren\Otp;
 
-use Mockery as M;
 use Carbon\Carbon;
-use PHPUnit\Framework\TestCase;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Container\Container;
-use Illuminate\Support\Facades\Facade;
-use Illuminate\Database\DatabaseManager;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Connectors\ConnectionFactory;
+use Illuminate\Database\DatabaseManager;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Facade;
+use Mockery as M;
+use PHPUnit\Framework\TestCase;
 
 if (! \function_exists('\Erdemkeren\Otp\config')) {
     function config($key)

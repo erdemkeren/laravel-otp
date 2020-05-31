@@ -8,6 +8,7 @@
 namespace Erdemkeren\Otp\PasswordGenerators;
 
 use Erdemkeren\Otp\PasswordGeneratorInterface;
+use Illuminate\Support\Str;
 
 /**
  * Class StringPasswordGenerator.
@@ -23,6 +24,6 @@ class StringPasswordGenerator implements PasswordGeneratorInterface
      */
     public function generate(int $length): string
     {
-        return str_random($length);
+        return Str::random($length);
     }
 }

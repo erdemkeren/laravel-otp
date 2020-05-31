@@ -7,9 +7,9 @@
 
 namespace Erdemkeren\Otp;
 
+use Illuminate\Notifications\Messages\MailMessage;
 use Mockery as M;
 use PHPUnit\Framework\TestCase;
-use Illuminate\Notifications\Messages\MailMessage;
 
 if (! \function_exists('\Erdemkeren\Otp\config')) {
     function config($key)
@@ -37,7 +37,7 @@ class TokenNotificationTest extends TestCase
      */
     private $notification;
 
-    public function setUp()
+    public function setUp(): void
     {
         global $testerClass;
         $testerClass = self::class;
@@ -47,7 +47,7 @@ class TokenNotificationTest extends TestCase
         $this->notification = new TokenNotification($this->token);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         M::close();
 
@@ -57,7 +57,7 @@ class TokenNotificationTest extends TestCase
         parent::tearDown();
     }
 
-    public function testToMail()
+    public function testToMail(): void
     {
         $this::$functions->shouldReceive('config')
             ->once()->with('app.name')
@@ -77,7 +77,7 @@ class TokenNotificationTest extends TestCase
         ], $mailMessage->introLines);
     }
 
-    public function testViaReturnsDefaultChannels()
+    public function testViaReturnsDefaultChannels(): void
     {
         $this::$functions->shouldReceive('config')
             ->once()->with('otp.default_channels')
@@ -86,7 +86,7 @@ class TokenNotificationTest extends TestCase
         $this->assertSame(['mail', 'sms', 'acme_sms'], $this->notification->via(null));
     }
 
-    public function testViaReturnsNotifiablePreference()
+    public function testViaReturnsNotifiablePreference(): void
     {
         $notifiable = new class() {
             public function otpChannels()
@@ -98,7 +98,7 @@ class TokenNotificationTest extends TestCase
         $this->assertSame(['mail', 'sms'], $this->notification->via($notifiable));
     }
 
-    public function testTokenNotificationMacro()
+    public function testTokenNotificationMacro(): void
     {
         $testedThis = null;
 
@@ -111,7 +111,7 @@ class TokenNotificationTest extends TestCase
         $this->assertInstanceOf(TokenNotification::class, $testedThis);
     }
 
-    public function testToSms()
+    public function testToSms(): void
     {
         $this->token->shouldReceive('plainText')
             ->once()
@@ -122,5 +122,34 @@ class TokenNotificationTest extends TestCase
             ." You can enter the following reset code: {$plainText}"
             .' If you didn\'t request the password, simply ignore this message.', $this->notification->toSms()
         );
+    }
+
+    public function testItIsSerializable(): void
+    {
+        $this::$functions->shouldReceive('config')
+            ->once()->with('otp.expires')
+            ->andReturn('60');
+
+        $tokenNotification = new TokenNotification(new FakeToken2(1, 'foo'));
+        $tokenNotification::macro('acmeSms', function () {
+            return 'foo';
+        });
+        $serialized = serialize($tokenNotification);
+        $tokenNotification = unserialize($serialized);
+
+        $this->assertEquals('foo', $tokenNotification->acmeSms());
+    }
+}
+
+class FakeToken2 extends Token implements TokenInterface
+{
+    public static function retrieveByAttributes(array $attributes): ?TokenInterface
+    {
+        return OtpServiceTest::$functions->retrieveByAttributes($attributes);
+    }
+
+    protected function persist(): bool
+    {
+        return true;
     }
 }

@@ -7,8 +7,8 @@
 
 namespace Erdemkeren\Otp;
 
-use Illuminate\Support\Facades\Route;
 use Erdemkeren\Otp\Http\Controllers\OtpController;
+use Illuminate\Support\Facades\Route;
 
 class OtpRoutes
 {

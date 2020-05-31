@@ -53,7 +53,7 @@ $ composer require erdemkeren/laravel-otp;
 
 2- Register the package in your `config/app.php` file:
 
-_only if you are using Laravel <=5.4 or your auto package discovery off._
+_only if you your auto package discovery off._
 
 ```php
 Erdemkeren\Otp\OtpServiceProvider::class,
