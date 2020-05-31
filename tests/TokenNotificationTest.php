@@ -7,9 +7,9 @@
 
 namespace Erdemkeren\Otp;
 
+use Illuminate\Notifications\Messages\MailMessage;
 use Mockery as M;
 use PHPUnit\Framework\TestCase;
-use Illuminate\Notifications\Messages\MailMessage;
 
 if (! \function_exists('\Erdemkeren\Otp\config')) {
     function config($key)
