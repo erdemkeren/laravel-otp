@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 /** @covers \Erdemkeren\Otp\OtpRoutes */
 class OtpRoutesTest extends TestCase
 {
-    public function testRegister()
+    public function testRegister(): void
     {
         // This test makes no sense.
         // Just for coverage =)

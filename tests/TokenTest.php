@@ -50,12 +50,12 @@ class TokenTest extends TestCase
         $testerClass = self::class;
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         M::close();
     }
 
-    public function testRefresh()
+    public function testRefresh(): void
     {
         Carbon::setTestNow(new Carbon('2018-11-06 00:00:01'));
 
@@ -66,12 +66,12 @@ class TokenTest extends TestCase
         $this->assertSame(11, $this->token->expiryTime());
     }
 
-    public function testExpiresAt()
+    public function testExpiresAt(): void
     {
         $this->assertSame('2018-11-06 00:00:10', $this->token->expiresAt()->toDateTimeString());
     }
 
-    public function testItDoesNotConstructWithNullAuthenticableId()
+    public function testItDoesNotConstructWithNullAuthenticableId(): void
     {
         $this->expectException(\LogicException::class);
 
@@ -85,22 +85,22 @@ class TokenTest extends TestCase
         );
     }
 
-    public function testAuthenticableId()
+    public function testAuthenticableId(): void
     {
         $this->assertSame(1, $this->token->authenticableId());
     }
 
-    public function testExpiryTime()
+    public function testExpiryTime(): void
     {
         $this->assertSame(10, $this->token->expiryTime());
     }
 
-    public function testPlainText()
+    public function testPlainText(): void
     {
         $this->assertSame('bar', $this->token->plainText());
     }
 
-    public function testCreate()
+    public function testCreate(): void
     {
         Carbon::setTestNow(new Carbon('2018-11-06 00:00:00'));
 
@@ -138,7 +138,7 @@ class TokenTest extends TestCase
         $this->assertInstanceOf(TokenInterface::class, $newToken);
     }
 
-    public function testPersistenceShouldHandleErrors()
+    public function testPersistenceShouldHandleErrors(): void
     {
         $this->expectException(\RuntimeException::class);
 
@@ -179,23 +179,23 @@ class TokenTest extends TestCase
         $this->assertInstanceOf(TokenInterface::class, $newToken);
     }
 
-    public function testToNotification()
+    public function testToNotification(): void
     {
         $this->assertInstanceOf(TokenNotification::class, $this->token->toNotification());
         $this->assertSame($this->token, $this->token->toNotification()->token);
     }
 
-    public function testCreatedAt()
+    public function testCreatedAt(): void
     {
         $this->assertSame('2018-11-06 00:00:00', $this->token->createdAt()->toDateTimeString());
     }
 
-    public function testUpdatedAt()
+    public function testUpdatedAt(): void
     {
         $this->assertSame('2018-11-06 00:00:00', $this->token->updatedAt()->toDateTimeString());
     }
 
-    public function testExpired()
+    public function testExpired(): void
     {
         Carbon::setTestNow(new Carbon('2018-11-06 00:00:11'));
 
@@ -206,7 +206,7 @@ class TokenTest extends TestCase
         $this->assertFalse($this->token->expired());
     }
 
-    public function testExtend()
+    public function testExtend(): void
     {
         $this->persistShouldBeCalled();
 
@@ -215,12 +215,12 @@ class TokenTest extends TestCase
         $this->assertSame(11, $this->token->expiryTime());
     }
 
-    public function testItCastsToString()
+    public function testItCastsToString(): void
     {
         $this->assertSame('foo', (string) $this->token);
     }
 
-    public function testRetrieveByAttributesCanReturnEmptyResults()
+    public function testRetrieveByAttributesCanReturnEmptyResults(): void
     {
         $this::$functions->shouldReceive('config')
             ->once()->with('otp.table')
@@ -233,7 +233,7 @@ class TokenTest extends TestCase
         $this->assertNull($result);
     }
 
-    public function testRetrieveByAttributes()
+    public function testRetrieveByAttributes(): void
     {
         $this::$functions->shouldReceive('config')
             ->once()->with('otp.table')
@@ -254,19 +254,19 @@ class TokenTest extends TestCase
         $this->assertInstanceOf(TokenInterface::class, $result);
     }
 
-    public function testCipherText()
+    public function testCipherText(): void
     {
         $this->assertSame('foo', (string) $this->token);
     }
 
-    public function testTimeLeft()
+    public function testTimeLeft(): void
     {
         Carbon::setTestNow(new Carbon('2018-11-06 00:00:05'));
 
         $this->assertSame(5, $this->token->timeLeft());
     }
 
-    public function testRevoke()
+    public function testRevoke(): void
     {
         $this->persistShouldBeCalled();
 
@@ -275,7 +275,7 @@ class TokenTest extends TestCase
         $this->assertSame(0, $this->token->expiryTime());
     }
 
-    public function testInvalidate()
+    public function testInvalidate(): void
     {
         $this->persistShouldBeCalled();
 

@@ -37,7 +37,7 @@ class TokenNotificationTest extends TestCase
      */
     private $notification;
 
-    public function setUp()
+    public function setUp(): void
     {
         global $testerClass;
         $testerClass = self::class;
@@ -47,7 +47,7 @@ class TokenNotificationTest extends TestCase
         $this->notification = new TokenNotification($this->token);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         M::close();
 
@@ -57,7 +57,7 @@ class TokenNotificationTest extends TestCase
         parent::tearDown();
     }
 
-    public function testToMail()
+    public function testToMail(): void
     {
         $this::$functions->shouldReceive('config')
             ->once()->with('app.name')
@@ -77,7 +77,7 @@ class TokenNotificationTest extends TestCase
         ], $mailMessage->introLines);
     }
 
-    public function testViaReturnsDefaultChannels()
+    public function testViaReturnsDefaultChannels(): void
     {
         $this::$functions->shouldReceive('config')
             ->once()->with('otp.default_channels')
@@ -86,7 +86,7 @@ class TokenNotificationTest extends TestCase
         $this->assertSame(['mail', 'sms', 'acme_sms'], $this->notification->via(null));
     }
 
-    public function testViaReturnsNotifiablePreference()
+    public function testViaReturnsNotifiablePreference(): void
     {
         $notifiable = new class() {
             public function otpChannels()
@@ -98,7 +98,7 @@ class TokenNotificationTest extends TestCase
         $this->assertSame(['mail', 'sms'], $this->notification->via($notifiable));
     }
 
-    public function testTokenNotificationMacro()
+    public function testTokenNotificationMacro(): void
     {
         $testedThis = null;
 
@@ -111,7 +111,7 @@ class TokenNotificationTest extends TestCase
         $this->assertInstanceOf(TokenNotification::class, $testedThis);
     }
 
-    public function testToSms()
+    public function testToSms(): void
     {
         $this->token->shouldReceive('plainText')
             ->once()

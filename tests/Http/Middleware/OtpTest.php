@@ -89,7 +89,7 @@ class OtpTest extends TestCase
 
     private $tokenNotification;
 
-    public function setUp()
+    public function setUp(): void
     {
         global $testerClass;
         $testerClass = self::class;
@@ -112,7 +112,7 @@ class OtpTest extends TestCase
         $this::$functions = M::mock();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         M::close();
 

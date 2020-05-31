@@ -42,7 +42,7 @@ class NumericNo0PasswordGeneratorTest extends TestCase
      */
     private $passwordGenerator;
 
-    public function setUp()
+    public function setUp(): void
     {
         self::$functions = M::mock();
 
@@ -52,12 +52,12 @@ class NumericNo0PasswordGeneratorTest extends TestCase
         $this->passwordGenerator = new NumericNo0PasswordGenerator();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         M::close();
     }
 
-    public function testGenerate()
+    public function testGenerate(): void
     {
         $this::$functions->shouldReceive('random_int')
             ->once()->with(10000, 99999)->andReturn(10345);
@@ -69,7 +69,7 @@ class NumericNo0PasswordGeneratorTest extends TestCase
         $this->assertSame('16345', $password);
     }
 
-    public function testGenerateUsesRandWhenRandomIntDontWork()
+    public function testGenerateUsesRandWhenRandomIntDontWork(): void
     {
         $this::$functions->shouldReceive('random_int')
             ->twice()->andThrow(\Exception::class);

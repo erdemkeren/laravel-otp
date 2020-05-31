@@ -66,7 +66,7 @@ class OtpControllerTest extends TestCase
 
     private $service;
 
-    public function setUp()
+    public function setUp(): void
     {
         global $testerClass;
         $testerClass = self::class;
@@ -90,7 +90,7 @@ class OtpControllerTest extends TestCase
         Facade::setFacadeApplication($app);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         M::close();
 
@@ -117,7 +117,7 @@ class OtpControllerTest extends TestCase
         $this->assertSame('view', $controller->create());
     }
 
-    public function testCreateRedirectsWhenNotRedirectedByMiddleware()
+    public function testCreateRedirectsWhenNotRedirectedByMiddleware(): void
     {
         $controller = new OtpController();
 
@@ -134,7 +134,7 @@ class OtpControllerTest extends TestCase
         $this->assertSame($response, $controller->create($request));
     }
 
-    public function testStore()
+    public function testStore(): void
     {
         $controller = new OtpController();
 
@@ -268,7 +268,7 @@ class OtpControllerTest extends TestCase
         $this->assertSame($response, $controller->store($request));
     }
 
-    public function testStoreShouldRedirectBackWithErrorsOnValidationError()
+    public function testStoreShouldRedirectBackWithErrorsOnValidationError(): void
     {
         $controller = new OtpController();
 
@@ -327,7 +327,7 @@ class OtpControllerTest extends TestCase
         $this->assertSame($response, $controller->store($request));
     }
 
-    public function testStoreShouldRedirectBackWithErrorsOnInvalidPassword()
+    public function testStoreShouldRedirectBackWithErrorsOnInvalidPassword(): void
     {
         $controller = new OtpController();
 
@@ -406,7 +406,7 @@ class OtpControllerTest extends TestCase
         $this->assertSame($response, $controller->store($request));
     }
 
-    public function testStoreShouldRedirectBackWithErrorsOnExpiredToken()
+    public function testStoreShouldRedirectBackWithErrorsOnExpiredToken(): void
     {
         $controller = new OtpController();
 
@@ -489,7 +489,7 @@ class OtpControllerTest extends TestCase
         $this->assertSame($response, $controller->store($request));
     }
 
-    public function testStoreRedirectsWhenNotRedirectedByMiddleware()
+    public function testStoreRedirectsWhenNotRedirectedByMiddleware(): void
     {
         $controller = new OtpController();
 
