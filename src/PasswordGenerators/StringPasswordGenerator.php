@@ -7,8 +7,8 @@
 
 namespace Erdemkeren\Otp\PasswordGenerators;
 
-use Illuminate\Support\Str;
 use Erdemkeren\Otp\PasswordGeneratorInterface;
+use Illuminate\Support\Str;
 
 /**
  * Class StringPasswordGenerator.
