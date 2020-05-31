@@ -7,17 +7,17 @@
 
 namespace Erdemkeren\Otp\Http\Controllers;
 
-use Mockery as M;
-use Illuminate\Http\Request;
 use Erdemkeren\Otp\OtpService;
-use PHPUnit\Framework\TestCase;
 use Erdemkeren\Otp\TokenInterface;
-use Illuminate\Support\MessageBag;
 use Illuminate\Container\Container;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Facade;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\MessageBag;
+use Mockery as M;
+use PHPUnit\Framework\TestCase;
 
 if (! \function_exists('\Erdemkeren\Otp\Http\Controllers\session')) {
     function session($a = null, $b = null)

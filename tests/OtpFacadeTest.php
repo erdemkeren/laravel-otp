@@ -7,9 +7,9 @@
 
 namespace Erdemkeren\Otp;
 
-use PHPUnit\Framework\TestCase;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \Erdemkeren\Otp\OtpFacade

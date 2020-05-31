@@ -7,14 +7,14 @@
 
 namespace Erdemkeren\Otp\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Erdemkeren\Otp\TokenInterface;
-use Illuminate\Contracts\View\View;
 use Erdemkeren\Otp\OtpFacade as Otp;
-use Illuminate\Http\RedirectResponse;
+use Erdemkeren\Otp\TokenInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Support\Facades\Validator as ValidatorFacade;
 use Illuminate\Contracts\Validation\Validator as ValidatorInterface;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator as ValidatorFacade;
 
 /**
  * Class OtpController.

@@ -7,9 +7,9 @@
 
 namespace Erdemkeren\Otp\PasswordGenerators;
 
+use Erdemkeren\Otp\PasswordGeneratorInterface;
 use Mockery as M;
 use PHPUnit\Framework\TestCase;
-use Erdemkeren\Otp\PasswordGeneratorInterface;
 
 if (! \function_exists('\Erdemkeren\Otp\PasswordGenerators\random_int')) {
     function random_int($min, $max)
