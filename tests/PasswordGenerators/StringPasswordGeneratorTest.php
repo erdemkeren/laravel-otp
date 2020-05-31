@@ -11,15 +11,6 @@ use Erdemkeren\Otp\PasswordGeneratorInterface;
 use Mockery as M;
 use PHPUnit\Framework\TestCase;
 
-if (! \function_exists('\Erdemkeren\Otp\PasswordGenerators\str_random')) {
-    function str_random($l)
-    {
-        global $testerClass;
-
-        return $testerClass::$functions->str_random($l);
-    }
-}
-
 /** @covers \Erdemkeren\Otp\PasswordGenerators\StringPasswordGenerator */
 class StringPasswordGeneratorTest extends TestCase
 {
@@ -50,10 +41,7 @@ class StringPasswordGeneratorTest extends TestCase
 
     public function testGenerate(): void
     {
-        $this::$functions->shouldReceive('str_random')
-            ->once()->with(5)->andReturn('abcde');
-
-        $password = $this->passwordGenerator->generate(5);
-        $this->assertSame('abcde', $password);
+        $password = $this->passwordGenerator->generate(7);
+        $this->assertSame(7, strlen($password));
     }
 }

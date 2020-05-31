@@ -123,4 +123,33 @@ class TokenNotificationTest extends TestCase
             .' If you didn\'t request the password, simply ignore this message.', $this->notification->toSms()
         );
     }
+
+    public function testItIsSerializable(): void
+    {
+        $this::$functions->shouldReceive('config')
+            ->once()->with('otp.expires')
+            ->andReturn('60');
+
+        $tokenNotification = new TokenNotification(new FakeToken2(1, 'foo'));
+        $tokenNotification::macro('acmeSms', function () {
+            return 'foo';
+        });
+        $serialized = serialize($tokenNotification);
+        $tokenNotification = unserialize($serialized);
+
+        $this->assertEquals('foo', $tokenNotification->acmeSms());
+    }
+}
+
+class FakeToken2 extends Token implements TokenInterface
+{
+    public static function retrieveByAttributes(array $attributes): ?TokenInterface
+    {
+        return OtpServiceTest::$functions->retrieveByAttributes($attributes);
+    }
+
+    protected function persist(): bool
+    {
+        return true;
+    }
 }
