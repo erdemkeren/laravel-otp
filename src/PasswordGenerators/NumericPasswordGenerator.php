@@ -7,8 +7,8 @@
 
 namespace Erdemkeren\Otp\PasswordGenerators;
 
-use Exception;
 use Erdemkeren\Otp\PasswordGeneratorInterface;
+use Exception;
 
 /**
  * Class NumericPasswordGenerator.

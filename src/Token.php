@@ -8,8 +8,8 @@
 namespace Erdemkeren\Otp;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class Token.
@@ -44,7 +44,7 @@ class Token implements TokenInterface
         $authenticableId,
         string $cipherText,
         ?string $plainText = null,
-        ?int    $expiryTime = null,
+        ?int $expiryTime = null,
         ?Carbon $createdAt = null,
         ?Carbon $updatedAt = null
     ) {

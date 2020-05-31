@@ -19,7 +19,7 @@ class PasswordGeneratorManagerTest extends TestCase
      */
     private $manager;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->manager = new PasswordGeneratorManager();
     }

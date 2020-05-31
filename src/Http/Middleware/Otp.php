@@ -8,11 +8,11 @@
 namespace Erdemkeren\Otp\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
 use Erdemkeren\Otp\OtpFacade;
 use Erdemkeren\Otp\TokenInterface;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class Otp
 {

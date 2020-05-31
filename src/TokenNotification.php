@@ -8,10 +8,10 @@
 namespace Erdemkeren\Otp;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Support\Traits\Macroable;
-use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Traits\Macroable;
 
 /**
  * Class TokenNotification.

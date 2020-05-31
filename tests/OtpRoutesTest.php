@@ -7,16 +7,16 @@
 
 namespace Erdemkeren\Otp;
 
-use Mockery as M;
-use PHPUnit\Framework\TestCase;
+use Erdemkeren\Otp\Http\Controllers\OtpController;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
-use Erdemkeren\Otp\Http\Controllers\OtpController;
+use Mockery as M;
+use PHPUnit\Framework\TestCase;
 
 /** @covers \Erdemkeren\Otp\OtpRoutes */
 class OtpRoutesTest extends TestCase
 {
-    public function testRegister()
+    public function testRegister(): void
     {
         // This test makes no sense.
         // Just for coverage =)

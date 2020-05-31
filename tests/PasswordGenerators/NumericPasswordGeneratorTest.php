@@ -7,9 +7,9 @@
 
 namespace Erdemkeren\Otp\PasswordGenerators;
 
+use Erdemkeren\Otp\PasswordGeneratorInterface;
 use Mockery as M;
 use PHPUnit\Framework\TestCase;
-use Erdemkeren\Otp\PasswordGeneratorInterface;
 
 if (! \function_exists('\Erdemkeren\Otp\PasswordGenerators\random_int')) {
     function random_int($min, $max)
@@ -42,7 +42,7 @@ class NumericPasswordGeneratorTest extends TestCase
      */
     private $passwordGenerator;
 
-    public function setUp()
+    public function setUp(): void
     {
         self::$functions = M::mock();
 
@@ -52,12 +52,12 @@ class NumericPasswordGeneratorTest extends TestCase
         $this->passwordGenerator = new NumericPasswordGenerator();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         M::close();
     }
 
-    public function testGenerate()
+    public function testGenerate(): void
     {
         $this::$functions->shouldReceive('random_int')
             ->once()->with(10000, 99999)->andReturn(10345);
@@ -66,7 +66,7 @@ class NumericPasswordGeneratorTest extends TestCase
         $this->assertSame('10345', $password);
     }
 
-    public function testGenerateUsesRandWhenRandomIntDontWork()
+    public function testGenerateUsesRandWhenRandomIntDontWork(): void
     {
         $this::$functions->shouldReceive('random_int')
             ->once()->andThrow(\Exception::class);

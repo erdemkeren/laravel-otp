@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
  */
 class EncryptorTest extends TestCase
 {
-    public function testEncrypt()
+    public function testEncrypt(): void
     {
         $key = '12345678901234567890123456789012';
 
