@@ -32,7 +32,7 @@ class NumericNo0PasswordGenerator extends NumericPasswordGenerator implements Pa
      *
      * @return int
      */
-    private function getRandomDigitWithNo0()
+    protected function getRandomDigitWithNo0()
     {
         try {
             $int = random_int(1, 9);
