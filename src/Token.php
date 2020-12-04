@@ -314,7 +314,7 @@ class Token implements TokenInterface
      *
      * @return Carbon
      */
-    private function getNow(): Carbon
+    protected function getNow(): Carbon
     {
         return Carbon::now();
     }
@@ -324,7 +324,7 @@ class Token implements TokenInterface
      *
      * @return string
      */
-    private static function getTable(): string
+    protected static function getTable(): string
     {
         return config('otp.table');
     }
@@ -334,7 +334,7 @@ class Token implements TokenInterface
      *
      * @return int
      */
-    private function getDefaultExpiryTime(): int
+    protected function getDefaultExpiryTime(): int
     {
         return config('otp.expires') * 60;
     }

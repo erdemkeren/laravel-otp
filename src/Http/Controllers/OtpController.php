@@ -92,7 +92,7 @@ class OtpController
      *
      * @return ValidatorInterface
      */
-    private function getOtpSubmissionRequestValidator(Request $request): ValidatorInterface
+    protected function getOtpSubmissionRequestValidator(Request $request): ValidatorInterface
     {
         return ValidatorFacade::make($request->all(), [
             'password' => 'required|string',
@@ -107,7 +107,7 @@ class OtpController
      *
      * @return mixed
      */
-    private function retrieveOtpTokenByPlainText(Authenticatable $user, string $password): ?TokenInterface
+    protected function retrieveOtpTokenByPlainText(Authenticatable $user, string $password): ?TokenInterface
     {
         return Otp::retrieveByPlainText($user, $password);
     }
@@ -117,7 +117,7 @@ class OtpController
      *
      * @return mixed
      */
-    private function otpHasBeenRequested()
+    protected function otpHasBeenRequested()
     {
         return session('otp_requested', false);
     }

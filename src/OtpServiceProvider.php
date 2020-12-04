@@ -62,7 +62,7 @@ class OtpServiceProvider extends ServiceProvider
      *
      * @return OtpService
      */
-    private function createServiceInstance(): OtpService
+    protected function createServiceInstance(): OtpService
     {
         return new OtpService(
             new PasswordGeneratorManager(),
@@ -79,7 +79,7 @@ class OtpServiceProvider extends ServiceProvider
      *
      * @param OtpService $service
      */
-    private function registerDefaultPasswordGenerators($service): void
+    protected function registerDefaultPasswordGenerators($service): void
     {
         $service->addPasswordGenerator('string', Generators\StringPasswordGenerator::class);
         $service->addPasswordGenerator('numeric', Generators\NumericPasswordGenerator::class);
@@ -91,7 +91,7 @@ class OtpServiceProvider extends ServiceProvider
      *
      * @return string
      */
-    private function configPath()
+    protected function configPath()
     {
         return __DIR__.'/../config/otp.php';
     }
@@ -101,7 +101,7 @@ class OtpServiceProvider extends ServiceProvider
      *
      * @return string
      */
-    private function migrationPath()
+    protected function migrationPath()
     {
         return __DIR__.'/../database/migrations/';
     }
@@ -111,7 +111,7 @@ class OtpServiceProvider extends ServiceProvider
      *
      * @return string
      */
-    private function viewPath()
+    protected function viewPath()
     {
         return __DIR__.'/../views/';
     }

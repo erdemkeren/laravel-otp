@@ -77,7 +77,7 @@ class Otp
      *
      * @param Authenticatable $user
      */
-    private function sendNewOtpToUser(Authenticatable $user): void
+    protected function sendNewOtpToUser(Authenticatable $user): void
     {
         $token = OtpFacade::create($user, 6);
 

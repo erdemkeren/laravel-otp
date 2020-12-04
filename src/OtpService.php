@@ -197,7 +197,7 @@ class OtpService
      *
      * @return callable
      */
-    private function getPasswordGenerator(): callable
+    protected function getPasswordGenerator(): callable
     {
         return $this->passwordGenerator ?: $this->passwordGenerator = $this->manager->get($this->defaultGenerator);
     }
