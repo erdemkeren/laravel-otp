@@ -147,6 +147,24 @@ class OtpService
     }
 
     /**
+     * Create a new otp and notify the user.
+     *
+     * @param Authenticatable $user
+     */
+    public function sendNewOtpToUser(Authenticatable $user): void
+    {
+        $token = OtpFacade::create($user, 6);
+
+        if (! method_exists($user, 'notify')) {
+            throw new \UnexpectedValueException(
+                'The otp owner should be an instance of notifiable or implement the notify method.'
+            );
+        }
+
+        $user->notify($token->toNotification());
+    }
+
+    /**
      * Retrieve the token of the authenticable
      * by the given plain text.
      *

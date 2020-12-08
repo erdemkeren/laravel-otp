@@ -10,7 +10,6 @@ namespace Erdemkeren\Otp\Http\Middleware;
 use Closure;
 use Erdemkeren\Otp\OtpFacade;
 use Erdemkeren\Otp\TokenInterface;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -34,7 +33,7 @@ class Otp
         }
 
         if (! $request->hasCookie('otp_token')) {
-            $this->sendNewOtpToUser($user);
+            OtpFacade::sendNewOtpToUser($user);
 
             return $this->redirectToOtpPage();
         }
@@ -45,7 +44,7 @@ class Otp
         );
 
         if (! $token || $token->expired()) {
-            $this->sendNewOtpToUser($user);
+            OtpFacade::sendNewOtpToUser($user);
 
             return $this->redirectToOtpPage();
         }
@@ -70,23 +69,5 @@ class Otp
         ]);
 
         return redirect()->route('otp.create');
-    }
-
-    /**
-     * Create a new otp and notify the user.
-     *
-     * @param Authenticatable $user
-     */
-    private function sendNewOtpToUser(Authenticatable $user): void
-    {
-        $token = OtpFacade::create($user, 6);
-
-        if (! method_exists($user, 'notify')) {
-            throw new \UnexpectedValueException(
-                'The otp owner should be an instance of notifiable or implement the notify method.'
-            );
-        }
-
-        $user->notify($token->toNotification());
     }
 }
