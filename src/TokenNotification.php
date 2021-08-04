@@ -46,7 +46,7 @@ class TokenNotification extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        $channels = method_exists($notifiable, 'otpChannels') && ! empty($notifiable->otpChannels())
+        $channels = ! is_null($notifiable) && method_exists($notifiable, 'otpChannels') && ! empty($notifiable->otpChannels())
             ? $notifiable->otpChannels()
             : config('otp.default_channels');
 
