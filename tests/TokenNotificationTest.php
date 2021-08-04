@@ -88,7 +88,8 @@ class TokenNotificationTest extends TestCase
 
     public function testViaReturnsNotifiablePreference(): void
     {
-        $notifiable = new class() {
+        $notifiable = new class()
+        {
             public function otpChannels()
             {
                 return ['mail', 'sms'];
