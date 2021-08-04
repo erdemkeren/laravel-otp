@@ -23,7 +23,8 @@ class OtpFacadeTest extends TestCase
         $app->singleton('app', 'Illuminate\Container\Container');
         $app->singleton('config', 'Illuminate\Config\Repository');
         $app->singleton('otp', function () {
-            return new class() {
+            return new class()
+            {
                 public function create($a, $b): string
                 {
                     return $a.$b;

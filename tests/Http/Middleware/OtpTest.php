@@ -180,7 +180,8 @@ class OtpTest extends TestCase
             ->andReturnNull();
 
         $this::$functions->shouldReceive('url')
-            ->once()->andReturn(new class() {
+            ->once()->andReturn(new class()
+            {
                 public function current(): string
                 {
                     return 'foo';
@@ -194,7 +195,8 @@ class OtpTest extends TestCase
             ])->andReturnNull();
 
         $this::$functions->shouldReceive('redirect')
-            ->once()->andReturn(new class() {
+            ->once()->andReturn(new class()
+            {
                 public function route()
                 {
                     return M::mock(RedirectResponse::class);
@@ -269,7 +271,8 @@ class OtpTest extends TestCase
             ->andReturnNull();
 
         $this::$functions->shouldReceive('url')
-            ->once()->andReturn(new class() {
+            ->once()->andReturn(new class()
+            {
                 public function current(): string
                 {
                     return 'foo';
@@ -283,7 +286,8 @@ class OtpTest extends TestCase
             ])->andReturnNull();
 
         $this::$functions->shouldReceive('redirect')
-            ->once()->andReturn(new class() {
+            ->once()->andReturn(new class()
+            {
                 public function route()
                 {
                     return M::mock(RedirectResponse::class);
