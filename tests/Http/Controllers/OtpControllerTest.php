@@ -179,7 +179,8 @@ class OtpControllerTest extends TestCase
 
         $this::$functions->shouldReceive('session')
             ->twice()->with(null, null)
-            ->andReturn(new class(self::$functions) {
+            ->andReturn(new class(self::$functions)
+            {
                 private $funcs;
 
                 public function __construct($funcs)
@@ -204,7 +205,8 @@ class OtpControllerTest extends TestCase
 
         $this::$functions->shouldReceive('redirect')
             ->once()
-            ->andReturn($c = new class(self::$functions) {
+            ->andReturn($c = new class(self::$functions)
+            {
                 private $funcs;
 
                 public function __construct($funcs)
@@ -251,7 +253,8 @@ class OtpControllerTest extends TestCase
 
         $this::$functions->shouldReceive('cookie')
             ->once()
-            ->andReturn(new class($this::$functions) {
+            ->andReturn(new class($this::$functions)
+            {
                 private $funcs;
 
                 public function __construct($funcs)
@@ -297,7 +300,8 @@ class OtpControllerTest extends TestCase
 
         $this::$functions->shouldReceive('redirect')
             ->once()
-            ->andReturn($c = new class(self::$functions) {
+            ->andReturn($c = new class(self::$functions)
+            {
                 private $funcs;
 
                 public function __construct($funcs)
@@ -376,7 +380,8 @@ class OtpControllerTest extends TestCase
 
         $this::$functions->shouldReceive('redirect')
             ->once()
-            ->andReturn($c = new class(self::$functions) {
+            ->andReturn($c = new class(self::$functions)
+            {
                 private $funcs;
 
                 public function __construct($funcs)
@@ -459,7 +464,8 @@ class OtpControllerTest extends TestCase
 
         $this::$functions->shouldReceive('redirect')
             ->once()
-            ->andReturn($c = new class(self::$functions) {
+            ->andReturn($c = new class(self::$functions)
+            {
                 private $funcs;
 
                 public function __construct($funcs)
