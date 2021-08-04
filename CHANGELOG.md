@@ -2,7 +2,12 @@
 
 All notable changes to `erdemkeren/laravel-otp` will be documented in this file.
 
-## Laravel OTP 1.0.0
+## 4.0.0 - 2021-08-04
+
+- Removes PHP 7 support
+- Adds support for PHP 8
+
+## Laravel OTP
 
 Renames the package as laravel-otp. Was temporary-access before.
 
