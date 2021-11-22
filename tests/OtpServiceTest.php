@@ -1,327 +1,141 @@
 <?php
-
 /*
- * @copyright 2018 Hilmi Erdem KEREN
- * @license MIT
+ * Copyright (c) 2021. Hilmi Erdem Keren
+ * license MIT
  */
 
-namespace Erdemkeren\Otp;
+namespace Erdemkeren\Otp\Test;
 
 use Carbon\Carbon;
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Database\Connectors\ConnectionFactory;
-use Illuminate\Database\DatabaseManager;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Facade;
-use Mockery as M;
+use Erdemkeren\Otp\Contracts\EncryptorContract;
+use Erdemkeren\Otp\OtpToken;
+use Erdemkeren\Otp\OtpService;
+use Erdemkeren\Otp\Contracts\GeneratorManagerContract;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
 
-if (! \function_exists('\Erdemkeren\Otp\config')) {
-    function config($key)
-    {
-        global $testerClass;
-
-        return $testerClass::$functions->config($key);
-    }
-}
-
-/**
- * @covers \Erdemkeren\Otp\OtpService
- */
 class OtpServiceTest extends TestCase
 {
-    public static $functions = [];
+    private OtpService $tokenService;
 
-    /**
-     * @var int
-     */
-    private $pwdLength;
+    private MockObject|TokenRepositoryContract $repository;
 
-    /**
-     * @var string
-     */
-    private $defaultGeneratorName;
+    private MockObject|EncryptorContract $encryptor;
 
-    /**
-     * @var OtpService
-     */
-    private $service;
+    private MockObject|GeneratorManagerContract $manager;
 
-    /**
-     * @var PasswordGeneratorManagerInterface
-     */
-    private $pwdGenManager;
-
-    /**
-     * @var Authenticatable
-     */
-    private $authenticable;
-
-    /**
-     * @var TokenInterface
-     */
-    private $token;
-
-    /**
-     * @var EncryptorInterface
-     */
-    private $encryptor;
-
-    public function setUp(): void
+    protected function setUp(): void
     {
-        self::$functions = M::mock();
+        parent::setUp();
 
-        global $testerClass;
-        $testerClass = self::class;
+        $this->manager = $this->createMock(GeneratorManagerContract::class);
+        $this->encryptor = $this->createMock(EncryptorContract::class);
+        $this->repository = $this->createMock(TokenRepositoryContract::class);
+        $this->tokenService = new OtpService($this->manager, $this->encryptor, $this->repository);
+    }
 
-        $app = new Container();
-        $app->singleton('app', 'Illuminate\Container\Container');
-        $app->singleton('config', 'Illuminate\Config\Repository');
 
-        $app->bind('db', function ($app) {
-            return new DatabaseManager($app, new ConnectionFactory($app));
-        });
+    /**
+     * @test
+     */
+    public function itIsInstantiable(): void
+    {
+        $this->assertInstanceOf(OtpService::class, $this->tokenService);
+    }
 
-        Facade::setFacadeApplication($app);
+    /**
+     * @test
+     */
+    public function itCreatesANewPersistedTokenWithTheGivenAuthenticableId(): void
+    {
+        $this->manager
+            ->expects($this->once())
+            ->method('get')
+            ->with('default')
+            ->willReturn(fn (): string => ':token:');
 
-        $this->pwdGenManager = M::mock(PasswordGeneratorManagerInterface::class);
-        $this->encryptor = M::mock(EncryptorInterface::class);
-        $this->defaultGeneratorName = 'foo';
-        $this->pwdLength = 6;
+        $this->encryptor
+            ->expects($this->once())
+            ->method('encrypt')
+            ->with(':token:')
+            ->willReturn('encrypted');
 
-        $this->authenticable = M::mock(Authenticatable::class);
-        $this->token = M::mock(TokenInterface::class);
+        $this->repository
+            ->expects($this->once())
+            ->method('persist')
+            ->willReturn(true);
 
-        $this->service = new OtpService(
-            $this->pwdGenManager,
-            $this->encryptor,
-            $this->defaultGeneratorName,
-            $this->pwdLength,
-            FakeToken::class
+        $token = $this->tokenService->create(1);
+        $this->assertInstanceOf(OtpToken::class, $token);
+        $this->assertEquals(1, $token->authenticableId());
+    }
+
+    /**
+     * @test
+     */
+    public function itSavesTheGivenOtp(): void
+    {
+        $token = new OtpToken(['expiry_time' => 300]);
+
+        $this->repository
+            ->expects($this->once())
+            ->method('persist')
+            ->with($token)
+            ->willReturn(true);
+
+        $this->assertTrue($this->tokenService->save($token));
+    }
+
+    /**
+     * @test
+     */
+    public function itExtendsTheValidityOfAToken(): void
+    {
+        $token = new OtpToken([
+            'expiry_time' => 300,
+        ]);
+
+        $extendedToken = $this->tokenService->extend($token, 300);
+
+        $this->assertEquals(600, $extendedToken->expiryTime());
+    }
+
+    /**
+     * @test
+     */
+    public function itRefreshesTheExpiryTimeOfAToken(): void
+    {
+        Carbon::setTestNow('2021-11-20 19:20:00');
+
+        $token = new OtpToken([
+            'expiry_time' => 300,
+        ]);
+
+        Carbon::setTestNow('2021-11-20 19:25:00');
+
+        $refreshedToken = $this->tokenService->refresh($token);
+
+        $this->assertEquals('300', $refreshedToken->timeLeft());
+        $this->assertEquals(
+            300,
+            $token->expiresAt()->diffInSeconds($refreshedToken->expiresAt())
         );
     }
 
-    public function tearDown(): void
+    /**
+     * @test
+     */
+    public function itInvalidatesTheToken(): void
     {
-        M::close();
+        $token = new OtpToken([
+            'expiry_time' => 300,
+        ]);
 
-        global $testerClass;
-        $testerClass = null;
+        $invalidatedToken = $this->tokenService->invalidate($token);
 
-        parent::tearDown();
+        $this->assertFalse($token->expired());
+        $this->assertEquals(0, $invalidatedToken->expiryTime());
+        $this->assertTrue($invalidatedToken->expired());
     }
-
-    public function testItThrowRuntimeExceptionIfTokenClassNotFound(): void
-    {
-        $this->expectException(\RuntimeException::class);
-
-        $this->service = new OtpService(
-            $this->pwdGenManager,
-            $this->encryptor,
-            $this->defaultGeneratorName,
-            $this->pwdLength,
-            AcmeToken::class
-        );
-    }
-
-    public function testItThrowRuntimeExceptionIfTokenIsNotInstantiable(): void
-    {
-        $this->expectException(\RuntimeException::class);
-
-        $this->service = new OtpService(
-            $this->pwdGenManager,
-            $this->encryptor,
-            $this->defaultGeneratorName,
-            $this->pwdLength,
-            AbstractToken::class
-        );
-    }
-
-    public function testItThrowTypeErrorIfTokenIsNotAnInstanceOfTokenInterface(): void
-    {
-        $this->expectException(\TypeError::class);
-
-        $this->service = new OtpService(
-            $this->pwdGenManager,
-            $this->encryptor,
-            $this->defaultGeneratorName,
-            $this->pwdLength,
-            NotImplementingToken::class
-        );
-    }
-
-    public function testItCreatesTokens(): void
-    {
-        $this->pwdGenManager->shouldReceive('get')
-            ->once()->with($this->defaultGeneratorName)
-            ->andReturn($this->fooGenerator());
-
-        $this->encryptor->shouldReceive('encrypt')
-            ->once()->with('foo')
-            ->andReturn('bar');
-
-        $this->authenticable->shouldReceive('getAuthIdentifier')
-            ->once()
-            ->andReturn(1);
-
-        $this::$functions->shouldReceive('config')
-            ->once()->with('otp.table')
-            ->andReturn($tableName = 'foes');
-
-        $this::$functions->shouldReceive('config')
-            ->once()->with('otp.expires')
-            ->andReturn('900');
-
-        DB::shouldReceive('beginTransaction')->once();
-        DB::shouldReceive('table')->with($tableName)->once()->andReturnSelf();
-        DB::shouldReceive('updateOrInsert')->once()->andReturn(true);
-        DB::shouldReceive('commit')->once();
-
-        $token = $this->service->create($this->authenticable);
-
-        $this->assertInstanceOf(TokenInterface::class, $token);
-        $this->assertSame('foo', $token->plainText());
-        $this->assertSame('bar', $token->cipherText());
-    }
-
-    public function testCheck(): void
-    {
-        $this->authenticable->shouldReceive('getAuthIdentifier')
-            ->once()
-            ->andReturn($authenticableId = 1);
-
-        $this::$functions->shouldReceive('retrieveByAttributes')
-            ->once()
-            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar'])
-            ->andReturn(new FakeToken(
-                1,
-                $cipherText,
-                null,
-                10,
-                new Carbon('2018-11-06 14:44:00'),
-                new Carbon('2018-11-06 14:44:00')
-            ));
-
-        Carbon::setTestNow(new Carbon('2018-11-06 14:44:09'));
-
-        $result = $this->service->check($this->authenticable, $cipherText);
-        $this->assertTrue($result);
-    }
-
-    public function testRetrieveByPlainText(): void
-    {
-        $this->authenticable->shouldReceive('getAuthIdentifier')
-            ->once()
-            ->andReturn($authenticableId = 1);
-
-        $this->encryptor->shouldReceive('encrypt')
-            ->once()->with($plainText = 'foo')
-            ->andReturn($cipherText = 'bar');
-
-        $this::$functions->shouldReceive('retrieveByAttributes')
-            ->once()
-            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar'])
-            ->andReturn(new FakeToken(
-                1,
-                $cipherText,
-                null,
-                10,
-                new Carbon('2018-11-06 14:44:00'),
-                new Carbon('2018-11-06 14:44:00')
-            ));
-
-        $token = $this->service->retrieveByPlainText($this->authenticable, $plainText);
-        $this->assertInstanceOf(TokenInterface::class, $token);
-    }
-
-    public function testAddSetPasswordGenerator(): void
-    {
-        $generatorResult = 'acme_generator_result';
-
-        $this->pwdGenManager->shouldReceive('register')
-            ->once()->with('acme', $generator = function () use ($generatorResult) {
-                return $generatorResult;
-            })->andReturnNull();
-
-        $this->pwdGenManager->shouldReceive('get')
-            ->once()->with('acme')
-            ->andReturn($generator);
-
-        $this->service->addPasswordGenerator('acme', $generator);
-
-        $this->encryptor->shouldReceive('encrypt')
-            ->once()->with($generatorResult)
-            ->andReturn('bar');
-
-        $this->service->setPasswordGenerator('acme');
-
-        $this->authenticable->shouldReceive('getAuthIdentifier')->once()->andReturn($authId = 1);
-
-        $this::$functions->shouldReceive('config')
-            ->once()->with('otp.expires')
-            ->andReturn(900);
-
-        $this::$functions->shouldReceive('config')
-            ->once()->with('otp.table')
-            ->andReturn($tableName = 'foes');
-
-        DB::shouldReceive('beginTransaction')->once();
-        DB::shouldReceive('table')->with($tableName)->once()->andReturnSelf();
-        DB::shouldReceive('updateOrInsert')->once()->andReturn(true);
-        DB::shouldReceive('commit')->once();
-
-        $token = $this->service->create($this->authenticable);
-        $this->assertSame($generatorResult, $token->plainText());
-    }
-
-    public function testRetrieveByCipherText(): void
-    {
-        $this->authenticable->shouldReceive('getAuthIdentifier')
-            ->once()
-            ->andReturn($authenticableId = 1);
-
-        $this::$functions->shouldReceive('retrieveByAttributes')
-            ->once()
-            ->with(['authenticable_id' => $authenticableId, 'cipher_text' => $cipherText = 'bar'])
-            ->andReturn(new FakeToken(
-                1,
-                $cipherText,
-                null,
-                10,
-                new Carbon('2018-11-06 14:44:00'),
-                new Carbon('2018-11-06 14:44:00')
-            ));
-
-        $token = $this->service->retrieveByCipherText($this->authenticable, $cipherText);
-        $this->assertInstanceOf(TokenInterface::class, $token);
-    }
-
-    private function fooGenerator(): callable
-    {
-        return function (): string {
-            return 'foo';
-        };
-    }
-}
-
-class FakeToken extends Token implements TokenInterface
-{
-    public static function retrieveByAttributes(array $attributes): ?TokenInterface
-    {
-        return OtpServiceTest::$functions->retrieveByAttributes($attributes);
-    }
-
-    protected function persist(): bool
-    {
-        return true;
-    }
-}
-
-abstract class AbstractToken implements TokenInterface
-{
-}
-
-class NotImplementingToken
-{
 }

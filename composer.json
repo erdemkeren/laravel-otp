@@ -21,12 +21,12 @@
         "illuminate/notifications": "^8.0",
         "illuminate/routing": "^8.0",
         "illuminate/support": "^8.0",
+        "mockery/mockery": "^1.4",
         "nesbot/carbon": "^2.35"
     },
     "require-dev": {
         "illuminate/config": "^8.0",
-        "mockery/mockery": "~1.4.3",
-        "phpunit/phpunit": "8.*"
+        "phpunit/phpunit": "9.*"
     },
     "autoload": {
         "psr-4": {
@@ -49,7 +49,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Erdemkeren\\Otp\\OtpServiceProvider"
+              "ServiceProvider"
             ],
             "aliases": {
                 "Otp": "Erdemkeren\\Otp\\OtpFacade"

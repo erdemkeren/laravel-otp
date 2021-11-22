@@ -7,19 +7,23 @@
 
 namespace Erdemkeren\Otp;
 
-use Erdemkeren\Otp\Http\Middleware\Otp;
-use Erdemkeren\Otp\PasswordGenerators as Generators;
+use Erdemkeren\Otp\Generators;
+use Erdemkeren\Otp\Repositories\DatabaseTokenRepository;
 use Illuminate\Routing\Router;
-use Illuminate\Support\ServiceProvider;
+use Erdemkeren\Otp\Http\Middleware\Otp;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
-class OtpServiceProvider extends ServiceProvider
+/**
+ * Class ServiceProvider.
+ */
+class ServiceProvider extends BaseServiceProvider
 {
     /**
      * Indicates if loading of the provider is deferred.
      *
      * @var bool
      */
-    protected $defer = true;
+    protected bool $defer = true;
 
     public function boot(): void
     {
@@ -30,6 +34,8 @@ class OtpServiceProvider extends ServiceProvider
 
     /**
      * Register the otp service.
+     *
+     * @return void
      */
     public function register(): void
     {
@@ -65,11 +71,9 @@ class OtpServiceProvider extends ServiceProvider
     private function createServiceInstance(): OtpService
     {
         return new OtpService(
-            new PasswordGeneratorManager(),
+            new GeneratorManager(),
             new Encryptor(config('app.secret')),
-            config('otp.password_generator', 'string'),
-            6,
-            Token::class
+            new DatabaseTokenRepository()
         );
     }
 
@@ -81,9 +85,9 @@ class OtpServiceProvider extends ServiceProvider
      */
     private function registerDefaultPasswordGenerators($service): void
     {
-        $service->addPasswordGenerator('string', Generators\StringPasswordGenerator::class);
-        $service->addPasswordGenerator('numeric', Generators\NumericPasswordGenerator::class);
-        $service->addPasswordGenerator('numeric-no-0', Generators\NumericNo0PasswordGenerator::class);
+        $service->addPasswordGenerator('string', Generators\StringGenerator::class);
+        $service->addPasswordGenerator('numeric', Generators\NumericGenerator::class);
+        $service->addPasswordGenerator('numeric-no-0', Generators\NumericNo0Generator::class);
     }
 
     /**
@@ -91,7 +95,7 @@ class OtpServiceProvider extends ServiceProvider
      *
      * @return string
      */
-    private function configPath()
+    private function configPath(): string
     {
         return __DIR__.'/../config/otp.php';
     }
@@ -101,7 +105,7 @@ class OtpServiceProvider extends ServiceProvider
      *
      * @return string
      */
-    private function migrationPath()
+    private function migrationPath(): string
     {
         return __DIR__.'/../database/migrations/';
     }
@@ -111,7 +115,7 @@ class OtpServiceProvider extends ServiceProvider
      *
      * @return string
      */
-    private function viewPath()
+    private function viewPath(): string
     {
         return __DIR__.'/../views/';
     }

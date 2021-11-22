@@ -13,18 +13,22 @@ This package allows you to secure your resources with one time password access (
 Example Usage:
 
 ```php
-Route::get('secret', function (\Illuminate\Http\Request $request): string {
+use Erdemkeren\Otp\Otp;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+Route::get('secret', function (Request $request): string {
     $token = $request->otpToken();
     $messages[] = "The otp token {$token} has {$token->timeLeft()} out of {$token->expiryTime()} seconds.";
 
-    $token->refresh();
+    Otp::refresh($token);
     $messages[] = "The time left can be reset using the refresh method: {$token->timeLeft()}/{$token->expiryTime()}";
 
-    $token->extend(30);
+    Otp::extend($token, 30);
     $messages[] = "The expiry time can be increased using the extend method: {$token->timeLeft()}/{$token->expiryTime()}";
 
     $messages[] = "You can also invalidate the token immediately. Try refreshing the page ;)";
-    $request->otpToken()->invalidate();
+    Otp::invalidate($token);
 
     return implode('<br>', $messages);
 })->middleware('auth', 'otp');
@@ -56,12 +60,12 @@ $ composer require erdemkeren/laravel-otp;
 _only if you your auto package discovery off._
 
 ```php
-Erdemkeren\Otp\OtpServiceProvider::class,
+Erdemkeren\Otp\ServiceProvider::class,
 ```
 
 3- Publish the components:
 
-_Publishes a migration, two views and a configuration file._
+_Publishes a migration, two views and, a configuration file._
 
 ```
 $ php artisan vendor:publish

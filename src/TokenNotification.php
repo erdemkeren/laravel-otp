@@ -1,7 +1,7 @@
 <?php
 
 /*
- * @copyright 2018 Hilmi Erdem KEREN
+ * @copyright 2021 Hilmi Erdem KEREN
  * @license MIT
  */
 
@@ -12,6 +12,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Traits\Macroable;
+use function is_array;
 
 /**
  * Class TokenNotification.
@@ -21,18 +22,18 @@ class TokenNotification extends Notification implements ShouldQueue
     use Queueable, Macroable;
 
     /**
-     * The token implementation.
+     * The token.
      *
-     * @var TokenInterface
+     * @var OtpToken
      */
-    public $token;
+    public OtpToken $token;
 
     /**
-     * TokenGenerated constructor.
+     * TokenNotification constructor.
      *
-     * @param TokenInterface $token
+     * @param OtpToken $token
      */
-    public function __construct(TokenInterface $token)
+    public function __construct(OtpToken $token)
     {
         $this->token = $token;
     }
@@ -44,13 +45,13 @@ class TokenNotification extends Notification implements ShouldQueue
      *
      * @return array
      */
-    public function via($notifiable)
+    public function via(mixed $notifiable): array
     {
-        $channels = ! is_null($notifiable) && method_exists($notifiable, 'otpChannels') && ! empty($notifiable->otpChannels())
+        $channels = $this->notifiableHasOtpChannels($notifiable)
             ? $notifiable->otpChannels()
             : config('otp.default_channels');
 
-        return \is_array($channels)
+        return is_array($channels)
             ? $channels
             : array_map('trim', explode(',', $channels));
     }
@@ -62,12 +63,14 @@ class TokenNotification extends Notification implements ShouldQueue
      */
     public function toMail(): MailMessage
     {
+        $plainText = $this->token->plainText();
+
         return (new MailMessage())
-            ->subject(config('app.name').' One Time Password')
-            ->greeting('Hello!')
-            ->line('Somebody recently requested for a one-time password in behalf of you.')
-            ->line('You can enter the following reset code: '.$this->token->plainText())
-            ->line('If you didn\'t request the password, simply ignore this message.');
+            ->subject(trans('erdemkeren.otp.token-notification.email.subject'))
+            ->subject(trans('erdemkeren.otp.token-notification.email.greeting'))
+            ->subject(trans('erdemkeren.otp.token-notification.email.line1', $plainText))
+            ->subject(trans('erdemkeren.otp.token-notification.email.line2', $plainText))
+            ->subject(trans('erdemkeren.otp.token-notification.email.line3', $plainText));
     }
 
     /**
@@ -77,8 +80,20 @@ class TokenNotification extends Notification implements ShouldQueue
      */
     public function toSms(): string
     {
-        return 'Somebody recently requested a one-time password.'
-        ." You can enter the following reset code: {$this->token->plainText()}"
-        .' If you didn\'t request the password, simply ignore this message.';
+        return trans('erdemkeren.otp.token-notification.sms', $this->token->plainText());
+    }
+
+    /**
+     * Determine if the notifiable has otp channels or not.
+     *
+     * @param mixed $notifiable
+     *
+     * @return bool
+     */
+    private function notifiableHasOtpChannels(mixed $notifiable): bool
+    {
+        return !is_null($notifiable)
+        && method_exists($notifiable, 'otpChannels')
+        && !empty($notifiable->otpChannels());
     }
 }

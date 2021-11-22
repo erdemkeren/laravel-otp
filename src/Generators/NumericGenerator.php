@@ -1,34 +1,32 @@
 <?php
 
 /*
- * @copyright 2018 Hilmi Erdem KEREN
+ * @copyright 2021 Hilmi Erdem KEREN
  * @license MIT
  */
 
-namespace Erdemkeren\Otp\PasswordGenerators;
+namespace Erdemkeren\Otp\Generators;
 
-use Erdemkeren\Otp\PasswordGeneratorInterface;
-use Exception;
+use Throwable;
+use Erdemkeren\Otp\Contracts\GeneratorContract;
 
 /**
- * Class NumericPasswordGenerator.
+ * Class NumericGenerator.
  */
-class NumericPasswordGenerator implements PasswordGeneratorInterface
+class NumericGenerator implements GeneratorContract
 {
     /**
      * Generate a numeric password.
      *
-     * @param int $length
-     *
      * @return string
      */
-    public function generate(int $length): string
+    public function generate(): string
     {
-        $range = $this->generateRangeForLength($length);
+        $range = $this->generateRangeForLength();
 
         try {
             $int = random_int($range[0], $range[1]);
-        } catch (Exception $e) {
+        } catch (Throwable) {
             $int = rand($range[0], $range[1]);
         }
 
@@ -38,14 +36,13 @@ class NumericPasswordGenerator implements PasswordGeneratorInterface
     /**
      * Generate the required range for the given length.
      *
-     * @param int $length
-     *
      * @return array
      */
-    protected function generateRangeForLength(int $length): array
+    protected function generateRangeForLength(): array
     {
         $min = 1;
         $max = 9;
+        $length = 8;
 
         while ($length > 1) {
             $min .= 0;

@@ -2,6 +2,10 @@
 
 All notable changes to `erdemkeren/laravel-otp` will be documented in this file.
 
+## 5.0.0-dev
+
+- Creates the 5th version
+
 ## 4.0.0 - 2021-08-04
 
 - Removes PHP 7 support

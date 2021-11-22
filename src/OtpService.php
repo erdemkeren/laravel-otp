@@ -1,204 +1,139 @@
 <?php
-
 /*
- * @copyright 2018 Hilmi Erdem KEREN
- * @license MIT
+ * Copyright (c) 2021. Hilmi Erdem Keren
+ * license MIT
  */
 
 namespace Erdemkeren\Otp;
 
-use Illuminate\Contracts\Auth\Authenticatable;
+use Erdemkeren\Otp\Contracts\EncryptorContract;
+use Erdemkeren\Otp\Contracts\GeneratorManagerContract;
+use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
+use Erdemkeren\Otp\Exceptions\UnregisteredGeneratorException;
 
 /**
  * Class OtpService.
  */
 class OtpService
 {
-    /**
-     * The password generator manager.
-     *
-     * @var PasswordGeneratorManagerInterface
-     */
-    private $manager;
-
-    /**
-     * The encryptor implementation.
-     *
-     * @var EncryptorInterface
-     */
-    private $encryptor;
-
-    /**
-     * The password length.
-     *
-     * @var int
-     */
-    private $passwordLength;
-
-    /**
-     * The default otp password generator.
-     *
-     * @var string
-     */
-    private $defaultGenerator;
-
-    /**
-     * The password generator.
-     *
-     * @var callable
-     */
-    private $passwordGenerator;
-
-    /**
-     * The name of the token class being used
-     * by the otp service.
-     *
-     * @var string
-     */
-    private $tokenClass;
-
-    /**
-     * OtpService constructor.
-     *
-     * @param PasswordGeneratorManagerInterface $manager
-     * @param EncryptorInterface                $encryptor
-     * @param string                            $defaultGenerator
-     * @param int                               $passwordLength
-     * @param string                            $tokenClass
-     */
     public function __construct(
-        PasswordGeneratorManagerInterface $manager,
-        EncryptorInterface $encryptor,
-        string $defaultGenerator,
-        int $passwordLength,
-        string $tokenClass
-    ) {
-        $this->manager = $manager;
-        $this->encryptor = $encryptor;
-        $this->passwordLength = $passwordLength;
-        $this->defaultGenerator = $defaultGenerator;
-
-        if (! class_exists($tokenClass)) {
-            throw new \RuntimeException(
-                "The token implementation [{$tokenClass}] could not be found."
-            );
-        }
-
-        $generatorReflection = new \ReflectionClass($tokenClass);
-        if (! $generatorReflection->isInstantiable()) {
-            throw new \RuntimeException(
-                "The token implementation [{$tokenClass}] is not instantiable."
-            );
-        }
-
-        if (! is_subclass_of($tokenClass, TokenInterface::class)) {
-            throw new \TypeError(
-                'The token class should be an instance of '.TokenInterface::class
-            );
-        }
-
-        $this->tokenClass = $tokenClass;
+        private GeneratorManagerContract $manager,
+        private EncryptorContract $encryptor,
+        private TokenRepositoryContract $tokenRepository,
+    )
+    {
+        //
     }
 
     /**
-     * Check the otp of the authenticable
-     * with the given cipher text.
+     * Create a new token and get it.
      *
-     * @param mixed  $authenticableId
-     * @param string $token
+     * @param int|string $authenticableId
+     * @param string     $generator
+     *
+     * @return OtpToken
+     */
+    public function create(int|string $authenticableId, string $generator = 'default'): OtpToken
+    {
+        $plainText = $this->getPasswordGenerator($generator)();
+        $cipherText = $this->encryptor->encrypt($plainText);
+
+        $token = new OtpToken([
+            'plain_text' => $plainText,
+            'cipher_text' => $cipherText,
+            'expiry_time' => 300,
+            'authenticable_id' => $authenticableId,
+        ]);
+
+        $this->tokenRepository->persist($token);
+
+        return $token;
+    }
+
+    /**
+     * Save the given token to the storage.
+     *
+     * @param OtpToken $token
      *
      * @return bool
      */
-    public function check($authenticableId, string $token): bool
+    public function save(OtpToken $token): bool
     {
-        $token = $this->retrieveByCipherText($authenticableId, $token);
-
-        return (bool) $token && ! $token->expired();
+        return $this->tokenRepository->persist($token);
     }
 
     /**
-     * Set the active password generator of the otp service.
+     * Extend the given token and get the extended instance.
      *
-     * @param string $name
+     * @param OtpToken $token
+     * @param int      $secs
+     *
+     * @return OtpToken
      */
-    public function setPasswordGenerator(string $name): void
+    public function extend(OtpToken $token, int $secs): OtpToken
     {
-        $this->passwordGenerator = $this->manager->get($name);
+        $extended = $token->extend($secs);
+
+        $this->tokenRepository->persist($extended);
+
+        return $extended;
     }
 
     /**
-     * Create a new otp token.
+     * Refresh the given token and get the refreshed instance.
      *
-     * @param Authenticatable|mixed $authenticatableId
-     * @param int                   $length
+     * @param OtpToken $token
      *
-     * @return Token
+     * @return OtpToken
      */
-    public function create($authenticatableId, ?int $length = null): TokenInterface
+    public function refresh(OtpToken $token): OtpToken
     {
-        $plainText = $this->getPasswordGenerator()($length ?: $this->passwordLength);
-        $cipherText = $this->encryptor->encrypt($plainText);
+        $refreshed = $token->refresh();
 
-        if ($authenticatableId instanceof Authenticatable) {
-            $authenticatableId = $authenticatableId->getAuthIdentifier();
-        }
+        $this->tokenRepository->persist($refreshed);
 
-        return $this->tokenClass::create($authenticatableId, $cipherText, $plainText);
+        return $refreshed;
     }
 
     /**
-     * Retrieve the token of the authenticable
-     * by the given plain text.
+     * Invalidate the given token and get the invalidated instance.
      *
-     * @param mixed  $authenticableId
-     * @param string $plainText
+     * @param OtpToken $token
      *
-     * @return null|TokenInterface
+     * @return OtpToken
      */
-    public function retrieveByPlainText($authenticableId, string $plainText): ?TokenInterface
+    public function invalidate(OtpToken $token): OtpToken
     {
-        return $this->retrieveByCipherText($authenticableId, $this->encryptor->encrypt($plainText));
-    }
+        $invalidated = $token->invalidate();
 
-    /**
-     * Retrieve the token of the authenticable
-     * by the given cipher text.
-     *
-     * @param mixed  $authenticableId
-     * @param string $cipherText
-     *
-     * @return null|TokenInterface
-     */
-    public function retrieveByCipherText($authenticableId, string $cipherText): ?TokenInterface
-    {
-        if ($authenticableId instanceof Authenticatable) {
-            $authenticableId = $authenticableId->getAuthIdentifier();
-        }
+        $this->tokenRepository->persist($invalidated);
 
-        return $this->tokenClass::retrieveByAttributes([
-            'authenticable_id' => $authenticableId,
-            'cipher_text'      => $cipherText,
-        ]);
+        return $invalidated;
     }
 
     /**
      * Add a new password generator implementation.
      *
-     * @param string                                     $name
-     * @param callable|PasswordGeneratorInterface|string $generator
+     * @param string $name
+     * @param string|callable $generator
+     *
+     * @return void
      */
-    public function addPasswordGenerator(string $name, $generator): void
+    public function addPasswordGenerator(string $name, string|callable $generator): void
     {
         $this->manager->register($name, $generator);
     }
 
     /**
-     * Get the active password generator.
+     * Get the token generator by the given name.
+     *
+     * @param string $name
      *
      * @return callable
+     * @throws UnregisteredGeneratorException
      */
-    private function getPasswordGenerator(): callable
+    private function getPasswordGenerator(string $generator): callable
     {
-        return $this->passwordGenerator ?: $this->passwordGenerator = $this->manager->get($this->defaultGenerator);
+        return $this->manager->get($generator);
     }
 }

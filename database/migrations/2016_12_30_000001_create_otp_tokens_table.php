@@ -1,7 +1,6 @@
 <?php
-
 /*
- * @copyright 2018 Hilmi Erdem KEREN
+ * @copyright 2021 Hilmi Erdem KEREN
  * @license MIT
  */
 
@@ -9,12 +8,15 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Class CreateOtpTokensTable
+ */
 class CreateOtpTokensTable extends Migration
 {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('otp_tokens', function (Blueprint $table) {
             $table->unsignedInteger('authenticable_id');
@@ -24,13 +26,14 @@ class CreateOtpTokensTable extends Migration
             $table->unsignedSmallInteger('expiry_time')->nullable();
 
             $table->unique(['authenticable_id', 'cipher_text']);
+            $table->index(['cipher_text']);
         });
     }
 
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Schema::drop('otp_tokens');
     }
