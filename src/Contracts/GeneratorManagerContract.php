@@ -16,9 +16,9 @@ interface GeneratorManagerContract
     /**
      * Get the token generator by the given name.
      *
-     * @param string $name
-     *
+     * @param  string  $name
      * @return callable
+     *
      * @throws UnregisteredGeneratorException
      */
     public function get(string $name): callable;
@@ -26,9 +26,8 @@ interface GeneratorManagerContract
     /**
      * Add a new GeneratorContract implementation.
      *
-     * @param string $name
-     * @param string|callable $generator
-     *
+     * @param  string  $name
+     * @param  string|callable  $generator
      * @return void
      */
     public function register(string $name, string|callable $generator): void;

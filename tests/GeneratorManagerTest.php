@@ -7,8 +7,8 @@
 namespace Erdemkeren\Otp\Test;
 
 use Erdemkeren\Otp\Exceptions\UnregisteredGeneratorException;
-use PHPUnit\Framework\TestCase;
 use Erdemkeren\Otp\GeneratorManager;
+use PHPUnit\Framework\TestCase;
 
 class GeneratorManagerTest extends TestCase
 {
@@ -20,7 +20,7 @@ class GeneratorManagerTest extends TestCase
 
         $this->manager = tap(
             new GeneratorManager(),
-            fn(GeneratorManager $m) => $m->register('default', fn (): string => ':default:'),
+            fn (GeneratorManager $m) => $m->register('default', fn (): string => ':default:'),
         );
     }
 

@@ -7,10 +7,9 @@
 
 namespace Erdemkeren\Otp;
 
-use Erdemkeren\Otp\Generators;
+use Erdemkeren\Otp\Http\Middleware\Otp;
 use Erdemkeren\Otp\Repositories\DatabaseTokenRepository;
 use Illuminate\Routing\Router;
-use Erdemkeren\Otp\Http\Middleware\Otp;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 /**
@@ -81,7 +80,7 @@ class ServiceProvider extends BaseServiceProvider
      * Register default password generators to the
      * given otp service instance.
      *
-     * @param OtpService $service
+     * @param  OtpService  $service
      */
     private function registerDefaultPasswordGenerators($service): void
     {

@@ -20,17 +20,15 @@ class OtpService
         private GeneratorManagerContract $manager,
         private EncryptorContract $encryptor,
         private TokenRepositoryContract $tokenRepository,
-    )
-    {
+    ) {
         //
     }
 
     /**
      * Create a new token and get it.
      *
-     * @param int|string $authenticableId
-     * @param string     $generator
-     *
+     * @param  int|string  $authenticableId
+     * @param  string  $generator
      * @return OtpToken
      */
     public function create(int|string $authenticableId, string $generator = 'default'): OtpToken
@@ -53,8 +51,7 @@ class OtpService
     /**
      * Save the given token to the storage.
      *
-     * @param OtpToken $token
-     *
+     * @param  OtpToken  $token
      * @return bool
      */
     public function save(OtpToken $token): bool
@@ -65,9 +62,8 @@ class OtpService
     /**
      * Extend the given token and get the extended instance.
      *
-     * @param OtpToken $token
-     * @param int      $secs
-     *
+     * @param  OtpToken  $token
+     * @param  int  $secs
      * @return OtpToken
      */
     public function extend(OtpToken $token, int $secs): OtpToken
@@ -82,8 +78,7 @@ class OtpService
     /**
      * Refresh the given token and get the refreshed instance.
      *
-     * @param OtpToken $token
-     *
+     * @param  OtpToken  $token
      * @return OtpToken
      */
     public function refresh(OtpToken $token): OtpToken
@@ -98,8 +93,7 @@ class OtpService
     /**
      * Invalidate the given token and get the invalidated instance.
      *
-     * @param OtpToken $token
-     *
+     * @param  OtpToken  $token
      * @return OtpToken
      */
     public function invalidate(OtpToken $token): OtpToken
@@ -114,9 +108,8 @@ class OtpService
     /**
      * Add a new password generator implementation.
      *
-     * @param string $name
-     * @param string|callable $generator
-     *
+     * @param  string  $name
+     * @param  string|callable  $generator
      * @return void
      */
     public function addPasswordGenerator(string $name, string|callable $generator): void
@@ -127,9 +120,9 @@ class OtpService
     /**
      * Get the token generator by the given name.
      *
-     * @param string $name
-     *
+     * @param  string  $name
      * @return callable
+     *
      * @throws UnregisteredGeneratorException
      */
     private function getPasswordGenerator(string $generator): callable

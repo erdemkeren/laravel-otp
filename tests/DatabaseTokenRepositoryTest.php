@@ -7,8 +7,8 @@
 namespace Erdemkeren\Otp\Test;
 
 use Carbon\Carbon;
-use Erdemkeren\Otp\Repositories\DatabaseTokenRepository;
 use Erdemkeren\Otp\OtpToken;
+use Erdemkeren\Otp\Repositories\DatabaseTokenRepository;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\TestCase;
 
@@ -43,7 +43,7 @@ class DatabaseTokenRepositoryTest extends TestCase
                 'created_at'       => '2018-11-06 00:00:00',
                 'updated_at'       => '2018-11-06 00:00:00',
             ])->andReturn(true);
-        DB::shouldReceive('transaction')->once()->andReturnUsing(fn($callable) => $callable());
+        DB::shouldReceive('transaction')->once()->andReturnUsing(fn ($callable) => $callable());
 
         $token = new OtpToken([
             'plain_text' => ':plain_text:',
