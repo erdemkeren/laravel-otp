@@ -7,8 +7,8 @@
 
 namespace Erdemkeren\Otp\Generators;
 
-use Illuminate\Support\Str;
 use Erdemkeren\Otp\Contracts\GeneratorContract;
+use Illuminate\Support\Str;
 
 /**
  * Class StringGenerator.

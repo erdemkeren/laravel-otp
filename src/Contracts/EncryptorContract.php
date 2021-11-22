@@ -14,8 +14,7 @@ interface EncryptorContract
     /**
      * Encrypt the given text.
      *
-     * @param string $plainText
-     *
+     * @param  string  $plainText
      * @return string
      */
     public function encrypt(string $plainText): string;

@@ -16,11 +16,11 @@ class OtpToken
     /**
      * OtpToken constructor.
      *
-     * @param array $attributes
+     * @param  array  $attributes
      */
     public function __construct(private array $attributes)
     {
-        if (!array_key_exists('created_at', $this->attributes)) {
+        if (! array_key_exists('created_at', $this->attributes)) {
             $this->attributes['created_at'] = $this->getNow();
             $this->attributes['updated_at'] = $this->getNow();
         }
@@ -57,7 +57,7 @@ class OtpToken
     }
 
     /**
-     * Get the time left for the expiration
+     * Get the time left for the expiration.
      *
      * @return int
      */
@@ -110,8 +110,7 @@ class OtpToken
      * Get a new instance of the token
      * with an extended expiry time.
      *
-     * @param int $secs
-     *
+     * @param  int  $secs
      * @return $this
      */
     public function extend(int $secs): self
@@ -188,8 +187,7 @@ class OtpToken
     /**
      * Get the value of an attribute.
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return mixed
      */
     private function getAttributeValue(string $key): mixed

@@ -8,12 +8,12 @@ namespace Erdemkeren\Otp\Test;
 
 use Carbon\Carbon;
 use Erdemkeren\Otp\Contracts\EncryptorContract;
-use Erdemkeren\Otp\OtpToken;
-use Erdemkeren\Otp\OtpService;
 use Erdemkeren\Otp\Contracts\GeneratorManagerContract;
+use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
+use Erdemkeren\Otp\OtpService;
+use Erdemkeren\Otp\OtpToken;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
 
 class OtpServiceTest extends TestCase
 {
@@ -34,7 +34,6 @@ class OtpServiceTest extends TestCase
         $this->repository = $this->createMock(TokenRepositoryContract::class);
         $this->tokenService = new OtpService($this->manager, $this->encryptor, $this->repository);
     }
-
 
     /**
      * @test

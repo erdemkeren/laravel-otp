@@ -31,7 +31,7 @@ class TokenNotification extends Notification implements ShouldQueue
     /**
      * TokenNotification constructor.
      *
-     * @param OtpToken $token
+     * @param  OtpToken  $token
      */
     public function __construct(OtpToken $token)
     {
@@ -41,8 +41,7 @@ class TokenNotification extends Notification implements ShouldQueue
     /**
      * Get the notification's delivery channels.
      *
-     * @param mixed $notifiable
-     *
+     * @param  mixed  $notifiable
      * @return array
      */
     public function via(mixed $notifiable): array
@@ -86,14 +85,13 @@ class TokenNotification extends Notification implements ShouldQueue
     /**
      * Determine if the notifiable has otp channels or not.
      *
-     * @param mixed $notifiable
-     *
+     * @param  mixed  $notifiable
      * @return bool
      */
     private function notifiableHasOtpChannels(mixed $notifiable): bool
     {
-        return !is_null($notifiable)
+        return ! is_null($notifiable)
         && method_exists($notifiable, 'otpChannels')
-        && !empty($notifiable->otpChannels());
+        && ! empty($notifiable->otpChannels());
     }
 }

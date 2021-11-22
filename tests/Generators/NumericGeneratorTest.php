@@ -29,10 +29,10 @@ if (! function_exists('\Erdemkeren\Otp\PasswordGenerators\rand')) {
 
 namespace Erdemkeren\Otp\Test\Generators;
 
+use Erdemkeren\Otp\Generators\NumericGenerator;
 use Exception;
 use Mockery as M;
 use PHPUnit\Framework\TestCase;
-use Erdemkeren\Otp\Generators\NumericGenerator;
 
 /**
  * @covers \Erdemkeren\Otp\Generators\NumericGenerator

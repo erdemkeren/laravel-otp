@@ -9,7 +9,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Class CreateOtpTokensTable
+ * Class CreateOtpTokensTable.
  */
 class CreateOtpTokensTable extends Migration
 {

@@ -7,8 +7,8 @@
 
 namespace Erdemkeren\Otp\Test\Generators;
 
-use PHPUnit\Framework\TestCase;
 use Erdemkeren\Otp\Generators\StringGenerator;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \Erdemkeren\Otp\StringGenerator

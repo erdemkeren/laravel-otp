@@ -16,8 +16,7 @@ interface TokenRepositoryContract
     /**
      * Save the given token in the storage.
      *
-     * @param OtpToken $token
-     *
+     * @param  OtpToken  $token
      * @return bool
      */
     public function persist(OtpToken $token): bool;

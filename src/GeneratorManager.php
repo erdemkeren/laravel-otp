@@ -6,14 +6,14 @@
 
 namespace Erdemkeren\Otp;
 
-use ReflectionClass;
-use UnexpectedValueException;
 use Erdemkeren\Otp\Contracts\GeneratorContract;
 use Erdemkeren\Otp\Contracts\GeneratorManagerContract;
-use Erdemkeren\Otp\Exceptions\UnregisteredGeneratorException;
 use Erdemkeren\Otp\Exceptions\GeneratorInstantiationException;
-use function is_string;
+use Erdemkeren\Otp\Exceptions\UnregisteredGeneratorException;
 use function is_callable;
+use function is_string;
+use ReflectionClass;
+use UnexpectedValueException;
 
 /**
  * Class GeneratorManager.
@@ -30,14 +30,14 @@ class GeneratorManager implements GeneratorManagerContract
     /**
      * Get the token generator by the given name.
      *
-     * @param string $name
-     *
+     * @param  string  $name
      * @return callable
+     *
      * @throws UnregisteredGeneratorException
      */
     public function get(string $name): callable
     {
-        if (!array_key_exists($name, static::$generators)) {
+        if (! array_key_exists($name, static::$generators)) {
             throw UnregisteredGeneratorException::createForName($name);
         }
 
@@ -47,8 +47,8 @@ class GeneratorManager implements GeneratorManagerContract
     /**
      * Registers the given password generator with the given name.
      *
-     * @param string $name
-     * @param callable|string $generator
+     * @param  string  $name
+     * @param  callable|string  $generator
      */
     public function register(string $name, string|callable $generator): void
     {
@@ -69,12 +69,12 @@ class GeneratorManager implements GeneratorManagerContract
                 return $generator->generate();
             };
     }
+
     /**
      * Create a new password generator instance using the given
      * fully qualified password generator class name.
      *
-     * @param string $className
-     *
+     * @param  string  $className
      * @return GeneratorContract
      */
     private function createGeneratorFromString(string $className): GeneratorContract
