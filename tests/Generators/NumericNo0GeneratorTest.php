@@ -65,7 +65,7 @@ class NumericNo0GeneratorTest extends TestCase
     {
         $this::$functions->shouldReceive('random_int')
             ->once()
-            ->with(10000000, 99999999)
+            ->with(100000, 999999)
             ->andReturn(103410);
 
         $this::$functions->shouldReceive('random_int')
@@ -73,7 +73,7 @@ class NumericNo0GeneratorTest extends TestCase
             ->with(1, 9)
             ->andReturn(6);
 
-        $this->assertSame('163416', $this->passwordGenerator->generate());
+        $this->assertSame('163416', $this->passwordGenerator->generate(6));
     }
 
     /**
@@ -87,7 +87,7 @@ class NumericNo0GeneratorTest extends TestCase
 
         $this::$functions->shouldReceive('rand')
             ->once()
-            ->with(10000000, 99999999)
+            ->with(1000000, 9999999)
             ->andReturn(1034510);
 
         $this::$functions->shouldReceive('rand')
@@ -95,6 +95,6 @@ class NumericNo0GeneratorTest extends TestCase
             ->with(1, 9)
             ->andReturn(7);
 
-        $this->assertSame('1734517', $this->passwordGenerator->generate());
+        $this->assertSame('1734517', $this->passwordGenerator->generate(7));
     }
 }

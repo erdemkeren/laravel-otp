@@ -26,6 +26,46 @@ class DatabaseTokenRepositoryTest extends TestCase
     /**
      * @test
      */
+    public function itRetrievesTheOtpTokenByTheGivenCipherText(): void
+    {
+        DB::shouldReceive('table')->with('otp_tokens')->once()->andReturnSelf();
+        DB::shouldReceive('where')
+            ->with('cipher_text', ':cipher_text:')
+            ->once()
+            ->andReturnSelf();
+        DB::shouldReceive('first')
+            ->andReturn((object) [
+                'authenticable_id' => ':authenticable_id:',
+                'cipher_text' => ':cipher_text:',
+                'format' => ':format:',
+                'expiry_time' => 30,
+                'created_at' => '2022-01-01 00:00:00',
+                'updated_at' => '2022-01-02 00:00:00',
+            ]);
+
+        $this->assertInstanceOf(
+            OtpToken::class,
+            $otpToken = $this->repository->retrieveByCipherText(':cipher_text:'),
+        );
+
+        $this->assertEquals(':authenticable_id:', $otpToken->authenticableId());
+        $this->assertNull($otpToken->plainText());
+        $this->assertEquals(':cipher_text:', $otpToken->cipherText());
+        $this->assertEquals(':format:', $otpToken->format());
+        $this->assertEquals(30, $otpToken->expiryTime());
+        $this->assertEquals(
+            '2022-01-01 00:00:00',
+            $otpToken->createdAt()->format('Y-m-d H:i:s'),
+        );
+        $this->assertEquals(
+            '2022-01-02 00:00:00',
+            $otpToken->updatedAt()->format('Y-m-d H:i:s'),
+        );
+    }
+
+    /**
+     * @test
+     */
     public function itPersistsTheGivenToken(): void
     {
         Carbon::setTestNow(new Carbon('2018-11-06 00:00:00'));

@@ -12,9 +12,6 @@ use Erdemkeren\Otp\Repositories\DatabaseTokenRepository;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
-/**
- * Class ServiceProvider.
- */
 class ServiceProvider extends BaseServiceProvider
 {
     /**
@@ -70,7 +67,7 @@ class ServiceProvider extends BaseServiceProvider
     private function createServiceInstance(): OtpService
     {
         return new OtpService(
-            new GeneratorManager(),
+            new FormatManager(),
             new Encryptor(config('app.secret')),
             new DatabaseTokenRepository()
         );

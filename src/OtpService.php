@@ -6,127 +6,100 @@
 
 namespace Erdemkeren\Otp;
 
+use UnexpectedValueException;
+use Erdemkeren\Otp\Contracts\FormatContract;
 use Erdemkeren\Otp\Contracts\EncryptorContract;
-use Erdemkeren\Otp\Contracts\GeneratorManagerContract;
+use Erdemkeren\Otp\Contracts\FormatManagerContract;
 use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
-use Erdemkeren\Otp\Exceptions\UnregisteredGeneratorException;
+use Illuminate\Contracts\Auth\Authenticatable;
 
-/**
- * Class OtpService.
- */
 class OtpService
 {
     public function __construct(
-        private GeneratorManagerContract $manager,
-        private EncryptorContract $encryptor,
-        private TokenRepositoryContract $tokenRepository,
+        private FormatManagerContract   $manager,
+        private EncryptorContract       $encryptor,
+        private TokenRepositoryContract $repository,
     ) {
         //
     }
 
-    /**
-     * Create a new token and get it.
-     *
-     * @param  int|string  $authenticableId
-     * @param  string  $generator
-     * @return OtpToken
-     */
-    public function create(int|string $authenticableId, string $generator = 'default'): OtpToken
+    public function retrieveByCipherText(string $cipherText): ?OtpToken
     {
-        $plainText = $this->getPasswordGenerator($generator)();
-        $cipherText = $this->encryptor->encrypt($plainText);
+        return $this->repository->retrieveByCipherText($cipherText);
+    }
 
-        $token = new OtpToken([
-            'plain_text' => $plainText,
-            'cipher_text' => $cipherText,
+    public function create(int|string $authenticableId, string $format = 'default'): OtpToken
+    {
+        $format = $this->getFormat($format);
+
+        return tap(new OtpToken([
+            'format' => $format->name(),
+            'plain_text' => $plainText = $format->generator()(),
+            'cipher_text' => $this->encryptor->encrypt($plainText),
             'expiry_time' => 300,
             'authenticable_id' => $authenticableId,
-        ]);
-
-        $this->tokenRepository->persist($token);
-
-        return $token;
+        ]), fn (OtpToken $otpToken) => $this->repository->persist($otpToken));
     }
 
-    /**
-     * Save the given token to the storage.
-     *
-     * @param  OtpToken  $token
-     * @return bool
-     */
     public function save(OtpToken $token): bool
     {
-        return $this->tokenRepository->persist($token);
+        return $this->repository->persist($token);
     }
 
-    /**
-     * Extend the given token and get the extended instance.
-     *
-     * @param  OtpToken  $token
-     * @param  int  $secs
-     * @return OtpToken
-     */
     public function extend(OtpToken $token, int $secs): OtpToken
     {
         $extended = $token->extend($secs);
 
-        $this->tokenRepository->persist($extended);
+        $this->repository->persist($extended);
 
         return $extended;
     }
 
-    /**
-     * Refresh the given token and get the refreshed instance.
-     *
-     * @param  OtpToken  $token
-     * @return OtpToken
-     */
     public function refresh(OtpToken $token): OtpToken
     {
         $refreshed = $token->refresh();
 
-        $this->tokenRepository->persist($refreshed);
+        $this->repository->persist($refreshed);
 
         return $refreshed;
     }
 
-    /**
-     * Invalidate the given token and get the invalidated instance.
-     *
-     * @param  OtpToken  $token
-     * @return OtpToken
-     */
     public function invalidate(OtpToken $token): OtpToken
     {
         $invalidated = $token->invalidate();
 
-        $this->tokenRepository->persist($invalidated);
+        $this->repository->persist($invalidated);
 
         return $invalidated;
     }
 
-    /**
-     * Add a new password generator implementation.
-     *
-     * @param  string  $name
-     * @param  string|callable  $generator
-     * @return void
-     */
-    public function addPasswordGenerator(string $name, string|callable $generator): void
+    public function addFormat(FormatContract $format): void
     {
-        $this->manager->register($name, $generator);
+        $this->manager->register($format);
     }
 
-    /**
-     * Get the token generator by the given name.
-     *
-     * @param  string  $name
-     * @return callable
-     *
-     * @throws UnregisteredGeneratorException
-     */
-    private function getPasswordGenerator(string $generator): callable
+    public function sendOtpNotification(object $notifiable, OtpToken $token): void
     {
-        return $this->manager->get($generator);
+        $notifiable->notify(
+            $this->getFormat($token->format())->createNotification($token)
+        );
+    }
+
+    public function sendNewOtp(Authenticatable $user): void
+    {
+        $token = $this->create($user->getAuthIdentifier());
+
+        if (! method_exists($user, 'notify')) {
+            throw new UnexpectedValueException(
+                'The otp owner should be an instance of notifiable or implement the notify method.'
+            );
+        }
+
+        $this->sendOtpNotification($user, $token);
+    }
+
+    private function getFormat(string $format): FormatContract
+    {
+        return $this->manager->get($format);
     }
 }

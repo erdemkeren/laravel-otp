@@ -7,33 +7,20 @@
 
 namespace Erdemkeren\Otp\Generators;
 
-use Erdemkeren\Otp\Contracts\GeneratorContract;
 use Throwable;
+use Erdemkeren\Otp\Contracts\GeneratorContract;
 
-/**
- * Class NumericNo0Generator.
- */
 class NumericNo0Generator extends NumericGenerator implements GeneratorContract
 {
-    /**
-     * Generate a numeric token with no zeroes.
-     *
-     * @return string
-     */
-    public function generate(): string
+    public function generate(int $length = null): string
     {
         return (string) str_replace(
             0,
             $this->getRandomDigitWithNo0(),
-            parent::generate()
+            parent::generate($length)
         );
     }
 
-    /**
-     * Generate a random digit with no zeroes.
-     *
-     * @return int
-     */
     private function getRandomDigitWithNo0(): int
     {
         try {

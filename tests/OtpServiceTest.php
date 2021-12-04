@@ -8,10 +8,14 @@ namespace Erdemkeren\Otp\Test;
 
 use Carbon\Carbon;
 use Erdemkeren\Otp\Contracts\EncryptorContract;
-use Erdemkeren\Otp\Contracts\GeneratorManagerContract;
+use Erdemkeren\Otp\Contracts\FormatContract;
+use Erdemkeren\Otp\Contracts\FormatManagerContract;
 use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
+use Erdemkeren\Otp\GenericFormat;
 use Erdemkeren\Otp\OtpService;
 use Erdemkeren\Otp\OtpToken;
+use Erdemkeren\Otp\Test\TestFormat\AcmeNotification;
+use Illuminate\Contracts\Auth\Authenticatable;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -23,13 +27,18 @@ class OtpServiceTest extends TestCase
 
     private MockObject|EncryptorContract $encryptor;
 
-    private MockObject|GeneratorManagerContract $manager;
+    private MockObject|FormatManagerContract $manager;
+
+    private MockObject|Notifiable $notifiable;
+
+    private MockObject|FormatContract $format;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->manager = $this->createMock(GeneratorManagerContract::class);
+        $this->notifiable = $this->createMock(Notifiable::class);
+        $this->manager = $this->createMock(FormatManagerContract::class);
         $this->encryptor = $this->createMock(EncryptorContract::class);
         $this->repository = $this->createMock(TokenRepositoryContract::class);
         $this->tokenService = new OtpService($this->manager, $this->encryptor, $this->repository);
@@ -46,19 +55,61 @@ class OtpServiceTest extends TestCase
     /**
      * @test
      */
+    public function itRetrievesTheOtpTokenByTheGivenCipherText(): void
+    {
+        $this->repository
+            ->expects($this->once())
+            ->method('retrieveByCipherText')
+            ->with(':cipher_text:')
+            ->willReturn($otpToken = new OtpToken(['cipher_text' => ':cipher_text:']));
+
+        $this->assertEquals(
+            $otpToken,
+            $this->tokenService->retrieveByCipherText(':cipher_text:'),
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function itSupportsCustomFormats(): void
+    {
+        $format = new GenericFormat(
+            ':acme:',
+            fn(): string => ':acme:',
+            fn(OtpToken $otp): AcmeNotification => new AcmeNotification($otp),
+        );
+
+        $this->manager
+            ->expects($this->once())
+            ->method('register')
+            ->with($format);
+
+        $this->tokenService->addFormat($format);
+    }
+
+    /**
+     * @test
+     */
     public function itCreatesANewPersistedTokenWithTheGivenAuthenticableId(): void
     {
         $this->manager
             ->expects($this->once())
             ->method('get')
             ->with('default')
-            ->willReturn(fn (): string => ':token:');
+            ->willReturn(
+                new GenericFormat(
+                    ':acme:',
+                    fn(): string => ':otpToken:',
+                    fn(OtpToken $otp): AcmeNotification => new AcmeNotification($otp),
+                ),
+            );
 
         $this->encryptor
             ->expects($this->once())
             ->method('encrypt')
-            ->with(':token:')
-            ->willReturn('encrypted');
+            ->with(':otpToken:')
+            ->willReturn(':encrypted:');
 
         $this->repository
             ->expects($this->once())
@@ -68,6 +119,10 @@ class OtpServiceTest extends TestCase
         $token = $this->tokenService->create(1);
         $this->assertInstanceOf(OtpToken::class, $token);
         $this->assertEquals(1, $token->authenticableId());
+
+        $this->assertEquals(':acme:', $token->format());
+        $this->assertEquals(':otpToken:', $token->plainText());
+        $this->assertEquals(':encrypted:', $token->cipherText());
     }
 
     /**
@@ -136,5 +191,93 @@ class OtpServiceTest extends TestCase
         $this->assertFalse($token->expired());
         $this->assertEquals(0, $invalidatedToken->expiryTime());
         $this->assertTrue($invalidatedToken->expired());
+    }
+
+    /**
+     * @test
+     */
+    public function itSendsOtpNotifications(): void
+    {
+        $token = new OtpToken([
+            'format' => ':acme:',
+        ]);
+
+        $format = new GenericFormat(
+            ':acme:',
+            fn(): string => ':otpToken:',
+            fn(OtpToken $otpToken): AcmeNotification => new AcmeNotification($otpToken),
+        );
+
+        $this->manager
+            ->expects($this->once())
+            ->method('get')
+            ->with(':acme:')
+            ->willReturn($format);
+
+        $this->notifiable
+            ->expects($this->once())
+            ->method('notify');
+
+        $this->tokenService->sendOtpNotification($this->notifiable, $token);
+    }
+
+    /**
+     * @test
+     */
+    public function itSendsNewOtp(): void
+    {
+        $format = new GenericFormat(
+            'default',
+            fn(): string => ':otpToken:',
+            fn(OtpToken $otpToken): AcmeNotification => new AcmeNotification($otpToken),
+        );
+
+        $this->manager
+            ->expects($this->exactly(2))
+            ->method('get')
+            ->with('default')
+            ->willReturn($format);
+
+        $this->notifiable
+            ->expects($this->once())
+            ->method('getAuthIdentifier')
+            ->willReturn(':auth_id:');
+
+        $this->notifiable
+            ->expects($this->once())
+            ->method('notify');
+
+        $this->tokenService->sendNewOtp($this->notifiable);
+    }
+}
+
+class Notifiable implements Authenticatable
+{
+    public function notify(mixed $instance): void
+    {
+    }
+
+    public function getAuthIdentifierName()
+    {
+    }
+
+    public function getAuthIdentifier()
+    {
+    }
+
+    public function getAuthPassword()
+    {
+    }
+
+    public function getRememberToken()
+    {
+    }
+
+    public function setRememberToken($value)
+    {
+    }
+
+    public function getRememberTokenName()
+    {
     }
 }

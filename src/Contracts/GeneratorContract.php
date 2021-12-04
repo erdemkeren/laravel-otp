@@ -7,15 +7,7 @@
 
 namespace Erdemkeren\Otp\Contracts;
 
-/**
- * Interface GeneratorContract.
- */
 interface GeneratorContract
 {
-    /**
-     * Generate a new token.
-     *
-     * @return string
-     */
     public function generate(): string;
 }

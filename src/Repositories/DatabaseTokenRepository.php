@@ -6,21 +6,19 @@
 
 namespace Erdemkeren\Otp\Repositories;
 
-use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
 use Erdemkeren\Otp\OtpToken;
 use Illuminate\Support\Facades\DB;
+use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
 
-/**
- * Class DatabaseTokenRepository.
- */
 class DatabaseTokenRepository implements TokenRepositoryContract
 {
-    /**
-     * Save the given token in the storage.
-     *
-     * @param  OtpToken  $token
-     * @return bool
-     */
+    public function retrieveByCipherText(string $cipherText): ?OtpToken
+    {
+        $result = DB::table('otp_tokens')->where('cipher_text', $cipherText)->first();
+
+        return $result ? $this->createOtpToken($result) : null;
+    }
+
     public function persist(OtpToken $token): bool
     {
         return DB::transaction(
@@ -29,5 +27,17 @@ class DatabaseTokenRepository implements TokenRepositoryContract
                 'cipher_text'      => $token->cipherText(),
             ], $token->withoutPlainText()->toArray())
         );
+    }
+
+    private function createOtpToken(object $result): OtpToken
+    {
+        return new OtpToken([
+            'authenticable_id' => $result->authenticable_id,
+            'cipher_text' => $result->cipher_text,
+            'format' => $result->format,
+            'expiry_time' => $result->expiry_time,
+            'created_at' => $result->created_at,
+            'updated_at' => $result->updated_at,
+        ]);
     }
 }

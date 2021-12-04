@@ -14,9 +14,6 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Traits\Macroable;
 use function is_array;
 
-/**
- * Class TokenNotification.
- */
 class TokenNotification extends Notification implements ShouldQueue
 {
     use Queueable, Macroable;

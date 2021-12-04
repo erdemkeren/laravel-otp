@@ -9,7 +9,7 @@ namespace Erdemkeren\Otp\Generators;
 
 use function function_exists;
 
-if (! function_exists('\Erdemkeren\Otp\PasswordGenerators\random_int')) {
+if (! function_exists('\Erdemkeren\Otp\Generators\random_int')) {
     function random_int($min, $max)
     {
         global $testerClass;
@@ -18,7 +18,7 @@ if (! function_exists('\Erdemkeren\Otp\PasswordGenerators\random_int')) {
     }
 }
 
-if (! function_exists('\Erdemkeren\Otp\PasswordGenerators\rand')) {
+if (! function_exists('\Erdemkeren\Otp\Generators\rand')) {
     function rand($min, $max)
     {
         global $testerClass;
@@ -68,7 +68,7 @@ class NumericGeneratorTest extends TestCase
             ->with(10000000, 99999999)
             ->andReturn(10345310);
 
-        $this->assertSame('10345310', $this->passwordGenerator->generate());
+        $this->assertSame('10345310', $this->passwordGenerator->generate(8));
     }
 
     /**
@@ -85,6 +85,6 @@ class NumericGeneratorTest extends TestCase
             ->with(10000000, 99999999)
             ->andReturn(10345310);
 
-        $this->assertSame('10345310', $this->passwordGenerator->generate());
+        $this->assertSame('10345310', $this->passwordGenerator->generate(8));
     }
 }

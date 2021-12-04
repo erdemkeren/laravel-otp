@@ -20,6 +20,7 @@ class CreateOtpTokensTable extends Migration
     {
         Schema::create('otp_tokens', function (Blueprint $table) {
             $table->unsignedInteger('authenticable_id');
+            $table->string('format');
             $table->string('cipher_text', 64);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();

@@ -10,16 +10,8 @@ namespace Erdemkeren\Otp\Generators;
 use Erdemkeren\Otp\Contracts\GeneratorContract;
 use Illuminate\Support\Str;
 
-/**
- * Class StringGenerator.
- */
 class StringGenerator implements GeneratorContract
 {
-    /**
-     * Generate a string password with the given length.
-     *
-     * @return string
-     */
     public function generate(): string
     {
         return Str::random(8);

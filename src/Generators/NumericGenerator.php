@@ -7,22 +7,14 @@
 
 namespace Erdemkeren\Otp\Generators;
 
-use Erdemkeren\Otp\Contracts\GeneratorContract;
 use Throwable;
+use Erdemkeren\Otp\Contracts\GeneratorContract;
 
-/**
- * Class NumericGenerator.
- */
 class NumericGenerator implements GeneratorContract
 {
-    /**
-     * Generate a numeric password.
-     *
-     * @return string
-     */
-    public function generate(): string
+    public function generate(int $length = null): string
     {
-        $range = $this->generateRangeForLength();
+        $range = $this->generateRangeForLength($length);
 
         try {
             $int = random_int($range[0], $range[1]);
@@ -33,16 +25,10 @@ class NumericGenerator implements GeneratorContract
         return (string) $int;
     }
 
-    /**
-     * Generate the required range for the given length.
-     *
-     * @return array
-     */
-    protected function generateRangeForLength(): array
+    protected function generateRangeForLength(int $length): array
     {
         $min = 1;
         $max = 9;
-        $length = 8;
 
         while ($length > 1) {
             $min .= 0;
