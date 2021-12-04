@@ -6,18 +6,18 @@
 
 namespace Erdemkeren\Otp;
 
-use UnexpectedValueException;
-use Erdemkeren\Otp\Contracts\FormatContract;
 use Erdemkeren\Otp\Contracts\EncryptorContract;
+use Erdemkeren\Otp\Contracts\FormatContract;
 use Erdemkeren\Otp\Contracts\FormatManagerContract;
 use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
 use Illuminate\Contracts\Auth\Authenticatable;
+use UnexpectedValueException;
 
 class OtpService
 {
     public function __construct(
-        private FormatManagerContract   $manager,
-        private EncryptorContract       $encryptor,
+        private FormatManagerContract $manager,
+        private EncryptorContract $encryptor,
         private TokenRepositoryContract $repository,
     ) {
         //

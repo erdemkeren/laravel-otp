@@ -6,9 +6,9 @@
 
 namespace Erdemkeren\Otp\Repositories;
 
+use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
 use Erdemkeren\Otp\OtpToken;
 use Illuminate\Support\Facades\DB;
-use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
 
 class DatabaseTokenRepository implements TokenRepositoryContract
 {

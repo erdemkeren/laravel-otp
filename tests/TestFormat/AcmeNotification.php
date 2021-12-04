@@ -12,7 +12,6 @@ class AcmeNotification
 {
     public function __construct(
         private OtpToken $otpToken
-    )
-    {
+    ) {
     }
 }

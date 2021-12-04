@@ -7,8 +7,8 @@
 namespace Erdemkeren\Otp;
 
 use Erdemkeren\Otp\Contracts\FormatContract;
-use Erdemkeren\Otp\Exceptions\UnknownOtpFormat;
 use Erdemkeren\Otp\Contracts\FormatManagerContract;
+use Erdemkeren\Otp\Exceptions\UnknownOtpFormat;
 
 class FormatManager implements FormatManagerContract
 {
