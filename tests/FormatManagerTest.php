@@ -26,13 +26,13 @@ class FormatManagerTest extends TestCase
 
         $this->format = new GenericFormat(
             ':acme:',
-            fn(): string => ':otpToken:',
-            fn(OtpToken $token): AcmeNotification => new AcmeNotification($token),
+            fn (): string => ':otpToken:',
+            fn (OtpToken $token): AcmeNotification => new AcmeNotification($token),
         );
 
         $this->manager = tap(
             new FormatManager(':acme:'),
-            fn(FormatManager $m) => $m->register($this->format),
+            fn (FormatManager $m) => $m->register($this->format),
         );
     }
 
@@ -62,8 +62,8 @@ class FormatManagerTest extends TestCase
     {
         $this->manager->register($customFormat = new GenericFormat(
             ':custom:',
-            fn(): string => ':otpToken:',
-            fn($otp): AcmeNotification => new AcmeNotification($otp),
+            fn (): string => ':otpToken:',
+            fn ($otp): AcmeNotification => new AcmeNotification($otp),
         ));
 
         $this->assertEquals($customFormat, $this->manager->get(':custom:'));

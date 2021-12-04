@@ -76,8 +76,8 @@ class OtpServiceTest extends TestCase
     {
         $format = new GenericFormat(
             ':acme:',
-            fn(): string => ':acme:',
-            fn(OtpToken $otp): AcmeNotification => new AcmeNotification($otp),
+            fn (): string => ':acme:',
+            fn (OtpToken $otp): AcmeNotification => new AcmeNotification($otp),
         );
 
         $this->manager
@@ -100,8 +100,8 @@ class OtpServiceTest extends TestCase
             ->willReturn(
                 new GenericFormat(
                     ':acme:',
-                    fn(): string => ':otpToken:',
-                    fn(OtpToken $otp): AcmeNotification => new AcmeNotification($otp),
+                    fn (): string => ':otpToken:',
+                    fn (OtpToken $otp): AcmeNotification => new AcmeNotification($otp),
                 ),
             );
 
@@ -204,8 +204,8 @@ class OtpServiceTest extends TestCase
 
         $format = new GenericFormat(
             ':acme:',
-            fn(): string => ':otpToken:',
-            fn(OtpToken $otpToken): AcmeNotification => new AcmeNotification($otpToken),
+            fn (): string => ':otpToken:',
+            fn (OtpToken $otpToken): AcmeNotification => new AcmeNotification($otpToken),
         );
 
         $this->manager
@@ -228,8 +228,8 @@ class OtpServiceTest extends TestCase
     {
         $format = new GenericFormat(
             'default',
-            fn(): string => ':otpToken:',
-            fn(OtpToken $otpToken): AcmeNotification => new AcmeNotification($otpToken),
+            fn (): string => ':otpToken:',
+            fn (OtpToken $otpToken): AcmeNotification => new AcmeNotification($otpToken),
         );
 
         $this->manager

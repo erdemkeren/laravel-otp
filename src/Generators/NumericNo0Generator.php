@@ -7,8 +7,8 @@
 
 namespace Erdemkeren\Otp\Generators;
 
-use Throwable;
 use Erdemkeren\Otp\Contracts\GeneratorContract;
+use Throwable;
 
 class NumericNo0Generator extends NumericGenerator implements GeneratorContract
 {
