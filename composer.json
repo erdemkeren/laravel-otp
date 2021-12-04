@@ -8,10 +8,6 @@
         {
             "name": "Hilmi Erdem KEREN",
             "email": "erdemkeren@gmail.com"
-        },
-        {
-            "name": "Berkay Güre",
-            "email": "bgure@hotmail.com.tr"
         }
     ],
     "require": {
@@ -26,7 +22,7 @@
     },
     "require-dev": {
         "illuminate/config": "^8.0",
-        "phpunit/phpunit": "9.*"
+        "phpunit/phpunit": "9.5"
     },
     "autoload": {
         "psr-4": {
