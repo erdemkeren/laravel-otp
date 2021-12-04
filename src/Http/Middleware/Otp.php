@@ -16,15 +16,6 @@ use Erdemkeren\Otp\Exceptions\AuthenticationException;
 
 class Otp
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request     $request
-     * @param Closure     $next
-     * @param string|null $guard
-     *
-     * @return mixed
-     */
     public function handle(Request $request, Closure $next, ?string $guard = null): mixed
     {
         if (! $user = $request->user($guard)) {
@@ -52,11 +43,6 @@ class Otp
         return $next($request);
     }
 
-    /**
-     * Get the redirect url if check do not pass.
-     *
-     * @return RedirectResponse
-     */
     protected function redirectToOtpPage(): RedirectResponse
     {
         session([
