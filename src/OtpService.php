@@ -12,7 +12,6 @@ use Erdemkeren\Otp\Contracts\FormatContract;
 use Erdemkeren\Otp\Contracts\FormatManagerContract;
 use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
 use Illuminate\Contracts\Auth\Authenticatable;
-use UnexpectedValueException;
 
 class OtpService
 {
@@ -79,15 +78,7 @@ class OtpService
 
     public function sendNewOtp(Authenticatable $user): void
     {
-        $token = $this->create($user->getAuthIdentifier());
-
-        if (! method_exists($user, 'notify')) {
-            throw new UnexpectedValueException(
-                'The otp owner should be an instance of notifiable or implement the notify method.'
-            );
-        }
-
-        $this->sendOtpNotification($user, $token);
+        $this->sendOtpNotification($user, $this->create($user->getAuthIdentifier()));
     }
 
     private function getPersistor(): Closure

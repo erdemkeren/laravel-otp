@@ -25,15 +25,13 @@ class ServiceProvider extends BaseServiceProvider implements DeferrableProvider
 
     public function register(): void
     {
-        $service = $this->createServiceInstance();
-        $this->registerFormats($service);
-
-        $this->app->singleton('otp', function () use ($service) {
-            return $service;
-        });
+        $this->app->singleton('otp', fn (): OtpService => tap(
+            $this->createService(),
+            fn(OtpService $service) => $this->registerFormats($service)
+        ));
 
         /** @var Router $router */
-        $router = $this->app['router'];
+        $router = $this->app->get('router');
         $router->aliasMiddleware('otp', WebOtp::class);
     }
 
@@ -49,7 +47,7 @@ class ServiceProvider extends BaseServiceProvider implements DeferrableProvider
         $service->addFormat(new Acme());
     }
 
-    private function createServiceInstance(): OtpService
+    private function createService(): OtpService
     {
         return new OtpService(
             new FormatManager(config('otp.default_format')),

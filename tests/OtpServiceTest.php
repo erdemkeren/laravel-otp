@@ -8,7 +8,6 @@ namespace Erdemkeren\Otp\Test;
 
 use Carbon\Carbon;
 use Erdemkeren\Otp\Contracts\EncryptorContract;
-use Erdemkeren\Otp\Contracts\FormatContract;
 use Erdemkeren\Otp\Contracts\FormatManagerContract;
 use Erdemkeren\Otp\Contracts\TokenRepositoryContract;
 use Erdemkeren\Otp\GenericFormat;
@@ -31,8 +30,6 @@ class OtpServiceTest extends TestCase
 
     private MockObject|Notifiable $notifiable;
 
-    private MockObject|FormatContract $format;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -52,6 +49,9 @@ class OtpServiceTest extends TestCase
         $this->assertInstanceOf(OtpService::class, $this->tokenService);
     }
 
+    /**
+     * @test
+     */
     public function itRetrievesTheOtpTokenByTheGivenPlainText(): void
     {
         $this->repository
@@ -64,7 +64,7 @@ class OtpServiceTest extends TestCase
             ->expects($this->once())
             ->method('encrypt')
             ->with(':plain_text:')
-            ->willReturn(':cipher_text');
+            ->willReturn(':cipher_text:');
 
         $this->assertEquals(
             $otpToken,
