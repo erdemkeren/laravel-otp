@@ -104,7 +104,7 @@ _Register the otp route middleware inside your `App\Http\Kernel`._
  */
 protected $routeMiddleware = [
     // [...]
-    'otp' => \Erdemkeren\Otp\Http\Middleware\Otp::class,
+    'otp' => \Erdemkeren\Otp\Http\Middleware\WebOtp::class,
 ];
 ```
 ## Configuration

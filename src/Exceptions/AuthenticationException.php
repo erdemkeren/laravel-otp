@@ -10,10 +10,5 @@ use LogicException;
 
 class AuthenticationException extends LogicException
 {
-    public static function create(): self
-    {
-        throw new static(
-            'The otp middleware requires authentication via laravel guards.'
-        );
-    }
+    protected $message = 'The otp middleware requires authentication via laravel guards.';
 }

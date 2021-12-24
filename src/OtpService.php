@@ -6,6 +6,7 @@
 
 namespace Erdemkeren\Otp;
 
+use Closure;
 use Erdemkeren\Otp\Contracts\EncryptorContract;
 use Erdemkeren\Otp\Contracts\FormatContract;
 use Erdemkeren\Otp\Contracts\FormatManagerContract;
@@ -23,6 +24,11 @@ class OtpService
         //
     }
 
+    public function retrieveByPlainText(string $plainText): ?OtpToken
+    {
+        return $this->repository->retrieveByCipherText($this->encryptor->encrypt($plainText));
+    }
+
     public function retrieveByCipherText(string $cipherText): ?OtpToken
     {
         return $this->repository->retrieveByCipherText($cipherText);
@@ -38,7 +44,7 @@ class OtpService
             'cipher_text' => $this->encryptor->encrypt($plainText),
             'expiry_time' => 300,
             'authenticable_id' => $authenticableId,
-        ]), fn (OtpToken $otpToken) => $this->repository->persist($otpToken));
+        ]), $this->getPersistor());
     }
 
     public function save(OtpToken $token): bool
@@ -48,29 +54,17 @@ class OtpService
 
     public function extend(OtpToken $token, int $secs): OtpToken
     {
-        $extended = $token->extend($secs);
-
-        $this->repository->persist($extended);
-
-        return $extended;
+        return tap($token->extend($secs), $this->getPersistor());
     }
 
     public function refresh(OtpToken $token): OtpToken
     {
-        $refreshed = $token->refresh();
-
-        $this->repository->persist($refreshed);
-
-        return $refreshed;
+        return tap($token->refresh(), $this->getPersistor());
     }
 
     public function invalidate(OtpToken $token): OtpToken
     {
-        $invalidated = $token->invalidate();
-
-        $this->repository->persist($invalidated);
-
-        return $invalidated;
+        return tap($token->invalidate(), $this->getPersistor());
     }
 
     public function addFormat(FormatContract $format): void
@@ -80,9 +74,7 @@ class OtpService
 
     public function sendOtpNotification(object $notifiable, OtpToken $token): void
     {
-        $notifiable->notify(
-            $this->getFormat($token->format())->createNotification($token)
-        );
+        $notifiable->notify($this->getFormat($token->format())->createNotification($token));
     }
 
     public function sendNewOtp(Authenticatable $user): void
@@ -96,6 +88,11 @@ class OtpService
         }
 
         $this->sendOtpNotification($user, $token);
+    }
+
+    private function getPersistor(): Closure
+    {
+        return fn(OtpToken $token): bool => $this->repository->persist($token);
     }
 
     private function getFormat(string $format): FormatContract

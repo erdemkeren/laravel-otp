@@ -93,7 +93,7 @@ class OtpToken
     {
         return new static(array_filter(array_merge($this->attributes, [
             'plain_text' => null,
-        ])));
+        ]), fn(mixed $val): bool => $val !== null));
     }
 
     public function toArray(): array
@@ -111,5 +111,10 @@ class OtpToken
         return array_key_exists($key, $this->attributes)
             ? $this->attributes[$key]
             : null;
+    }
+
+    public function __toString(): string
+    {
+        return $this->cipherText();
     }
 }

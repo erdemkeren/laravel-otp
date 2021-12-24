@@ -8,21 +8,21 @@
 namespace Erdemkeren\Otp\Http\Middleware;
 
 use Closure;
-use Erdemkeren\Otp\Exceptions\AuthenticationException;
-use Erdemkeren\Otp\OtpFacade;
 use Erdemkeren\Otp\OtpToken;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Erdemkeren\Otp\OtpFacade;
+use Illuminate\Http\RedirectResponse;
+use Erdemkeren\Otp\Exceptions\AuthenticationException;
 
-class Otp
+class WebOtp
 {
     public function handle(Request $request, Closure $next, ?string $guard = null): mixed
     {
-        if (! $user = $request->user($guard)) {
-            throw AuthenticationException::create();
+        if (!$user = $request->user($guard)) {
+            throw new AuthenticationException();
         }
 
-        if (! $cipher = $request->cookie('otp_token') || $request->header('otp_token')) {
+        if (!$cipher = $request->cookie('otp_token')) {
             OtpFacade::sendNewOtp($user);
 
             return $this->redirectToOtpPage();
@@ -30,7 +30,7 @@ class Otp
 
         $token = OtpFacade::retrieveByCipherText($cipher);
 
-        if (! $token || $token->expired()) {
+        if (!$token || $token->expired()) {
             OtpFacade::sendNewOtp($user);
 
             return $this->redirectToOtpPage();

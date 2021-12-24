@@ -11,7 +11,7 @@ use Erdemkeren\Otp\Generators\StringGenerator;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Erdemkeren\Otp\StringGenerator
+ * @covers \Erdemkeren\Otp\Generators\StringGenerator
  */
 class StringGeneratorTest extends TestCase
 {

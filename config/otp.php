@@ -17,7 +17,7 @@ return [
      *  - numeric-no-0
      */
 
-    'password_generator' => 'string',
+    'default_format' => 'string',
 
     /*
      * The name of the table to be used to store

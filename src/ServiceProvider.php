@@ -1,14 +1,15 @@
 <?php
 
 /*
- * @copyright 2018 Hilmi Erdem KEREN
- * @license MIT
+ * Copyright (c) 2021. Hilmi Erdem Keren
+ * license MIT
  */
 
 namespace Erdemkeren\Otp;
 
 use Illuminate\Routing\Router;
-use Erdemkeren\Otp\Http\Middleware\Otp;
+use Erdemkeren\Otp\Formats\Acme\Acme;
+use Erdemkeren\Otp\Http\Middleware\WebOtp;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Erdemkeren\Otp\Repositories\DatabaseTokenRepository;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -25,7 +26,7 @@ class ServiceProvider extends BaseServiceProvider implements DeferrableProvider
     public function register(): void
     {
         $service = $this->createServiceInstance();
-        $this->registerDefaultPasswordGenerators($service);
+        $this->registerFormats($service);
 
         $this->app->singleton('otp', function () use ($service) {
             return $service;
@@ -33,7 +34,7 @@ class ServiceProvider extends BaseServiceProvider implements DeferrableProvider
 
         /** @var Router $router */
         $router = $this->app['router'];
-        $router->aliasMiddleware('otp', Otp::class);
+        $router->aliasMiddleware('otp', WebOtp::class);
     }
 
     public function provides(): array
@@ -43,26 +44,18 @@ class ServiceProvider extends BaseServiceProvider implements DeferrableProvider
         ];
     }
 
+    protected function registerFormats(OtpService $service): void
+    {
+        $service->addFormat(new Acme());
+    }
+
     private function createServiceInstance(): OtpService
     {
         return new OtpService(
-            new FormatManager(config('opt.default.format')),
-            new Encryptor(config('app.secret')),
+            new FormatManager(config('otp.default_format')),
+            new Encryptor(config('app.key')),
             new DatabaseTokenRepository(),
         );
-    }
-
-    /**
-     * Register default password generators to the
-     * given otp service instance.
-     *
-     * @param  OtpService  $service
-     */
-    private function registerDefaultPasswordGenerators($service): void
-    {
-        $service->addPasswordGenerator('string', Generators\StringGenerator::class);
-        $service->addPasswordGenerator('numeric', Generators\NumericGenerator::class);
-        $service->addPasswordGenerator('numeric-no-0', Generators\NumericNo0Generator::class);
     }
 
     /**

@@ -52,6 +52,26 @@ class OtpServiceTest extends TestCase
         $this->assertInstanceOf(OtpService::class, $this->tokenService);
     }
 
+    public function itRetrievesTheOtpTokenByTheGivenPlainText(): void
+    {
+        $this->repository
+            ->expects($this->once())
+            ->method('retrieveByCipherText')
+            ->with(':cipher_text:')
+            ->willReturn($otpToken = new OtpToken(['cipher_text' => ':cipher_text:']));
+
+        $this->encryptor
+            ->expects($this->once())
+            ->method('encrypt')
+            ->with(':plain_text:')
+            ->willReturn(':cipher_text');
+
+        $this->assertEquals(
+            $otpToken,
+            $this->tokenService->retrieveByPlainText(':plain_text:'),
+        );
+    }
+
     /**
      * @test
      */
