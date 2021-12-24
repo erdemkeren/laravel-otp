@@ -7,20 +7,14 @@
 
 namespace Erdemkeren\Otp;
 
-use Erdemkeren\Otp\Http\Middleware\Otp;
-use Erdemkeren\Otp\Repositories\DatabaseTokenRepository;
 use Illuminate\Routing\Router;
+use Erdemkeren\Otp\Http\Middleware\Otp;
+use Illuminate\Contracts\Support\DeferrableProvider;
+use Erdemkeren\Otp\Repositories\DatabaseTokenRepository;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
-class ServiceProvider extends BaseServiceProvider
+class ServiceProvider extends BaseServiceProvider implements DeferrableProvider
 {
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected bool $defer = true;
-
     public function boot(): void
     {
         $this->publishes([$this->configPath() => config_path('otp.php')]);
@@ -28,11 +22,6 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([$this->viewPath() => resource_path('views')]);
     }
 
-    /**
-     * Register the otp service.
-     *
-     * @return void
-     */
     public function register(): void
     {
         $service = $this->createServiceInstance();
@@ -47,11 +36,6 @@ class ServiceProvider extends BaseServiceProvider
         $router->aliasMiddleware('otp', Otp::class);
     }
 
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
     public function provides(): array
     {
         return [
@@ -59,17 +43,12 @@ class ServiceProvider extends BaseServiceProvider
         ];
     }
 
-    /**
-     * Create a new otp service instance.
-     *
-     * @return OtpService
-     */
     private function createServiceInstance(): OtpService
     {
         return new OtpService(
-            new FormatManager(),
+            new FormatManager(config('opt.default.format')),
             new Encryptor(config('app.secret')),
-            new DatabaseTokenRepository()
+            new DatabaseTokenRepository(),
         );
     }
 

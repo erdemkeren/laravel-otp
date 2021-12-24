@@ -45,7 +45,7 @@
     "extra": {
         "laravel": {
             "providers": [
-              "ServiceProvider"
+              "Erdemkeren\\Otp\\ServiceProvider"
             ],
             "aliases": {
                 "Otp": "Erdemkeren\\Otp\\OtpFacade"
