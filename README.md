@@ -1,3 +1,8 @@
+Maintainer Wanted!
+
+I don't have time to maintain this package and therefore looking for maintainers.
+I am open to abandon this project and suggest replacement packages.
+
 # Laravel OTP
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/erdemkeren/laravel-otp.svg?style=flat-square)](https://packagist.org/packages/erdemkeren/laravel-otp)
